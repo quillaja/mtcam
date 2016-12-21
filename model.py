@@ -22,10 +22,13 @@ class Mountain(ModelBase):
         self.latitude, self.longitude, self.elevation_ft = location
         self.save()
 
+    def __repr__(self):
+        return '{} ({})'.format(self.name, self.state)
+
 
 class Cam(ModelBase):
     mountain = p.ForeignKeyField(Mountain, related_name='cams')
-    name = p.CharField(unique=True)
+    name = p.CharField()
     elevation_ft = p.IntegerField()
     latitude = p.FloatField()
     longitude = p.FloatField()
@@ -40,6 +43,9 @@ class Cam(ModelBase):
         self.latitude, self.longitude, self.elevation_ft = location
         self.save()
 
+    def __repr__(self):
+        return '{} ({})'.format(self.name, str(self.mountain))
+
 
 class ScrapeRecord(ModelBase):
     # status codes to use in the 'result' field
@@ -52,6 +58,9 @@ class ScrapeRecord(ModelBase):
     result = p.CharField()
     detail = p.TextField()
     filename = p.CharField()  #does not include path
+
+    def __repr__(self):
+        return '{}\t{}\t{}'.format(self.timestamp, self.cam.name, self.result)
 
 
 def create_tables():
