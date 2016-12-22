@@ -6,3 +6,7 @@ Hood from Palmer
 
 Rainier from Paradise
   https://www.nps.gov/webcams-mora/mountain.jpg
+
+
+google timezone api key
+  AIzaSyC7B3hbUJ0m-2F-pOp0W6IIirO4nOUwWrU
