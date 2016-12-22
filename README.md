@@ -18,3 +18,16 @@ For the sake of simplicity, update timezone info at 3AM Pacific Time.
 This is because most (all) of the webcams will be in the PT zone, and
 updating at this time should prevent most DST oddities, compared to using UTC.
 Cams in other timezones will just have potential time errors.
+
+should program configuration can also be saved in database?
+
+path to save each scraped image is /archiveroot/mountain/cam/timestamp.jpg
+
+at each scrape:
+1. load model data from database
+2. get utc timestamp (use same timestamp for each scrape)
+3. for each cam:
+    2.1 create observer (lat, lon, elev, local-noon as utc, horizon)
+    2.2 get sunrise and sunset times
+    2.3 if between sunrise and sunset, download cam
+    2.4 write new ScrapeRecord with appropriate info to database
