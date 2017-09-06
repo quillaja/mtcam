@@ -1,9 +1,19 @@
+import datetime
 import peewee as p
 
 _db = p.SqliteDatabase('mtcam_test.db')
 
 
 class ModelBase(p.Model):
+    created = p.DateTimeField(default=datetime.datetime.now)
+    modified = p.TimestampField()
+
+    def save(self, *args, **kwargs):
+        '''Overrides default Model.save() to enable the modified field
+        to be updated every time the model is written to the database.'''
+        self.modified = datetime.datetime.now()
+        super(ModelBase, self).save(*args, **kwargs)
+
     class Meta(object):
         database = _db
 
@@ -16,9 +26,12 @@ class Mountain(ModelBase):
     longitude = p.FloatField()
 
     def get_location(self):
+        '''Return 3-tuple of latitude, logitude, and elevation(ft).'''
         return (self.latitude, self.longitude, self.elevation_ft)
 
     def set_location(self, location):
+        '''Set location from provided 3-tuple of latitude, longitude, 
+        and elevatiion(ft).'''
         self.latitude, self.longitude, self.elevation_ft = location
         self.save()
 
@@ -34,7 +47,7 @@ class Cam(ModelBase):
     longitude = p.FloatField()
     url_fmt = p.CharField()
     is_active = p.BooleanField(default=True)
-    comment = p.TextField()
+    comment = p.TextField(default='')
 
     def get_location(self):
         return (self.latitude, self.longitude, self.elevation_ft)
@@ -54,9 +67,10 @@ class ScrapeRecord(ModelBase):
     IDLE = 'idle'
 
     cam = p.ForeignKeyField(Cam, related_name='scrapes')
-    timestamp = p.DateTimeField() # time the image was downloaded
+    timestamp = p.DateTimeField(
+        default=datetime.datetime.now())  # time the image was downloaded
     result = p.CharField()
-    detail = p.TextField()
+    detail = p.TextField(default='')
     filename = p.CharField()  #does not include path
 
     def __repr__(self):
@@ -67,3 +81,46 @@ def create_tables():
     _db.connect()
     _db.create_tables([Mountain, Cam, ScrapeRecord], safe=True)
     _db.close()
+
+
+def create_test_data():
+    import random
+
+    hood = Mountain.create(
+        name='Hood',
+        state='OR',
+        elevation_ft=11200,
+        latitude=45.5,
+        longitude=-120.1)
+    palmer = Cam.create(
+        mountain=hood,
+        name='Palmer',
+        elevation_ft=7000,
+        latitude=45.4,
+        longitude=-120.12,
+        url_fmt='''poop.com/palmer''')
+    cooper = Cam.create(
+        mountain=hood,
+        name='Cooper Spur',
+        elevation_ft=6040,
+        latitude=45.8,
+        longitude=-120.0,
+        url_fmt='''poop.com/cooper''')
+
+    t = datetime.datetime.now()
+    for td in range(0, 25, 5):
+        t = t + datetime.timedelta(minutes=td)
+        status = ScrapeRecord.SUCCESS if random.random(
+        ) >= 0.1 else ScrapeRecord.FAILURE
+        ScrapeRecord.create(
+            cam=palmer,
+            timestamp=t,
+            result=status,
+            filename='{}_{}.jpg'.format(str(palmer), int(t.timestamp())))
+        status = ScrapeRecord.SUCCESS if random.random(
+        ) >= 0.1 else ScrapeRecord.FAILURE
+        ScrapeRecord.create(
+            cam=cooper,
+            timestamp=t,
+            result=status,
+            filename='{}_{}.jpg'.format(str(cooper), int(t.timestamp())))
