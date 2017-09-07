@@ -24,16 +24,20 @@ class Mountain(ModelBase):
     elevation_ft = p.IntegerField()
     latitude = p.FloatField()
     longitude = p.FloatField()
+    tz_json = p.TextField(default='') #timezone info from google. req Lat,Lon
 
     def get_location(self):
         '''Return 3-tuple of latitude, logitude, and elevation(ft).'''
         return (self.latitude, self.longitude, self.elevation_ft)
 
-    def set_location(self, location):
-        '''Set location from provided 3-tuple of latitude, longitude, 
-        and elevatiion(ft).'''
-        self.latitude, self.longitude, self.elevation_ft = location
-        self.save()
+    # def set_location(self, location):
+    #     '''Set location from provided 3-tuple of latitude, longitude, 
+    #     and elevatiion(ft).'''
+    #     self.latitude, self.longitude, self.elevation_ft = location
+    #     self.save()
+
+    def as_pathname(self):
+        return '{}_{}'.format(self.name,self.state).lower().replace(' ', '_')
 
     def __repr__(self):
         return '{} ({})'.format(self.name, self.state)
@@ -52,9 +56,12 @@ class Cam(ModelBase):
     def get_location(self):
         return (self.latitude, self.longitude, self.elevation_ft)
 
-    def set_location(self, location):
-        self.latitude, self.longitude, self.elevation_ft = location
-        self.save()
+    # def set_location(self, location):
+    #     self.latitude, self.longitude, self.elevation_ft = location
+    #     self.save()
+
+    def as_pathname(self):
+        return str(self.name).lower().replace(' ', '_')
 
     def __repr__(self):
         return '{} ({})'.format(self.name, str(self.mountain))
@@ -72,6 +79,7 @@ class ScrapeRecord(ModelBase):
     result = p.CharField()
     detail = p.TextField(default='')
     filename = p.CharField()  #does not include path
+    file_ext = p.CharField(default='jpg')
 
     def __repr__(self):
         return '{}\t{}\t{}'.format(self.timestamp, self.cam.name, self.result)
@@ -92,6 +100,12 @@ def create_test_data():
         elevation_ft=11200,
         latitude=45.5,
         longitude=-120.1)
+    sisters = Mountain.create(
+        name='Three Sisters',
+        state='OR',
+        elevation_ft=10000,
+        latitude=41.2,
+        longitude=-119.0)
     palmer = Cam.create(
         mountain=hood,
         name='Palmer',
@@ -110,17 +124,19 @@ def create_test_data():
     t = datetime.datetime.now()
     for td in range(0, 25, 5):
         t = t + datetime.timedelta(minutes=td)
+
         status = ScrapeRecord.SUCCESS if random.random(
         ) >= 0.1 else ScrapeRecord.FAILURE
         ScrapeRecord.create(
             cam=palmer,
             timestamp=t,
             result=status,
-            filename='{}_{}.jpg'.format(str(palmer), int(t.timestamp())))
+            filename='{}.jpg'.format(int(t.timestamp())))
+
         status = ScrapeRecord.SUCCESS if random.random(
         ) >= 0.1 else ScrapeRecord.FAILURE
         ScrapeRecord.create(
             cam=cooper,
             timestamp=t,
             result=status,
-            filename='{}_{}.jpg'.format(str(cooper), int(t.timestamp())))
+            filename='{}.jpg'.format(int(t.timestamp())))

@@ -3,31 +3,37 @@ Enhanced version of "palmer" which is database backed and can scrape multiple we
 
 # Notes
 lat, lon must be a str for ephem
-elevation must be in meters for ephem
+elevation must be in meters for ephem (util.ft_m())
 ephem times are always UTC
 
-Can store google timezone info as string using str() and
-restore it to a dict using eval()
+Can store google timezone info (in Mountain.tz) as string using JSON
+encoding/decoding from/to dict.
 
 To check if scrape should happen use this (simplified):
-rise_time <= ephem.Date(datetime.utcnow()) <= set_time
- use util.strip_to_datehour() on each part of comparison to
- simulate floor()/ceiling() for dates
+`rise_time <= ephem.Date(datetime.utcnow()) <= set_time`
+ - rise_time and set_time are ephem.Date() type
+ - use util.strip_to_datehour() on each part of comparison to simulate floor()/ceiling() for dates
 
 For the sake of simplicity, update timezone info at 3AM Pacific Time.
 This is because most (all) of the webcams will be in the PT zone, and
 updating at this time should prevent most DST oddities, compared to using UTC.
-Cams in other timezones will just have potential time errors.
+Mounains/cams in other timezones will just have potential time errors.
+
+cron jobs:
+1. scrape every 5 mins
+    1. set delay for cams??
+2. update Mountain.tz daily at 3AM PT
 
 should program configuration can also be saved in database?
 
-path to save each scraped image is /archiveroot/mountain/cam/timestamp.jpg
+path to save each scraped image is `/archiveroot/mountain/cam/timestamp.jpg`
 
 at each scrape:
-1. load model data from database
+1. load model data from database (see http://docs.peewee-orm.com/en/latest/peewee/querying.html#using-aggregate-rows)
 2. get utc timestamp (use same timestamp for each scrape)
-3. for each cam:
-    2.1 create observer (lat, lon, elev, local-noon as utc, horizon)
-    2.2 get sunrise and sunset times
-    2.3 if between sunrise and sunset, download cam
-    2.4 write new ScrapeRecord with appropriate info to database
+3. for each mountain:
+    1. create observer (lat, lon, elev, local-noon as utc, horizon)
+    2. get sunrise and sunset times
+    3. if between sunrise and sunset, then for each cam
+        1. download cam photo from web
+        2. write new ScrapeRecord with appropriate info to database

@@ -1,6 +1,10 @@
+# """
+# Requires Python 3 for certain timezone objects/functions.
+# """
+
 import json
 import time
-from datetime import datetime, timedelta, tzinfo
+from datetime import datetime, timedelta, tzinfo, timezone
 
 import requests
 import ephem
@@ -17,6 +21,10 @@ everest = (27.988056, 86.925278)
 ##UTM->local: UTM_time + (offset + dstoffset)
 
 ## datetime.now().replace(tzinfo=pst).astimezone(timezone.utc)  'pst' from get_tzinfo()
+
+
+def ft_m(feet):
+    return feet * 0.3048
 
 
 def strip_to_datehour(dt):
@@ -42,11 +50,12 @@ def get_tz(lat, lon, t=None):
     return json.loads(result.content.decode('utf-8'))
 
 
-def utmnoon_at_loc(lat, lon):
+def utmnoon_at_loc(lat, lon, tz=None):
     """
     Returns the UTM time it'll be noon (12:00) at the given coordinates.
     """
-    tz = get_tz(lat, lon)
+    if not tz:
+        tz = get_tz(lat, lon)
     if (tz['status'] != 'OK'):
         return None
 
@@ -58,15 +67,18 @@ def utmnoon_at_loc(lat, lon):
     return noon
 
 
-def get_tzinfo(lat, lon, t=None):
+def get_tzinfo(lat, lon, tz=None, t=None):
     """
     Returns a datetime.tzinfo object for the given coordinates.
     Relies on Python 3's datetime.timezone() function.
     """
-    tz = get_tz(lat, lon, t)
+    if not tz:
+        tz = get_tz(lat, lon, t)
+
     return timezone(
         timedelta(seconds=(tz['rawOffset'] + tz['dstOffset'])),
         tz['timeZoneName'])
+
 
 # REDUNDANT: use datetime.utcnow()
 # def utm_now():
@@ -76,12 +88,15 @@ def get_tzinfo(lat, lon, t=None):
 #     return datetime.now() + timedelta(seconds=time.timezone)
 
 
-def now_at_loc(lat, lon):
+def now_at_loc(lat, lon, tz=None):
     """
     Returns the present time at the given coordinates.
     """
-    tz = get_tz(lat, lon)
-    return datetime.utcnow() + timedelta(seconds=(tz['rawOffset'] + tz['dstOffset']))
+    if not tz:
+        tz = get_tz(lat, lon)
+
+    return datetime.utcnow() + timedelta(
+        seconds=(tz['rawOffset'] + tz['dstOffset']))
 
 
 class Gtz(tzinfo):
@@ -89,11 +104,13 @@ class Gtz(tzinfo):
     Creates a tzinfo object for the given coordinates 
     for use with python's datetime utilities
     """
+
     def __init__(self, latitude, longitude):
         self.latitude = latitude
         self.longitude = longitude
         self.tz = get_tz(latitude, longitude)
-        self.offset = timedelta(seconds=(self.tz['rawOffset'] + self.tz['dstOffset']))
+        self.offset = timedelta(
+            seconds=(self.tz['rawOffset'] + self.tz['dstOffset']))
         self.dst_offset = timedelta(seconds=self.tz['dstOffset'])
 
     def utcoffset(self, dt):
