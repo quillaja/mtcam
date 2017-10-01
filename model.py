@@ -24,20 +24,20 @@ class Mountain(ModelBase):
     elevation_ft = p.IntegerField()
     latitude = p.FloatField()
     longitude = p.FloatField()
-    tz_json = p.TextField(default='') #timezone info from google. req Lat,Lon
+    tz_json = p.TextField(default='')  #timezone info from google. req Lat,Lon
 
     def get_location(self):
         '''Return 3-tuple of latitude, logitude, and elevation(ft).'''
         return (self.latitude, self.longitude, self.elevation_ft)
 
     # def set_location(self, location):
-    #     '''Set location from provided 3-tuple of latitude, longitude, 
+    #     '''Set location from provided 3-tuple of latitude, longitude,
     #     and elevatiion(ft).'''
     #     self.latitude, self.longitude, self.elevation_ft = location
     #     self.save()
 
     def as_pathname(self):
-        return '{}_{}'.format(self.name,self.state).lower().replace(' ', '_')
+        return '{}_{}'.format(self.name, self.state).lower().replace(' ', '_')
 
     def __repr__(self):
         return '{} ({})'.format(self.name, self.state)
@@ -50,7 +50,9 @@ class Cam(ModelBase):
     latitude = p.FloatField()
     longitude = p.FloatField()
     url_fmt = p.CharField()
+    file_ext = p.CharField(default='jpg')
     is_active = p.BooleanField(default=True)
+    every_mins = p.IntegerField(default=5)  # scrape every X mins
     comment = p.TextField(default='')
 
     def get_location(self):
@@ -78,8 +80,7 @@ class ScrapeRecord(ModelBase):
         default=datetime.datetime.now())  # time the image was downloaded
     result = p.CharField()
     detail = p.TextField(default='')
-    filename = p.CharField()  #does not include path
-    file_ext = p.CharField(default='jpg')
+    filename = p.CharField(default='')  #does not include path
 
     def __repr__(self):
         return '{}\t{}\t{}'.format(self.timestamp, self.cam.name, self.result)
@@ -93,50 +94,78 @@ def create_tables():
 
 def create_test_data():
     import random
+    import json
+    import util
 
     hood = Mountain.create(
         name='Hood',
         state='OR',
         elevation_ft=11200,
-        latitude=45.5,
-        longitude=-120.1)
+        latitude=45.373439,
+        longitude=-121.695962)
+    hood.tz_json = json.dumps(util.get_tz(hood.latitude, hood.longitude))
+    hood.save()
+
     sisters = Mountain.create(
         name='Three Sisters',
         state='OR',
-        elevation_ft=10000,
-        latitude=41.2,
-        longitude=-119.0)
+        elevation_ft=10358,
+        latitude=44.103241,
+        longitude=-121.769253)
+    sisters.tz_json = json.dumps(
+        util.get_tz(sisters.latitude, sisters.longitude))
+    sisters.save()
+
+    rainier = Mountain.create(
+        name='Rainier',
+        state='WA',
+        elevation_ft=14411,
+        latitude=46.851736,
+        longitude=-121.760398)
+    rainier.tz_json = json.dumps(
+        util.get_tz(rainier.latitude, rainier.longitude))
+    rainier.save()
+
     palmer = Cam.create(
         mountain=hood,
         name='Palmer',
         elevation_ft=7000,
-        latitude=45.4,
-        longitude=-120.12,
-        url_fmt='''poop.com/palmer''')
-    cooper = Cam.create(
-        mountain=hood,
-        name='Cooper Spur',
+        latitude=45.373439,
+        longitude=-121.695962,
+        url_fmt=
+        '''https://www.timberlinelodge.com/snowcameras/palmerbottom.jpg''')
+    bachelor = Cam.create(
+        mountain=sisters,
+        name='Bachelor',
         elevation_ft=6040,
-        latitude=45.8,
-        longitude=-120.0,
-        url_fmt='''poop.com/cooper''')
+        latitude=44.103241,
+        longitude=-121.769253,
+        url_fmt='''https://www.mtbachelor.com/webcams/southsisteroutback.jpg'''
+    )
+    paradise = Cam.create(
+        mountain=rainier,
+        name='Paradise',
+        elevation_ft=5400,
+        latitude=46.851736,
+        longitude=-121.760398,
+        url_fmt='''https://www.nps.gov/webcams-mora/mountain.jpg''')
 
-    t = datetime.datetime.now()
-    for td in range(0, 25, 5):
-        t = t + datetime.timedelta(minutes=td)
+    # t = datetime.datetime.now()
+    # for td in range(0, 25, 5):
+    #     t = t + datetime.timedelta(minutes=td)
 
-        status = ScrapeRecord.SUCCESS if random.random(
-        ) >= 0.1 else ScrapeRecord.FAILURE
-        ScrapeRecord.create(
-            cam=palmer,
-            timestamp=t,
-            result=status,
-            filename='{}.jpg'.format(int(t.timestamp())))
+    #     status = ScrapeRecord.SUCCESS if random.random(
+    #     ) >= 0.1 else ScrapeRecord.FAILURE
+    #     ScrapeRecord.create(
+    #         cam=palmer,
+    #         timestamp=t,
+    #         result=status,
+    #         filename='{}.jpg'.format(int(t.timestamp())))
 
-        status = ScrapeRecord.SUCCESS if random.random(
-        ) >= 0.1 else ScrapeRecord.FAILURE
-        ScrapeRecord.create(
-            cam=cooper,
-            timestamp=t,
-            result=status,
-            filename='{}.jpg'.format(int(t.timestamp())))
+    #     status = ScrapeRecord.SUCCESS if random.random(
+    #     ) >= 0.1 else ScrapeRecord.FAILURE
+    #     ScrapeRecord.create(
+    #         cam=cooper,
+    #         timestamp=t,
+    #         result=status,
+    #         filename='{}.jpg'.format(int(t.timestamp())))

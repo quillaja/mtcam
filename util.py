@@ -47,7 +47,7 @@ def get_tz(lat, lon, t=None):
     #use url to get json
     result = requests.get(url.format(lat, lon, t))
     #return converted json
-    return json.loads(result.content.decode('utf-8'))
+    return result.json()
 
 
 def utmnoon_at_loc(lat, lon, tz=None):
