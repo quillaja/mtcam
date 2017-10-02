@@ -43,6 +43,7 @@ at each scrape:
     1. queries.py
     2. views.py (using flask)
 2. clean up util.py
+2. decide (in db or file) and create program settings
 3. decide on timestamp or datetime for 'modified' ModelBase field
 4. Write script to update Mountain.tz_json field
 5. write script to convert/import original palmer data to mtcam data
