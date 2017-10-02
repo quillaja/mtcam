@@ -73,23 +73,24 @@ class ScrapeJob(threading.Thread):
         obs.lat = str(mt.latitude)
         obs.lon = str(mt.longitude)
 
+        # change UTC->local, make local = 12 noon, then change local->UTC
         total_offset_s = tz['rawOffset'] + tz['dstOffset']
-        noon = dt.datetime.utcnow().replace(
-            hour=12, minute=0, second=0, microsecond=0) - dt.timedelta(
-                seconds=total_offset_s)
+        noon = dt.datetime.utcnow() + dt.timedelta(seconds=total_offset_s)
+        noon = noon.replace(hour=12, minute=0, second=0, microsecond=0)
+        noon = noon - dt.timedelta(seconds=total_offset_s)
         obs.date = noon.strftime('%Y/%m/%d %H:%M:%S')
 
         srise = obs.previous_rising(ephem.Sun(), use_center=True)
         sset = obs.next_setting(ephem.Sun(), use_center=True)
         now = ephem.now()
 
-        return srise.datetime().hour <= now.datetime().hour <= sset.datetime(
-        ).hour
+        print(noon, srise, now, sset)
+        return srise <= now <= sset  #srise.datetime().hour <= now.datetime().hour <= sset.datetime().hour
 
 
 def main():
     data = prefetch_all_mts_cams()
-    now = dt.datetime.now()
+    now = dt.datetime.now()  #maybe make this and other time UTC?
     jobs = list()
 
     # perform scrapes on every cam which
@@ -97,7 +98,7 @@ def main():
     # 2) it's the appropriate time of the hour
     for mt in data:
         for cam in mt.cams_prefetch:
-            if cam.is_active and now.minute % cam.every_mins == 0:
+            if cam.is_active:  # and now.minute % cam.every_mins == 0:
                 j = ScrapeJob(cam, now)
                 jobs.append(j)
                 j.start()
