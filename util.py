@@ -24,10 +24,13 @@ everest = (27.988056, 86.925278)
 
 
 def ft_m(feet):
+    '''Converts feet to meters.'''
     return feet * 0.3048
 
 
-def strip_to_datehour(dt):
+def floor(dt):
+    '''Replaces minute, second, and microsecond parts of datetime or ephem.Date
+    with zeros, essentially 'flooring' it to the hour.'''
     if isinstance(dt, ephem.Date):
         tt = dt.tuple()
         return datetime(tt[0], tt[1], tt[2], tt[3])

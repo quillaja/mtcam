@@ -7,12 +7,20 @@ import ephem
 
 from model import Mountain, Cam, ScrapeRecord, _db
 from queries import prefetch_all_mts_cams
+from util import floor, ft_m
 
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36'
 IMG_ROOT = 'img'
 
 
 class ScrapeJob(threading.Thread):
+    """
+    Does the main work of scraping a webcam, including calculating if the
+    mountain seen in the webcam is between sun rise and sun set. As this is
+    a subclass of `Thread`, use it as one would a standard thread, by calling
+    `join`.
+    """
+
     def __init__(self, cam: Cam, tstamp: dt.datetime):
         super().__init__()
 
@@ -23,14 +31,16 @@ class ScrapeJob(threading.Thread):
         self.record.timestamp = tstamp
 
     def run(self):
+        '''Does the scrape'''
+
         if self.is_between_sunrise_sunset():
             # do the scrape
             try:
                 headers = requests.utils.default_headers()
                 headers.update({'User-Agent': USER_AGENT})
-
                 url = self.cam.url_fmt
                 result = requests.get(url, headers=headers, timeout=10)
+
                 if result.status_code == requests.codes.ok:
                     # request worked
                     self.record.result = ScrapeRecord.SUCCESS
@@ -64,12 +74,15 @@ class ScrapeJob(threading.Thread):
             self.record.result = ScrapeRecord.IDLE
 
     def is_between_sunrise_sunset(self):
+        '''Uses pyephem to determine if the cam should be scraped based on if
+        the time at the mountain is between sun rise and sun set.'''
+
         mt = self.cam.mountain
         tz = json.loads(mt.tz_json)
 
         obs = ephem.Observer()
         obs.horizon = '-12'
-        obs.elevation = 0.3048 * mt.elevation_ft
+        obs.elevation = ft_m(mt.elevation_ft)
         obs.lat = str(mt.latitude)
         obs.lon = str(mt.longitude)
 
@@ -80,17 +93,17 @@ class ScrapeJob(threading.Thread):
         noon = noon - dt.timedelta(seconds=total_offset_s)
         obs.date = noon.strftime('%Y/%m/%d %H:%M:%S')
 
-        srise = obs.previous_rising(ephem.Sun(), use_center=True)
-        sset = obs.next_setting(ephem.Sun(), use_center=True)
-        now = ephem.now()
+        # get sun rise/set times, convert to datetime, and "floor"
+        srise = floor(obs.previous_rising(ephem.Sun(), use_center=True))
+        sset = floor(obs.next_setting(ephem.Sun(), use_center=True))
+        now = floor(ephem.now())
 
-        print(noon, srise, now, sset)
-        return srise <= now <= sset  #srise.datetime().hour <= now.datetime().hour <= sset.datetime().hour
+        return srise <= now <= sset
 
 
 def main():
     data = prefetch_all_mts_cams()
-    now = dt.datetime.now()  #maybe make this and other time UTC?
+    now = dt.datetime.now()
     jobs = list()
 
     # perform scrapes on every cam which
@@ -98,7 +111,7 @@ def main():
     # 2) it's the appropriate time of the hour
     for mt in data:
         for cam in mt.cams_prefetch:
-            if cam.is_active:  # and now.minute % cam.every_mins == 0:
+            if cam.is_active and now.minute % cam.every_mins == 0:
                 j = ScrapeJob(cam, now)
                 jobs.append(j)
                 j.start()

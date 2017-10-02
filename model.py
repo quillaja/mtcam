@@ -12,7 +12,8 @@ class ModelBase(p.Model):
         '''Overrides default Model.save() to enable the modified field
         to be updated every time the model is written to the database.'''
         self.modified = datetime.datetime.now()
-        super(ModelBase, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
+        # super(ModelBase, self).save(*args, **kwargs)
 
     class Meta(object):
         database = _db
@@ -93,9 +94,11 @@ def create_tables():
 
 
 def create_test_data():
-    import random
+    # import random
     import json
     import util
+
+    #-- mountains ---
 
     hood = Mountain.create(
         name='Hood',
@@ -126,6 +129,16 @@ def create_test_data():
         util.get_tz(rainier.latitude, rainier.longitude))
     rainier.save()
 
+    fuji = Mountain.create(
+        name="Fuji",
+        state="Japan",
+        elevation_ft=12388,
+        latitude=35.360388,
+        longitude=138.727724)
+    fuji.tz_json = json.dumps(util.get_tz(fuji.latitude, fuji.longitude))
+    fuji.save()
+
+    #-- Cams ------
     palmer = Cam.create(
         mountain=hood,
         name='Palmer',
@@ -149,6 +162,14 @@ def create_test_data():
         latitude=46.851736,
         longitude=-121.760398,
         url_fmt='''https://www.nps.gov/webcams-mora/mountain.jpg''')
+
+    subaru = Cam.create(
+        mountain=fuji,
+        name='Fuji Subaru 5th',
+        elevation_ft=5000,
+        latitude=35.360388,
+        longitude=138.727724,
+        url_fmt='''http://www.mfi.or.jp/goraikou223/cam04/0000.jpg''')
 
     # t = datetime.datetime.now()
     # for td in range(0, 25, 5):

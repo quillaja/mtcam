@@ -10,9 +10,9 @@ Can store google timezone info (in Mountain.tz) as string using JSON
 encoding/decoding from/to dict.
 
 To check if scrape should happen use this (simplified):
-`rise_time <= ephem.Date(datetime.utcnow()) <= set_time`
+`rise_time <= ephem.now() <= set_time`
  - rise_time and set_time are ephem.Date() type
- - use util.strip_to_datehour() on each part of comparison to simulate floor()/ceiling() for dates
+ - use util.floor() on each part of comparison to simulate floor()/ceiling() for dates
 
 For the sake of simplicity, update timezone info at 3AM Pacific Time.
 This is because most (all) of the webcams will be in the PT zone, and
@@ -37,3 +37,12 @@ at each scrape:
     3. if between sunrise and sunset, then for each cam
         1. download cam photo from web
         2. write new ScrapeRecord with appropriate info to database
+
+# Todo
+1. write API
+    1. queries.py
+    2. views.py (using flask)
+2. clean up util.py
+3. decide on timestamp or datetime for 'modified' ModelBase field
+4. Write script to update Mountain.tz_json field
+5. write script to convert/import original palmer data to mtcam data
