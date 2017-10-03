@@ -21,14 +21,14 @@ class ScrapeJob(threading.Thread):
     `join`.
     """
 
-    def __init__(self, cam: Cam, tstamp: dt.datetime):
+    def __init__(self, cam: Cam, tstamp: str):
         super().__init__()
 
         self.cam = cam
 
         self.record = ScrapeRecord()
         self.record.cam = self.cam
-        self.record.timestamp = tstamp
+        self.timestamp = tstamp
 
     def run(self):
         '''Does the scrape'''
@@ -38,15 +38,14 @@ class ScrapeJob(threading.Thread):
             try:
                 headers = requests.utils.default_headers()
                 headers.update({'User-Agent': USER_AGENT})
-                url = self.cam.url_fmt
+                url = self.cam.url
                 result = requests.get(url, headers=headers, timeout=10)
 
                 if result.status_code == requests.codes.ok:
                     # request worked
                     self.record.result = ScrapeRecord.SUCCESS
                     self.record.filename = '{}.{}'.format(
-                        int(self.record.timestamp.timestamp()),
-                        self.cam.file_ext)
+                        self.timestamp, self.cam.file_ext)
 
                     # write image to file
                     picdir = os.path.join(IMG_ROOT,
@@ -103,7 +102,8 @@ class ScrapeJob(threading.Thread):
 
 def main():
     data = prefetch_all_mts_cams()
-    now = dt.datetime.now()
+    minute = dt.datetime.now().minute
+    filename_time = str(int(dt.datetime.utcnow().timestamp()))
     jobs = list()
 
     # perform scrapes on every cam which
@@ -111,8 +111,8 @@ def main():
     # 2) it's the appropriate time of the hour
     for mt in data:
         for cam in mt.cams_prefetch:
-            if cam.is_active and now.minute % cam.every_mins == 0:
-                j = ScrapeJob(cam, now)
+            if cam.is_active and minute % cam.interval == 0:
+                j = ScrapeJob(cam, filename_time)
                 jobs.append(j)
                 j.start()
 

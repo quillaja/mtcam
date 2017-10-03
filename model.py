@@ -5,8 +5,9 @@ _db = p.SqliteDatabase('mtcam_test.db')
 
 
 class ModelBase(p.Model):
-    created = p.DateTimeField(default=datetime.datetime.now)
-    modified = p.TimestampField()
+    created = p.DateTimeField(
+        default=datetime.datetime.now, formats=['%Y-%m-%d %H:%M:%S'])
+    modified = p.DateTimeField(formats=['%Y-%m-%d %H:%M:%S'])
 
     def save(self, *args, **kwargs):
         '''Overrides default Model.save() to enable the modified field
@@ -50,10 +51,10 @@ class Cam(ModelBase):
     elevation_ft = p.IntegerField()
     latitude = p.FloatField()
     longitude = p.FloatField()
-    url_fmt = p.CharField()
+    url = p.CharField()
     file_ext = p.CharField(default='jpg')
     is_active = p.BooleanField(default=True)
-    every_mins = p.IntegerField(default=5)  # scrape every X mins
+    interval = p.IntegerField(default=5)  # scrape every N mins
     comment = p.TextField(default='')
 
     def get_location(self):
@@ -77,14 +78,12 @@ class ScrapeRecord(ModelBase):
     IDLE = 'idle'
 
     cam = p.ForeignKeyField(Cam, related_name='scrapes')
-    timestamp = p.DateTimeField(
-        default=datetime.datetime.now())  # time the image was downloaded
     result = p.CharField()
     detail = p.TextField(default='')
     filename = p.CharField(default='')  #does not include path
 
     def __repr__(self):
-        return '{}\t{}\t{}'.format(self.timestamp, self.cam.name, self.result)
+        return '{}\t{}\t{}'.format(self.created, self.cam.name, self.result)
 
 
 def create_tables():
@@ -101,7 +100,7 @@ def create_test_data():
     #-- mountains ---
 
     hood = Mountain.create(
-        name='Hood',
+        name='Mt Hood',
         state='OR',
         elevation_ft=11200,
         latitude=45.373439,
@@ -120,7 +119,7 @@ def create_test_data():
     sisters.save()
 
     rainier = Mountain.create(
-        name='Rainier',
+        name='Mt Rainier',
         state='WA',
         elevation_ft=14411,
         latitude=46.851736,
@@ -130,13 +129,22 @@ def create_test_data():
     rainier.save()
 
     fuji = Mountain.create(
-        name="Fuji",
+        name="Mt Fuji",
         state="Japan",
         elevation_ft=12388,
         latitude=35.360388,
         longitude=138.727724)
     fuji.tz_json = json.dumps(util.get_tz(fuji.latitude, fuji.longitude))
     fuji.save()
+
+    blanc = Mountain.create(
+        name='Mt Blanc',
+        state='France',
+        elevation_ft=15774,
+        latitude=45.833611,
+        longitude=6.865)
+    blanc.tz_json = json.dumps(util.get_tz(blanc.latitude, blanc.longitude))
+    blanc.save()
 
     #-- Cams ------
     palmer = Cam.create(
@@ -145,48 +153,46 @@ def create_test_data():
         elevation_ft=7000,
         latitude=45.373439,
         longitude=-121.695962,
-        url_fmt=
-        '''https://www.timberlinelodge.com/snowcameras/palmerbottom.jpg''')
+        url='''https://www.timberlinelodge.com/snowcameras/palmerbottom.jpg''')
+    vista = Cam.create(
+        mountain=hood,
+        name='Vista',
+        elevation_ft=5000,
+        latitude=45.373439,
+        longitude=-121.695962,
+        url='''https://www.skihood.com/cams/vista''')
+
     bachelor = Cam.create(
         mountain=sisters,
         name='Bachelor',
         elevation_ft=6040,
         latitude=44.103241,
         longitude=-121.769253,
-        url_fmt='''https://www.mtbachelor.com/webcams/southsisteroutback.jpg'''
-    )
+        url='''https://www.mtbachelor.com/webcams/southsisteroutback.jpg''')
+
     paradise = Cam.create(
         mountain=rainier,
         name='Paradise',
         elevation_ft=5400,
         latitude=46.851736,
         longitude=-121.760398,
-        url_fmt='''https://www.nps.gov/webcams-mora/mountain.jpg''')
+        url='''https://www.nps.gov/webcams-mora/mountain.jpg''')
 
-    subaru = Cam.create(
+    fuji_n = Cam.create(
         mountain=fuji,
-        name='Fuji Subaru 5th',
+        name='North',
         elevation_ft=5000,
         latitude=35.360388,
         longitude=138.727724,
-        url_fmt='''http://www.mfi.or.jp/goraikou223/cam04/0000.jpg''')
+        url=
+        '''http://www.sizenken.biodic.go.jp/system/camera_image/biodic/117_c/NCS.jpg'''
+    )
 
-    # t = datetime.datetime.now()
-    # for td in range(0, 25, 5):
-    #     t = t + datetime.timedelta(minutes=td)
-
-    #     status = ScrapeRecord.SUCCESS if random.random(
-    #     ) >= 0.1 else ScrapeRecord.FAILURE
-    #     ScrapeRecord.create(
-    #         cam=palmer,
-    #         timestamp=t,
-    #         result=status,
-    #         filename='{}.jpg'.format(int(t.timestamp())))
-
-    #     status = ScrapeRecord.SUCCESS if random.random(
-    #     ) >= 0.1 else ScrapeRecord.FAILURE
-    #     ScrapeRecord.create(
-    #         cam=cooper,
-    #         timestamp=t,
-    #         result=status,
-    #         filename='{}.jpg'.format(int(t.timestamp())))
+    blanc_tourism = Cam.create(
+        mountain=blanc,
+        name='Tourism',
+        elevation_ft=5500,
+        latitude=45.833611,
+        longitude=6.865,
+        url=
+        '''http://www.chamonix.com/webcam/webcam-argentiere-mont-blanc.jpg''')
