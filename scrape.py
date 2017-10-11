@@ -33,9 +33,9 @@ class ScrapeJob(threading.Thread):
     def run(self):
         '''Does the scrape'''
 
-        if self.is_between_sunrise_sunset():
-            # do the scrape
-            try:
+        try:
+            if self.is_between_sunrise_sunset():
+                # do the scrape
                 headers = requests.utils.default_headers()
                 headers.update({'User-Agent': USER_AGENT})
                 url = self.cam.url
@@ -51,11 +51,7 @@ class ScrapeJob(threading.Thread):
                     picdir = os.path.join(IMG_ROOT,
                                           self.cam.mountain.as_pathname(),
                                           self.cam.as_pathname())
-                    try:
-                        os.makedirs(picdir)
-                    except OSError:
-                        # this exception raised if directory exists, so skip
-                        pass
+                    os.makedirs(picdir, exist_ok=True)  #no err if dir exists
                     filename = os.path.join(picdir, self.record.filename)
                     with open(filename, 'wb') as f:
                         f.write(result.content)
@@ -64,13 +60,18 @@ class ScrapeJob(threading.Thread):
                     # request failed
                     result.raise_for_status()
 
-            except requests.exceptions.RequestException as err:
-                # some sort of failure
-                self.record.result = ScrapeRecord.FAILURE
-                self.record.detail = str(err)
-        else:
-            # idle
-            self.record.result = ScrapeRecord.IDLE
+            else:
+                # idle
+                self.record.result = ScrapeRecord.IDLE
+
+        except requests.exceptions.RequestException as err:
+            # some sort of failure with the request
+            self.record.result = ScrapeRecord.FAILURE
+            self.record.detail = str(err)
+        except OSError as err:
+            # some sort of I/O failure
+            self.record.result = ScrapeRecord.FAILURE
+            self.record.detail = str(err)
 
     def is_between_sunrise_sunset(self):
         '''Uses pyephem to determine if the cam should be scraped based on if
@@ -101,29 +102,35 @@ class ScrapeJob(threading.Thread):
 
 
 def main():
-    data = prefetch_all_mts_cams()
-    minute = dt.datetime.now().minute
-    filename_time = str(int(dt.datetime.utcnow().timestamp()))
-    jobs = list()
+    try:
+        data = prefetch_all_mts_cams()
+        minute = dt.datetime.now().minute
+        filename_time = str(int(dt.datetime.utcnow().timestamp()))
+        jobs = list()
 
-    # perform scrapes on every cam which
-    # 1) is active
-    # 2) it's the appropriate time of the hour
-    for mt in data:
-        for cam in mt.cams_prefetch:
-            if cam.is_active and minute % cam.interval == 0:
-                j = ScrapeJob(cam, filename_time)
-                jobs.append(j)
-                j.start()
+        # perform scrapes on every cam which
+        # 1) is active
+        # 2) it's the appropriate time of the hour
+        for mt in data:
+            for cam in mt.cams_prefetch:
+                if cam.is_active and minute % cam.interval == 0:
+                    j = ScrapeJob(cam, filename_time)
+                    jobs.append(j)
+                    j.start()
 
-    # wait for all threads to finish, up to 30 sec
-    for j in jobs:
-        j.join(timeout=30)
-
-    # save all new scrape records to the database in 1 transaction
-    with _db.atomic():
+        # wait for all threads to finish, up to 30 sec
         for j in jobs:
-            j.record.save()
+            j.join(timeout=30)
+
+        # save all new scrape records to the database in 1 transaction
+        with _db.atomic():
+            for j in jobs:
+                j.record.save()
+
+    except Exception as err:
+        # catch all other exceptions and print
+        print('\n', dt.datetime.now().isoformat())
+        print(err.with_traceback())
 
 
 if __name__ == '__main__':
