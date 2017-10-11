@@ -5,12 +5,10 @@ import json
 import requests
 import ephem
 
+import settings
 from model import Mountain, Cam, ScrapeRecord, _db
 from queries import prefetch_all_mts_cams
 from util import floor, ft_m
-
-USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36'
-IMG_ROOT = 'img'
 
 
 class ScrapeJob(threading.Thread):
@@ -37,9 +35,10 @@ class ScrapeJob(threading.Thread):
             if self.is_between_sunrise_sunset():
                 # do the scrape
                 headers = requests.utils.default_headers()
-                headers.update({'User-Agent': USER_AGENT})
+                headers.update({'User-Agent': settings.USER_AGENT})
                 url = self.cam.url
-                result = requests.get(url, headers=headers, timeout=10)
+                result = requests.get(
+                    url, headers=headers, timeout=settings.REQUEST_TIMEOUT)
 
                 if result.status_code == requests.codes.ok:
                     # request worked
@@ -48,7 +47,7 @@ class ScrapeJob(threading.Thread):
                         self.timestamp, self.cam.file_ext)
 
                     # write image to file
-                    picdir = os.path.join(IMG_ROOT,
+                    picdir = os.path.join(settings.IMG_ROOT,
                                           self.cam.mountain.as_pathname(),
                                           self.cam.as_pathname())
                     os.makedirs(picdir, exist_ok=True)  #no err if dir exists
@@ -78,16 +77,20 @@ class ScrapeJob(threading.Thread):
         the time at the mountain is between sun rise and sun set.'''
 
         mt = self.cam.mountain
-        tz = json.loads(mt.tz_json)
 
         obs = ephem.Observer()
-        obs.horizon = '-12'
+        obs.horizon = settings.HORIZON
         obs.elevation = ft_m(mt.elevation_ft)
         obs.lat = str(mt.latitude)
         obs.lon = str(mt.longitude)
 
         # change UTC->local, make local = 12 noon, then change local->UTC
-        total_offset_s = tz['rawOffset'] + tz['dstOffset']
+        try:
+            tz = json.loads(mt.tz_json)
+            total_offset_s = tz['rawOffset'] + tz['dstOffset']
+        except Exception:
+            total_offset_s = 0
+
         noon = dt.datetime.utcnow() + dt.timedelta(seconds=total_offset_s)
         noon = noon.replace(hour=12, minute=0, second=0, microsecond=0)
         noon = noon - dt.timedelta(seconds=total_offset_s)
@@ -120,7 +123,7 @@ def main():
 
         # wait for all threads to finish, up to 30 sec
         for j in jobs:
-            j.join(timeout=30)
+            j.join(timeout=settings.SCRAPE_JOB_TIMEOUT)
 
         # save all new scrape records to the database in 1 transaction
         with _db.atomic():

@@ -1,7 +1,15 @@
 import datetime
 import peewee as p
+import settings
 
-_db = p.SqliteDatabase('mtcam_test.db')
+if settings.DB_TYPE == 'sqlite':
+    _db = p.SqliteDatabase(settings.DB_CONNECTION)
+elif settings.DB_TYPE == 'mysql':
+    _db = p.MySQLDatabase(settings.DB_CONNECTION)
+elif settings.DB_TYPE == 'postgresql':
+    _db = p.PostgresqlDatabase(settings.DB_CONNECTION)
+else:
+    raise RuntimeError('Invalid DB settings')
 
 
 class ModelBase(p.Model):
