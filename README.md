@@ -21,7 +21,7 @@ Mounains/cams in other timezones will just have potential time errors.
 
 cron jobs:
 1. scrape every 5 mins
-    1. set delay for cams??
+    1. Done - set delay for cams?? --10 sec seems good in early testing
 2. update Mountain.tz daily at 3AM PT
 
 should program configuration can also be saved in database?
@@ -43,7 +43,7 @@ at each scrape:
     1. queries.py
     2. views.py (using flask)
 2. clean up util.py
-2. decide (in db or file) and create program settings
-3. decide on timestamp or datetime for 'modified' ModelBase field
-4. Write script to update Mountain.tz_json field
+2. DONE -decide (in db or file) and create program settings
+3. Done- decide on timestamp or datetime for 'modified' ModelBase field
+4. DONE - Write script to update Mountain.tz_json field
 5. write script to convert/import original palmer data to mtcam data

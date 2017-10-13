@@ -6,4 +6,6 @@ SCRAPE_JOB_TIMEOUT = 30
 DB_TYPE = 'sqlite'
 DB_CONNECTION = 'mtcam_test.db'
 
+GOOGLE_TZAPI_KEY = 'AIzaSyC7B3hbUJ0m-2F-pOp0W6IIirO4nOUwWrU'
+
 HORIZON = '-12' # for nautical twilight

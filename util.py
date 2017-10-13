@@ -2,14 +2,15 @@
 # Requires Python 3 for certain timezone objects/functions.
 # """
 
-import json
 import time
-from datetime import datetime, timedelta, tzinfo, timezone
+from datetime import datetime, timedelta, timezone, tzinfo
 
-import requests
 import ephem
+import requests
 
-url = 'https://maps.googleapis.com/maps/api/timezone/json?location={},{}&timestamp={}&key=AIzaSyC7B3hbUJ0m-2F-pOp0W6IIirO4nOUwWrU'
+import settings
+
+url = 'https://maps.googleapis.com/maps/api/timezone/json?location={},{}&timestamp={}&key={}'
 fmt = '%Y-%m-%dT%H:%M:%S.%f%z'
 
 pdx = (45.31, -121.84)
@@ -19,8 +20,6 @@ everest = (27.988056, 86.925278)
 
 ##local->UTM: local_time - (offset + dstoffset)
 ##UTM->local: UTM_time + (offset + dstoffset)
-
-## datetime.now().replace(tzinfo=pst).astimezone(timezone.utc)  'pst' from get_tzinfo()
 
 
 def ft_m(feet):
@@ -48,9 +47,12 @@ def get_tz(lat, lon, t=None):
     if not t:
         t = int(time.time())
     #use url to get json
-    result = requests.get(url.format(lat, lon, t))
+    result = requests.get(url.format(lat, lon, t, settings.GOOGLE_TZAPI_KEY))
     #return converted json
     return result.json()
+
+
+# Unused? ----------------------------------------------------------------
 
 
 def utmnoon_at_loc(lat, lon, tz=None):
