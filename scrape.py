@@ -1,12 +1,15 @@
 import datetime as dt
-import os
-import threading
 import json
-import requests
+import os
+import sys
+import threading
+import traceback
+
 import ephem
+import requests
 
 import settings
-from model import Mountain, Cam, ScrapeRecord, _db
+from model import Cam, Mountain, ScrapeRecord, _db
 from queries import prefetch_all_mts_cams
 from util import floor, ft_m
 
@@ -133,7 +136,7 @@ def main():
     except Exception as err:
         # catch all other exceptions and print
         print('\n', dt.datetime.now().isoformat())
-        print(err.with_traceback())
+        traceback.print_exc(file=sys.stdout)
 
 
 if __name__ == '__main__':
