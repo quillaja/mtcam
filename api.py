@@ -46,8 +46,15 @@ def data():
 
 @app.route('/api/mountains/<int:mt_id>/cams/<int:cam_id>/scrapes')
 def scrapes(mt_id, cam_id):
-    end = request.args.get('end', dt.datetime.now())
-    start = request.args.get('start', end - dt.timedelta(hours=24))
+    end = request.args.get('end', '')
+    start = request.args.get('start', '')
+
+    try:
+        end = dt.datetime.strptime(end, '%Y-%m-%dT%H:%M')
+        start = dt.datetime.strptime(start, '%Y-%m-%dT%H:%M')
+    except ValueError:
+        end = dt.datetime.now()
+        start = end - dt.timedelta(hours=24)
 
     mt_path = Mountain.get(Mountain.id == mt_id).as_pathname()
     cam_path = Cam.get(Cam.id == cam_id).as_pathname()
