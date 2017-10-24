@@ -44,6 +44,13 @@ function getScrapes() {
             if (request.status == 200) {
                 var sTable = document.getElementById("scrapes");
                 var scrapes = JSON.parse(request.responseText);
+
+                // empty table
+                while (sTable.firstChild) {
+                    sTable.removeChild(sTable.firstChild);
+                }
+
+                // add each item to the table
                 scrapes.forEach(function (element) {
                     var r = document.createElement("tr");
                     r.textContent = JSON.stringify(element)
@@ -64,7 +71,7 @@ function getScrapes() {
         "/cams/" + cam +
         "/scrapes?start=" + start +
         "&end=" + end;
-    alert(url);
+    // alert(url);
     request.open("GET", url, true);
     request.send();
 }
