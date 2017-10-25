@@ -13,9 +13,8 @@ else:
 
 
 class ModelBase(p.Model):
-    created = p.DateTimeField(
-        default=datetime.datetime.now, formats=['%Y-%m-%d %H:%M:%S'])
-    modified = p.DateTimeField(formats=['%Y-%m-%d %H:%M:%S'])
+    created = p.DateTimeField(default=datetime.datetime.now)
+    modified = p.DateTimeField()
 
     def save(self, *args, **kwargs):
         '''Overrides default Model.save() to enable the modified field

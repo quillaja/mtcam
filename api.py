@@ -53,8 +53,9 @@ def scrapes(mt_id, cam_id):
         end = dt.datetime.strptime(end, '%Y-%m-%dT%H:%M')
         start = dt.datetime.strptime(start, '%Y-%m-%dT%H:%M')
     except ValueError:
-        end = dt.datetime.now()
-        start = end - dt.timedelta(hours=24)
+        # these will be resolved to now(), now()-24h in the query func
+        end = None
+        start = None
 
     mt_path = Mountain.get(Mountain.id == mt_id).as_pathname()
     cam_path = Cam.get(Cam.id == cam_id).as_pathname()
@@ -70,7 +71,7 @@ def scrapes(mt_id, cam_id):
             filename = ''
 
         sd = {
-            'time': s.created,
+            'time': s.created.strftime('%Y-%m-%d %H:%M'),
             'result': s.result,
             'detail': s.detail,
             'file': filename
