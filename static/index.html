@@ -3,22 +3,31 @@
 
 <head>
     <meta charset="UTF-8">
+    <link rel="shortcut icon" href="/static/favicon.ico" />
+
     <title>Document</title>
     <script src="client.js"></script>
+    <link href="style.css" rel="stylesheet" type="text/css">
 </head>
 
-<body>
-    <label for="mountain">Mountain:</label>
-    <select id="mountain" name="mountainselect"></select>
-    <label for="cam">Camera:</label>
-    <select id="cam" name="camselect"></select>
+<body class="grid-container">
+    <h1 class="grid-item" id="title">Mountain Cameras</h1>
 
-    <label for="start">From:</label>
-    <input id="start" type="datetime-local" name="startdate" required>
-    <label for="end">To:</label>
-    <input id="end" type="datetime-local" name="enddate">
-    <input id="submit" type="button" onclick="getScrapes()" value="Press" required>
-    <table id="scrapes"></table>
+    <label class="grid-item" for="mountain" id="label-mountain">Mountain:</label>
+    <select class="grid-item" id="mountain" name="mountainselect"></select>
+
+    <label class="grid-item" for="cam" id="label-cam">Camera:</label>
+    <select class="grid-item" id="cam" name="camselect"></select>
+
+    <label class="grid-item" for="start" id="label-start">From:</label>
+    <input class="grid-item" id="start" type="datetime-local" name="startdate" required>
+
+    <label class="grid-item" for="end" id="label-end">To:</label>
+    <input class="grid-item" id="end" type="datetime-local" name="enddate">
+
+    <input id="submit" class="grid-item" type="button" onclick="getScrapes()" value="Press" required>
+
+    <table id="scrapes" class="grid-item"></table>
 </body>
 
 </html>
