@@ -51,10 +51,14 @@ def scrapes(mt_id, cam_id):
 
     try:
         end = dt.datetime.strptime(end, '%Y-%m-%dT%H:%M')
+    except ValueError:
+        # will resolve to now() in the query func
+        end = None
+
+    try:
         start = dt.datetime.strptime(start, '%Y-%m-%dT%H:%M')
     except ValueError:
-        # these will be resolved to now(), now()-24h in the query func
-        end = None
+        # these will be resolved to 'end'-24h in the query func
         start = None
 
     mt_path = Mountain.get(Mountain.id == mt_id).as_pathname()

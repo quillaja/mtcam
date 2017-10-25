@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css?family=Open+Sans');
-
 * {
     font-family: 'Open Sans', sans-serif;
 }
@@ -60,6 +58,14 @@
 
 #scrapes {
     grid-area: scrape;
+}
+
+#scrapes tr {
+    transition: background-color 100ms;
+}
+
+#scrapes tr:hover {
+    background-color: lightgray;
 }
 
 #scrapes td {

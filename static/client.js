@@ -153,7 +153,7 @@ function createScrapeRow(cam) {
     c1.innerText = cam["time"];
     c2.innerText = cam["result"];
     if (cam["result"] == "success") {
-        c3.innerHTML = "<a href=" + cam["file"] + ">image</a>";
+        c3.innerHTML = "<a href=" + cam["file"] + " target=\"_blank\">image</a>";
     } else {
         c3.innerHTML = "";
     }
