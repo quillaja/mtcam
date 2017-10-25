@@ -2,7 +2,10 @@ var data = null;
 var urlBase = "";
 
 window.onload = function (e) {
-    urlBase = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port;
+    urlBase = window.location.protocol + "//" + window.location.hostname;
+    if (window.location.port != '' && window.location.port != 0) {
+        urlBase = urlBase + ":" + window.location.port;
+    }
     var mtSelect = document.getElementById("mountain");
     var camSelect = document.getElementById("cam");
 
@@ -149,7 +152,11 @@ function createScrapeRow(cam) {
     var c4 = document.createElement("td");
     c1.innerText = cam["time"];
     c2.innerText = cam["result"];
-    c3.innerHTML = "<a href=" + cam["file"] + ">image</a>";
+    if (cam["result"] == "success") {
+        c3.innerHTML = "<a href=" + cam["file"] + ">image</a>";
+    } else {
+        c3.innerHTML = "";
+    }
     c4.innerText = cam["detail"];
     tr.appendChild(c1);
     tr.appendChild(c2);

@@ -61,3 +61,7 @@
 #scrapes {
     grid-area: scrape;
 }
+
+#scrapes td {
+    padding: 0rem 1rem;
+}
