@@ -22,14 +22,17 @@
 
         <div class="control-box">
             <label for="start" id="label-start">From:</label>
-            <input id="start" type="datetime-local" name="startdate" required>
+            <input id="start" type="datetime-local" name="startdate">
 
             <label for="end" id="label-end">To:</label>
             <input id="end" type="datetime-local" name="enddate">
-        </div>
 
+            <input id="as-local" type="checkbox" checked>
+            <label for="as-local">Times local to mountain</label>
+        </div>
+        
     </div>
-    <input id="submit" type="button" onclick="getScrapes()" value="Load Data" required>
+    <button id="submit" onclick="getScrapes()">Load Data</button>
     <table id="scrapes"></table>
 </body>
 

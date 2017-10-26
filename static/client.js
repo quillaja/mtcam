@@ -68,10 +68,12 @@ function getScrapes() {
     };
     var mt = document.getElementById("mountain").value;
     var cam = document.getElementById("cam").value;
+    var asLocal = document.getElementById("as-local").checked;
     var url = urlBase + "/api/mountains/" + mt +
         "/cams/" + cam +
         "/scrapes?start=" + start +
-        "&end=" + end;
+        "&end=" + end +
+        "&as_local_time=" + asLocal;
     request.open("GET", url, true);
     request.send();
 }
@@ -132,7 +134,7 @@ function createScrapeHeader() {
     var c1 = document.createElement("th");
     var c2 = document.createElement("th");
     var c3 = document.createElement("th");
-    c1.innerText = "Time";
+    c1.innerText = "Time (Pacific Time)";
     c2.innerText = "Result";
     c3.innerText = "Detail";
     tr.appendChild(c1);
