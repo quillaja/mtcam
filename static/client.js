@@ -132,15 +132,12 @@ function createScrapeHeader() {
     var c1 = document.createElement("th");
     var c2 = document.createElement("th");
     var c3 = document.createElement("th");
-    var c4 = document.createElement("th");
     c1.innerText = "Time";
     c2.innerText = "Result";
-    c3.innerText = "Image";
-    c4.innerText = "Detail";
+    c3.innerText = "Detail";
     tr.appendChild(c1);
     tr.appendChild(c2);
     tr.appendChild(c3);
-    tr.appendChild(c4);
     return tr;
 }
 
@@ -149,18 +146,22 @@ function createScrapeRow(cam) {
     var c1 = document.createElement("td");
     var c2 = document.createElement("td");
     var c3 = document.createElement("td");
-    var c4 = document.createElement("td");
+
     c1.innerText = cam["time"];
-    c2.innerText = cam["result"];
+    c1.classList.add("time");
+
     if (cam["result"] == "success") {
-        c3.innerHTML = "<a href=" + cam["file"] + " target=\"_blank\">image</a>";
+        c2.innerHTML = "<a href=" + cam["file"] + " target=\"_blank\">" + cam["result"] + "</a>";
     } else {
-        c3.innerHTML = "";
+        c2.innerText = cam["result"];
     }
-    c4.innerText = cam["detail"];
+    c2.classList.add("result");
+
+    c3.innerText = cam["detail"];
+    c3.classList.add("detail");
+
     tr.appendChild(c1);
     tr.appendChild(c2);
     tr.appendChild(c3);
-    tr.appendChild(c4);
     return tr;
 }

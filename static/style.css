@@ -2,62 +2,17 @@
     font-family: 'Open Sans', sans-serif;
 }
 
-.grid-container {
+.controls-area {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.control-box {
     display: grid;
-    grid-template:
-    [row-1] "title title title title title" auto
-    [row-2] "lbmt mtsel lbstart start submit" auto
-    [row-3] "lbcam camsel lbend end submit" auto
-    [row-4] "scrape scrape scrape scrape scrape" auto
-    / auto 3fr auto 3fr 1fr;
     grid-gap: 0.5rem;
-}
-
-.grid-item {
-}
-
-#title {
-    grid-area: title;
-}
-
-#label-mountain {
-    grid-area: lbmt;
-}
-
-#mountain {
-    grid-area: mtsel;
-}
-
-#label-cam {
-    grid-area: lbcam;
-}
-
-#cam {
-    grid-area: camsel;
-}
-
-#label-start {
-    grid-area: lbstart;
-}
-
-#start {
-    grid-area: start;
-}
-
-#label-end {
-    grid-area: lbend;
-}
-
-#end {
-    grid-area: end;
-}
-
-#submit {
-    grid-area: submit;
-}
-
-#scrapes {
-    grid-area: scrape;
+    grid-template-columns: 1fr 3fr;
+    /* grid-auto-rows: auto auto; */
+    margin: 0.25rem;
 }
 
 #scrapes tr {
@@ -70,5 +25,18 @@
 
 #scrapes td {
     padding: 0rem 1rem;
+    height: 1rem;
+}
+
+#scrapes .time {
+    display: block;
     width: 9rem;
+}
+
+#scrapes .result {
+    width: auto;
+}
+
+#scrapes .detail {
+    overflow: hidden;
 }
