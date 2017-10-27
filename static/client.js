@@ -1,6 +1,8 @@
-var data = null;
-var urlBase = "";
+var data = null; // the mountain and camera info recieved from the api.
+var urlBase = ""; // the base url on which to build api requests.
 
+// Sets up urlBase, the mountain/camera 'dropdowns' + associated data,
+// and attatches an onchange listener to the mountain dropdown.
 window.onload = function (e) {
     urlBase = window.location.protocol + "//" + window.location.hostname;
     if (window.location.port != '' && window.location.port != 0) {
@@ -28,6 +30,8 @@ window.onload = function (e) {
     setupMtCamSelection();
 }
 
+// Requests scraperecords from the api between the dates specified in the ui,
+// then populates rows of the table.
 function getScrapes() {
     var start = document.getElementById("start").value;
     var end = document.getElementById("end").value;
@@ -53,8 +57,8 @@ function getScrapes() {
                 sTable.appendChild(createScrapeHeader());
 
                 // add each item to the table
-                scrapes.forEach(function (cam) {
-                    var r = createScrapeRow(cam);
+                scrapes.forEach(function (scrape) {
+                    var r = createScrapeRow(scrape);
                     sTable.appendChild(r);
                 }, this);
             }
@@ -66,6 +70,8 @@ function getScrapes() {
             }
         }
     };
+
+    // prepare and make api request
     var mt = document.getElementById("mountain").value;
     var cam = document.getElementById("cam").value;
     var asLocal = document.getElementById("as-local").checked;
@@ -78,7 +84,8 @@ function getScrapes() {
     request.send();
 }
 
-
+// Gets mountain and cam data from the api, then populates the
+// respective 'dropdown' items in the ui.
 function setupMtCamSelection() {
 
     var request = new XMLHttpRequest();
@@ -103,6 +110,7 @@ function setupMtCamSelection() {
         }
     };
 
+    // prepare and make api request
     var url = urlBase + "/api/data";
     request.open("GET", url, true);
     request.send();
@@ -115,6 +123,7 @@ function rmAllChildren(element) {
     }
 }
 
+// create a single `<option>` element for the mountain 'dropdown'
 function createMtSelectOption(mt) {
     var e = document.createElement("option");
     e.value = mt["id"];
@@ -122,6 +131,7 @@ function createMtSelectOption(mt) {
     return e;
 }
 
+// create a single `<option>` element for the camera 'dropdown'
 function createCamSelectOption(cam) {
     var e = document.createElement("option");
     e.value = cam["id"];
@@ -129,6 +139,7 @@ function createCamSelectOption(cam) {
     return e;
 }
 
+// create header `tr` for scrape display table
 function createScrapeHeader() {
     var tr = document.createElement("tr");
     var c1 = document.createElement("th");
@@ -143,23 +154,24 @@ function createScrapeHeader() {
     return tr;
 }
 
-function createScrapeRow(cam) {
+// create a single `tr` for the given scrape record
+function createScrapeRow(scrape) {
     var tr = document.createElement("tr");
     var c1 = document.createElement("td");
     var c2 = document.createElement("td");
     var c3 = document.createElement("td");
 
-    c1.innerText = cam["time"];
+    c1.innerText = scrape["time"];
     c1.classList.add("time");
 
-    if (cam["result"] == "success") {
-        c2.innerHTML = "<a href=" + cam["file"] + " target=\"_blank\">" + cam["result"] + "</a>";
+    if (scrape["result"] == "success") {
+        c2.innerHTML = "<a href=" + scrape["file"] + " target=\"_blank\">" + scrape["result"] + "</a>";
     } else {
-        c2.innerText = cam["result"];
+        c2.innerText = scrape["result"];
     }
     c2.classList.add("result");
 
-    c3.innerText = cam["detail"];
+    c3.innerText = scrape["detail"];
     c3.classList.add("detail");
 
     tr.appendChild(c1);
