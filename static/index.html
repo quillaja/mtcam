@@ -5,13 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Mountain Cams</title>
+    <link rel='shortcut icon' type='image/x-icon' href='/static/favicon.ico' />
     <script src="client.js"></script>
     <link href="style.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
 </head>
 
 <body>
-    <h1 id="title">Mountain Cameras</h1>
+    <h2 id="title">Mountain Cameras</h1>
+
     <div class="controls-area">
         <div class="control-box">
             <label for="mountain" id="label-mountain">Mountain:</label>
@@ -31,10 +33,20 @@
             <input id="as-local" type="checkbox" checked>
             <label for="as-local">Times local to mountain</label>
         </div>
-        
+
+        <div class="control-box">
+            <button id="submit">Load Data</button>
+        </div>
     </div>
-    <button id="submit" onclick="getScrapes()">Load Data</button>
-    <table id="scrapes"></table>
+
+    <div class="tab-area">
+    </div>
+
+    <div class="display-area">
+        <table id="scrapes" class="hidden"></table>
+        <div id="timelapse" class="hidden">Timelapse</div>
+        <div id="location" class="hidden"></div>
+    </div>
 </body>
 
 </html>

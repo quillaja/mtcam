@@ -1,5 +1,13 @@
 var data = null; // the mountain and camera info recieved from the api.
+var scrapes = null; // the scraperecords from the api (upon user action)
 var urlBase = ""; // the base url on which to build api requests.
+
+// tabs data structure
+var tabData = {
+    "Log": "scrapes",
+    "Timelapse": "timelapse",
+    "Location Info": "location"
+};
 
 // Sets up urlBase, the mountain/camera 'dropdowns' + associated data,
 // and attatches an onchange listener to the mountain dropdown.
@@ -23,11 +31,41 @@ window.onload = function (e) {
                     var e = createCamSelectOption(cam);
                     camSelect.appendChild(e);
                 }, this);
+                camSelect.onchange(); // make it act like a user changed it
             }
         }, this);
     };
 
+    camSelect.onchange = function () {
+        var mtId = document.getElementById("mountain").value;
+        var camId = document.getElementById("cam").value;
+        var mt = null;
+        var cam = null;
+
+        data.forEach(function (m) {
+            if (m["id"] == mtId) {
+                mt = m;
+                mt["cams"].forEach(function (c) {
+                    if (c["id"] == camId) {
+                        cam = c;
+                        return;
+                    }
+                }, this);
+                return;
+            }
+        }, this);
+
+        showInfo(mt, cam, scrapes);
+    };
+
+    // setup tab bar
+    setupTabBar();
+
+    // get data for 'dropdowns' from api
     setupMtCamSelection();
+
+    // attach functionality to "load data" button
+    document.getElementById("submit").onclick = getScrapes;
 }
 
 // Requests scraperecords from the api between the dates specified in the ui,
@@ -47,7 +85,7 @@ function getScrapes() {
     request.onreadystatechange = function () {
         if (request.readyState == XMLHttpRequest.DONE) {   // XMLHttpRequest.DONE == 4
             if (request.status == 200) {
-                var scrapes = JSON.parse(request.responseText);
+                scrapes = JSON.parse(request.responseText);
                 var sTable = document.getElementById("scrapes");
 
                 // empty table
@@ -66,7 +104,7 @@ function getScrapes() {
                 alert('There was an error 400');
             }
             else {
-                alert('something else other than 200 was returned');
+                alert('(getScrapes) something else other than 200 was returned');
             }
         }
     };
@@ -105,7 +143,7 @@ function setupMtCamSelection() {
                 alert('There was an error 400');
             }
             else {
-                alert('something else other than 200 was returned');
+                alert('(setupMtCam) something else other than 200 was returned');
             }
         }
     };
@@ -114,6 +152,39 @@ function setupMtCamSelection() {
     var url = urlBase + "/api/data";
     request.open("GET", url, true);
     request.send();
+}
+
+// creates the tabs from the information in `tabData`
+function setupTabBar() {
+    var tabBar = document.getElementsByClassName("tab-area")[0];
+
+    for (var k in tabData) {
+        t = document.createElement("span");
+        t.classList.add("tab");
+        t.innerText = k;
+        t.onclick = function () { tabClicked(this); }
+        tabBar.appendChild(t);
+    }
+}
+
+// toggles the tab clicked.
+// TODO: make tab click change display area visibility
+function tabClicked(tab) {
+    // var tabs = Array.from(document.getElementsByClassName("tab"));
+    // tabs.forEach(function (t) {
+    //     t.classList.remove("selected");
+    // }, this);
+
+    var selected = document.querySelector(".tab.selected");
+    if (selected != null) {
+        var oldContentId = tabData[selected.innerText];
+        selected.classList.remove("selected");
+        document.getElementById(oldContentId).classList.add("hidden");
+    }
+
+    tab.classList.add("selected");
+    var newContentId = tabData[tab.innerText];
+    document.getElementById(newContentId).classList.remove("hidden");
 }
 
 // remove all child elements of element.
@@ -178,4 +249,42 @@ function createScrapeRow(scrape) {
     tr.appendChild(c2);
     tr.appendChild(c3);
     return tr;
+}
+
+
+function showInfo(m, c, s) {
+    var locBox = document.getElementById("location");
+    rmAllChildren(locBox);
+
+    if (m != null) {
+        var mInfoBox = document.createElement("span");
+        mInfoBox.classList.add("info-box");
+        for (var k in m) {
+            var p = document.createElement("span");
+            p.classList.add("property");
+            p.innerHTML = k;
+            var v = document.createElement("span");
+            v.classList.add("value");
+            v.innerHTML = m[k];
+            mInfoBox.appendChild(p);
+            mInfoBox.appendChild(v);
+        }
+        locBox.appendChild(mInfoBox);
+    }
+
+    if (c != null) {
+        var cInfoBox = document.createElement("span");
+        cInfoBox.classList.add("info-box");
+        for (var k in c) {
+            var p = document.createElement("span");
+            p.classList.add("property");
+            p.innerHTML = k;
+            var v = document.createElement("span");
+            v.classList.add("value");
+            v.innerHTML = c[k];
+            cInfoBox.appendChild(p);
+            cInfoBox.appendChild(v);
+        }
+        locBox.appendChild(cInfoBox);
+    }
 }

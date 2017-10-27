@@ -2,18 +2,63 @@
     font-family: 'Open Sans', sans-serif;
 }
 
+.hidden{ 
+    display: none !important;
+}
+
+body {
+    margin: 0rem;
+}
+
+#title {
+    background-color: #F0F0F0;
+    margin: 0rem;
+    padding: 1rem 0.5rem;
+}
+
 .controls-area {
     display: flex;
     flex-wrap: wrap;
+    background-color: #F0F0F0;
 }
 
 .control-box {
     display: grid;
     grid-gap: 0.5rem;
     grid-template-columns: 1fr 3fr;
-    /* grid-auto-rows: auto auto; */
     margin: 0.25rem;
 }
+
+.tab-area {
+    display: flex;
+    background-color: #F0F0F0;
+}
+
+.tab {
+    padding: 0.3rem 1rem;
+    margin: 0rem 0.2rem;
+    border: 1px solid grey;
+    border-bottom: 1px solid white;
+    color: gray;
+}
+
+.tab:hover {
+    color: blue;
+}
+
+.tab.selected {
+    color: black;
+    background-color: white;
+    font-weight: bold;
+}
+
+.display-area {
+    margin-top: 1rem;
+    background-color: white;
+}
+
+
+
 
 #scrapes tr {
     transition: background-color 200ms;
@@ -40,4 +85,24 @@
 #scrapes .detail {
     display: block;
     overflow: hidden;
+}
+
+
+#location {
+    display: flex;
+}
+
+.info-box {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    grid-gap: 0.5rem;
+    margin: 0.25rem;
+}
+
+.info-box .property {
+    font-weight: bold;
+}
+
+.info-box .value {
+    font-style: italic;
 }
