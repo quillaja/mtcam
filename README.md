@@ -39,11 +39,16 @@ at each scrape:
         2. write new ScrapeRecord with appropriate info to database
 
 # Todo
-1. write API
+1. DONE - write API
     1. queries.py
     2. views.py (using flask)
 2. clean up util.py
-2. DONE -decide (in db or file) and create program settings
-3. Done- decide on timestamp or datetime for 'modified' ModelBase field
+2. DONE - decide (in db or file) and create program settings
+3. Done - decide on timestamp or datetime for 'modified' ModelBase field
 4. DONE - Write script to update Mountain.tz_json field
 5. write script to convert/import original palmer data to mtcam data
+6. Create "client" (webpage/javascript/css)
+    1. html (index.html)
+    2. javascript (client.js)
+        1. timelapse.js or gallery.js for the "moving picture" display?
+    3. style (style.css)
