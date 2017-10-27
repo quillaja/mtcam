@@ -39,13 +39,33 @@
         </div>
     </div>
 
-    <div class="tab-area">
+    <div id="tab-area" class="tab-area hidden">
     </div>
 
     <div class="display-area">
         <table id="scrapes" class="hidden"></table>
-        <div id="timelapse" class="hidden">Timelapse</div>
-        <div id="location" class="hidden"></div>
+
+        <div id="timelapse" class="hidden">
+            <div id="timelapse-controls">
+                <select id="speed">
+                    <option value="1">1 fps</option>
+                    <option value="2">2 fps</option>
+                    <option value="5">5 fps</option>
+                    <option value="10">10 fps</option>
+                    <option value="15">15 fps</option>
+                    <option value="20">20 fps</option>
+                    <option value="30">30 fps</option>
+                </select>
+                <button id="play">Play</button>
+                <button id="previous">&#8678;</button>
+                <button id="next">&#8680;</button>
+            </div>
+            <div id="timelapse-display">
+                <img src="https://rpi.one/img/mt_hood_or/palmer/1508971204.jpg"/>
+            </div>
+        </div>
+
+        <div id="info" class="hidden"></div>
     </div>
 </body>
 

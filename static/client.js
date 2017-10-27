@@ -6,7 +6,7 @@ var urlBase = ""; // the base url on which to build api requests.
 var tabData = {
     "Log": "scrapes",
     "Timelapse": "timelapse",
-    "Location Info": "location"
+    "Location Info": "info"
 };
 
 // Sets up urlBase, the mountain/camera 'dropdowns' + associated data,
@@ -31,37 +31,8 @@ window.onload = function (e) {
                     var e = createCamSelectOption(cam);
                     camSelect.appendChild(e);
                 }, this);
-                camSelect.onchange(); // make it act like a user changed it
             }
         }, this);
-    };
-
-    camSelect.onchange = function () {
-        //
-        // TODO: have to redo this whole thing. the info tab should
-        // really update when it is clicked, not when the cam dropdown
-        // changes. BUT also have to avoid re-rendering the entire
-        // info tab from scratch if nothing has actually changed.
-        //
-        var mtId = document.getElementById("mountain").value;
-        var camId = document.getElementById("cam").value;
-        var mt = null;
-        var cam = null;
-
-        data.forEach(function (m) {
-            if (m["id"] == mtId) {
-                mt = m;
-                mt["cams"].forEach(function (c) {
-                    if (c["id"] == camId) {
-                        cam = c;
-                        return;
-                    }
-                }, this);
-                return;
-            }
-        }, this);
-
-        showInfo(mt, cam, scrapes); 
     };
 
     // setup tab bar
@@ -71,40 +42,25 @@ window.onload = function (e) {
     setupMtCamSelection();
 
     // attach functionality to "load data" button
-    document.getElementById("submit").onclick = getScrapes;
+    document.getElementById("submit").onclick = loadAndDisplayData;
 }
 
 // Requests scraperecords from the api between the dates specified in the ui,
 // then populates rows of the table.
-function getScrapes() {
-    var start = document.getElementById("start").value;
-    var end = document.getElementById("end").value;
-
-    // if (start == '' || start == null) {
-    //     alert("'From' must be specified.");
-    // }
-    // if (end == '' || end == null) {
-    //     alert("'To' must be specified");
-    // }
+function loadAndDisplayData() {
 
     var request = new XMLHttpRequest();
     request.onreadystatechange = function () {
         if (request.readyState == XMLHttpRequest.DONE) {   // XMLHttpRequest.DONE == 4
             if (request.status == 200) {
+                // parse scrapes
                 scrapes = JSON.parse(request.responseText);
-                var sTable = document.getElementById("scrapes");
 
-                // empty table
-                rmAllChildren(sTable);
-
-                // add header
-                sTable.appendChild(createScrapeHeader());
-
-                // add each item to the table
-                scrapes.forEach(function (scrape) {
-                    var r = createScrapeRow(scrape);
-                    sTable.appendChild(r);
-                }, this);
+                // display various data
+                populateScrapeTable();
+                showInfo();
+                // makeTimelapse();
+                document.getElementById("tab-area").classList.remove("hidden");
             }
             else if (request.status == 400) {
                 alert('There was an error 400');
@@ -116,16 +72,36 @@ function getScrapes() {
     };
 
     // prepare and make api request
+    var start = document.getElementById("start").value;
+    var end = document.getElementById("end").value;
     var mt = document.getElementById("mountain").value;
     var cam = document.getElementById("cam").value;
     var asLocal = document.getElementById("as-local").checked;
+
     var url = urlBase + "/api/mountains/" + mt +
         "/cams/" + cam +
         "/scrapes?start=" + start +
         "&end=" + end +
         "&as_local_time=" + asLocal;
+
     request.open("GET", url, true);
     request.send();
+}
+
+function populateScrapeTable() {
+    var sTable = document.getElementById("scrapes");
+
+    // empty table
+    rmAllChildren(sTable);
+
+    // add header
+    sTable.appendChild(createScrapeHeader());
+
+    // add each item to the table
+    scrapes.forEach(function (scrape) {
+        var r = createScrapeRow(scrape);
+        sTable.appendChild(r);
+    }, this);
 }
 
 // Gets mountain and cam data from the api, then populates the
@@ -162,7 +138,7 @@ function setupMtCamSelection() {
 
 // creates the tabs from the information in `tabData`
 function setupTabBar() {
-    var tabBar = document.getElementsByClassName("tab-area")[0];
+    var tabBar = document.getElementById("tab-area");
 
     for (var k in tabData) {
         t = document.createElement("span");
@@ -171,15 +147,14 @@ function setupTabBar() {
         t.onclick = function () { tabClicked(this); }
         tabBar.appendChild(t);
     }
+
+    tabClicked(tabBar.children[0]);
 }
 
 // toggles the tab clicked.
 // TODO: make tab click change display area visibility
+// TODO: Ignore above TODO. Decided "load data" will initiate everything
 function tabClicked(tab) {
-    // var tabs = Array.from(document.getElementsByClassName("tab"));
-    // tabs.forEach(function (t) {
-    //     t.classList.remove("selected");
-    // }, this);
 
     var selected = document.querySelector(".tab.selected");
     if (selected != null) {
@@ -259,68 +234,108 @@ function createScrapeRow(scrape) {
 
 // TODO: eliminate repetition. Each type of object (mt, cam, scrapes)
 // will get customized UI presentation, so can't totally refactor this =(
-function showInfo(m, c, s) {
-    var locBox = document.getElementById("location");
+function showInfo() {
+
+    // most of this section sucks
+    var mtId = document.getElementById("mountain").value;
+    var camId = document.getElementById("cam").value;
+    var mt = null;
+    var cam = null;
+
+    data.forEach(function (m) {
+        if (m["id"] == mtId) {
+            mt = m;
+            mt["cams"].forEach(function (c) {
+                if (c["id"] == camId) {
+                    cam = c;
+                    return;
+                }
+            }, this);
+            return;
+        }
+    }, this);
+
+    var locBox = document.getElementById("info");
     rmAllChildren(locBox);
 
-    if (m != null) {
+    if (mt != null) {
         var mInfoBox = document.createElement("span");
         mInfoBox.classList.add("info-box");
-        for (var k in m) {
-            var p = document.createElement("span");
-            p.classList.add("property");
-            p.innerHTML = k;
-            var v = document.createElement("span");
-            v.classList.add("value");
-            v.innerHTML = m[k];
-            mInfoBox.appendChild(p);
-            mInfoBox.appendChild(v);
-        }
+
+        // Name, state
+        addPropValueToElement(mInfoBox, mt["name"] + "  (" + mt["state"] + ")", "");
+        // elevation
+        addPropValueToElement(mInfoBox, "Elevation (ft)", mt["elevation_ft"]);
+        // lat, lon (link)
+        addPropValueToElement(mInfoBox, "Location", mapLink(mt["latitude"], mt["longitude"]));
+        // timeZoneName, rawOffset, dstOffset
+        var tz = mt["tz"]["timeZoneName"] + "<br>(UTC+" +
+            secToHr(mt["tz"]["rawOffset"]) + "hr, +" + secToHr(mt["tz"]["dstOffset"]) + "hr DST)";
+        addPropValueToElement(mInfoBox, "Timezone", tz);
+
         locBox.appendChild(mInfoBox);
     }
 
-    if (c != null) {
+    if (cam != null) {
         var cInfoBox = document.createElement("span");
         cInfoBox.classList.add("info-box");
-        for (var k in c) {
-            var p = document.createElement("span");
-            p.classList.add("property");
-            p.innerHTML = k;
-            var v = document.createElement("span");
-            v.classList.add("value");
-            v.innerHTML = c[k];
-            cInfoBox.appendChild(p);
-            cInfoBox.appendChild(v);
-        }
+
+        // Name, active
+        addPropValueToElement(cInfoBox, cam["name"], "active = " + cam["is_active"]);
+        // elevation
+        addPropValueToElement(cInfoBox, "Elevation (ft)", cam["elevation_ft"]);
+        // lat,lon (link)
+        addPropValueToElement(cInfoBox, "Location", mapLink(cam["latitude"], cam["longitude"]));
+        // interval
+        addPropValueToElement(cInfoBox, "Interval (min)", cam["interval"]);
+        // comment
+        addPropValueToElement(cInfoBox, "Comment", cam["comment"]);
+
         locBox.appendChild(cInfoBox);
     }
 
-    if (s != null) {
+    if (scrapes != null) {
         var sInfoBox = document.createElement("span");
         sInfoBox.classList.add("info-box");
         stats = {
+            "Scrape Statistics": "",
             "total": 0,
             "success": 0,
             "failure": 0,
             "idle": 0,
             "success rate": 0.0
         };
-        s.forEach(function (scrape) {
+        scrapes.forEach(function (scrape) {
             stats["total"] += 1;
             stats[scrape["result"]] += 1;
         }, this);
-        stats["success rate"] = stats["success"] / stats["total"];
+        stats["success rate"] = (100 * stats["success"] / (stats["success"] + stats["failure"])).toFixed(1) + "%";
 
         for (var k in stats) {
-            var p = document.createElement("span");
-            p.classList.add("property");
-            p.innerHTML = k;
-            var v = document.createElement("span");
-            v.classList.add("value");
-            v.innerHTML = stats[k];
-            sInfoBox.appendChild(p);
-            sInfoBox.appendChild(v);
+            addPropValueToElement(sInfoBox, k, stats[k]);
         }
         locBox.appendChild(sInfoBox);
     }
+}
+
+// constructs and adds a row of "<property name, value>" 
+// to elem ( which is class .info-box)
+function addPropValueToElement(elem, prop, val) {
+    var p = document.createElement("span");
+    p.classList.add("property");
+    p.innerHTML = prop;
+    var v = document.createElement("span");
+    v.classList.add("value");
+    v.innerHTML = val;
+    elem.appendChild(p);
+    elem.appendChild(v);
+}
+
+function secToHr(sec) {
+    return Math.trunc(sec / 3600.0);
+}
+
+function mapLink(lat, lon) {
+    return '<a href="https://www.google.com/maps/place/' + lat + ',' + lon +
+        '" target="_blank">' + lat + ', ' + lon + '</a>';
 }

@@ -56,7 +56,7 @@ body {
 .display-area {
     padding-top: 1rem;
     background-color: white;
-    min-height: 1500px; /*meh...*/
+    min-height: 2000px; /*meh...*/
 }
 
 
@@ -90,9 +90,10 @@ body {
 }
 
 
-#location {
+#info {
     display: flex;
     flex-wrap: wrap;
+    padding: 1rem;
 }
 
 .info-box {
@@ -112,5 +113,20 @@ body {
 }
 
 .info-box .value {
-    font-style: italic;
+    /* font-style: italic; */
+}
+
+
+#timelapse {
+    padding: 1rem;
+}
+
+#timelapse-controls {
+    padding-bottom: 0.5rem;
+}
+
+#timelapse-controls>* {
+    padding: 0.25rem 0.75rem;
+    margin-right: 0.5rem;
+    font-size: 1.1rem;
 }
