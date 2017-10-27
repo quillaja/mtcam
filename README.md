@@ -42,6 +42,7 @@ at each scrape:
 1. DONE - write API
     1. queries.py
     2. views.py (using flask)
+2. Change JSON returned from API to be dict<id,obj> instead of just a list.
 2. clean up util.py
 2. DONE - decide (in db or file) and create program settings
 3. Done - decide on timestamp or datetime for 'modified' ModelBase field

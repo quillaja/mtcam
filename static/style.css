@@ -90,13 +90,14 @@ body {
 
 #location {
     display: flex;
+    flex-wrap: wrap;
 }
 
 .info-box {
     display: grid;
     grid-template-columns: 1fr 2fr;
     grid-gap: 0.5rem;
-    margin: 0.25rem;
+    margin: 1rem;
 }
 
 .info-box .property {

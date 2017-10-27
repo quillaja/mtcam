@@ -41,6 +41,9 @@ def convert_input(time_input: str, as_local_time: bool=False,
 
 @app.route('/api/data')
 def data():
+    '''Gets all the mountain and camera info, reformulates it into an
+    easily JSONified data structure, and then returns it as JSON.'''
+
     r = queries.prefetch_all_mts_cams()
     data = list()
     for m in r:
@@ -77,6 +80,9 @@ def data():
 
 @app.route('/api/mountains/<int:mt_id>/cams/<int:cam_id>/scrapes')
 def scrapes(mt_id, cam_id):
+    '''Gets and JSONifies the scrape records from the given mountain/cam 
+    and dates, if provided.'''
+
     mt = Mountain.get(Mountain.id == mt_id)
     cam = Cam.get(Cam.id == cam_id)
 
@@ -90,15 +96,20 @@ def scrapes(mt_id, cam_id):
         # mt.tz_json was invalid json (including '')
         mttz = None
 
-    print(end, start, as_local_time, mttz)
+    # convert GET date params into datetime objects
+    # also will adjust the datetimes to the provided timezone
+    # if as_local_time is True and mttz is a valid data structure
     end = convert_input(end, as_local_time, mttz)
     start = convert_input(start, as_local_time, mttz)
 
+    # get records from db
     r = queries.scraperecords_for_cam(cam_id, start, end)
     data = list()
     mt_path = mt.as_pathname()
     cam_path = cam.as_pathname()
 
+    # translate the db records into a more accessible form for
+    # JSON conversion and use on the client-end
     for s in r:
         if s.result == ScrapeRecord.SUCCESS:
             filename = '{}/{}/{}/{}'.format(settings.IMG_ROOT, mt_path,
@@ -115,9 +126,3 @@ def scrapes(mt_id, cam_id):
         data.append(sd)
 
     return json.dumps(data, indent=2, sort_keys=True)
-
-
-# don't really need this
-# @app.errorhandler(404)
-# def error_stuff(error):
-#     return 'Error: {}'.format(str(error)), error.code

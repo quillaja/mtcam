@@ -37,6 +37,12 @@ window.onload = function (e) {
     };
 
     camSelect.onchange = function () {
+        //
+        // TODO: have to redo this whole thing. the info tab should
+        // really update when it is clicked, not when the cam dropdown
+        // changes. BUT also have to avoid re-rendering the entire
+        // info tab from scratch if nothing has actually changed.
+        //
         var mtId = document.getElementById("mountain").value;
         var camId = document.getElementById("cam").value;
         var mt = null;
@@ -55,7 +61,7 @@ window.onload = function (e) {
             }
         }, this);
 
-        showInfo(mt, cam, scrapes);
+        showInfo(mt, cam, scrapes); 
     };
 
     // setup tab bar
@@ -251,7 +257,8 @@ function createScrapeRow(scrape) {
     return tr;
 }
 
-
+// TODO: eliminate repetition. Each type of object (mt, cam, scrapes)
+// will get customized UI presentation, so can't totally refactor this =(
 function showInfo(m, c, s) {
     var locBox = document.getElementById("location");
     rmAllChildren(locBox);
@@ -286,5 +293,34 @@ function showInfo(m, c, s) {
             cInfoBox.appendChild(v);
         }
         locBox.appendChild(cInfoBox);
+    }
+
+    if (s != null) {
+        var sInfoBox = document.createElement("span");
+        sInfoBox.classList.add("info-box");
+        stats = {
+            "total": 0,
+            "success": 0,
+            "failure": 0,
+            "idle": 0,
+            "success rate": 0.0
+        };
+        s.forEach(function (scrape) {
+            stats["total"] += 1;
+            stats[scrape["result"]] += 1;
+        }, this);
+        stats["success rate"] = stats["success"] / stats["total"];
+
+        for (var k in stats) {
+            var p = document.createElement("span");
+            p.classList.add("property");
+            p.innerHTML = k;
+            var v = document.createElement("span");
+            v.classList.add("value");
+            v.innerHTML = stats[k];
+            sInfoBox.appendChild(p);
+            sInfoBox.appendChild(v);
+        }
+        locBox.appendChild(sInfoBox);
     }
 }
