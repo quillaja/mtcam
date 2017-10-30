@@ -1,9 +1,13 @@
 var data = null; // the mountain and camera info recieved from the api.
 var scrapes = null; // the scraperecords from the api (upon user action)
 var urlBase = ""; // the base url on which to build api requests.
+var tlFrame = 0; // frame the timelapse is displaying
+var tlFrameTime = 1.0; // time in sec between each timelapse frame, from speed dropdown
+var tlIntervalID = 0; // ID of the call to SetInterval().
 
 // tabs data structure
 var tabData = {
+    "Help": "help",
     "Log": "scrapes",
     "Timelapse": "timelapse",
     "Location Info": "info"
@@ -59,8 +63,13 @@ function loadAndDisplayData() {
                 // display various data
                 populateScrapeTable();
                 showInfo();
-                // makeTimelapse();
-                document.getElementById("tab-area").classList.remove("hidden");
+                makeTimelapse();
+
+                // show tabs for the 3 displays created above
+                Array.from(document.getElementById("tab-area").children).
+                    forEach(function (element) {
+                        element.classList.remove("hidden");
+                    });
             }
             else if (request.status == 400) {
                 alert('There was an error 400');
@@ -143,11 +152,15 @@ function setupTabBar() {
     for (var k in tabData) {
         t = document.createElement("span");
         t.classList.add("tab");
+        t.classList.add("hidden");
         t.innerText = k;
         t.onclick = function () { tabClicked(this); }
         tabBar.appendChild(t);
     }
 
+    // remove 'hidden' from tab, then simulate click to unhide the
+    // associated content and apply corrent styles.
+    tabBar.children[0].classList.remove("hidden");
     tabClicked(tabBar.children[0]);
 }
 
@@ -338,4 +351,70 @@ function secToHr(sec) {
 function mapLink(lat, lon) {
     return '<a href="https://www.google.com/maps/place/' + lat + ',' + lon +
         '" target="_blank">' + lat + ', ' + lon + '</a>';
+}
+
+
+function makeTimelapse() {
+    // attach button actions
+    document.getElementById("speed").onclick = function () {
+        setTimelapseSpeed(this);
+    };
+    setTimelapseSpeed();
+
+    document.getElementById("previous").onclick = prevTimelapseImg;
+    document.getElementById("next").onclick = nextTimelapseImg;
+    document.getElementById("play").onclick = function () {
+        alert("not implemented\n timelapse speed = " + tlFrameTime);
+    };
+
+    // create img children
+    createTimelapseImages();
+}
+
+function createTimelapseImages() {
+    var tldisp = document.getElementById("timelapse-display");
+    scrapes.forEach(function (scrape) {
+        if (scrape["result"] == "success") {
+            var img = document.createElement("img");
+            img.src = scrape["file"];
+            img.classList.add("hidden");
+            tldisp.appendChild(img);
+        }
+    }, this);
+}
+
+function setTimelapseSpeed(speedDropdown = null) {
+    if (speedDropdown == null) {
+        speedDropdown = document.getElementById("speed");
+    }
+
+    tlFrameTime = 1.0 / speedDropdown.value;
+}
+
+function nextTimelapseImg() {
+    var tldisp = document.getElementById("timelapse-display");
+    tldisp.children[tlFrame].classList.add("hidden");
+    tlFrame++;
+    if (tlFrame >= tldisp.children.length) {
+        tlFrame = 0;
+    }
+    tldisp.children[tlFrame].classList.remove("hidden");
+}
+
+function prevTimelapseImg() {
+    var tldisp = document.getElementById("timelapse-display");
+    tldisp.children[tlFrame].classList.add("hidden");
+    tlFrame--;
+    if (tlFrame < 0) {
+        tlFrame = tldisp.children.length - 1;
+    }
+    tldisp.children[tlFrame].classList.remove("hidden");
+}
+
+function playTimelapse() {
+
+}
+
+function pauseTimelapse() {
+
 }

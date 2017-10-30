@@ -109,12 +109,17 @@ body {
 }
 
 .info-box .property {
-    font-weight: bold;
+    font-variant: small-caps;
 }
 
-.info-box .value {
-    /* font-style: italic; */
+.info-box .property:first-child {
+    font-weight: bold;
+    font-variant: normal;
 }
+
+/* .info-box .value {
+    /* font-style: italic; */
+} */
 
 
 #timelapse {
@@ -129,4 +134,8 @@ body {
     padding: 0.25rem 0.75rem;
     margin-right: 0.5rem;
     font-size: 1.1rem;
+}
+
+#timelapse img {
+    
 }
