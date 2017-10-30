@@ -355,6 +355,11 @@ function mapLink(lat, lon) {
 
 
 function makeTimelapse() {
+
+    // initialize/reset state
+    tlFrame = 0;
+    tlPaused = true;
+
     // attach button actions
     document.getElementById("speed").onclick = function () {
         setTimelapseSpeed(this);
