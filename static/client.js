@@ -361,7 +361,7 @@ function makeTimelapse() {
     tlPaused = true;
 
     // attach button actions
-    document.getElementById("speed").onclick = function () {
+    document.getElementById("speed").onchange = function () {
         setTimelapseSpeed(this);
     };
     setTimelapseSpeed();
@@ -413,22 +413,24 @@ function setTimelapseSpeed(speedDropdown = null) {
 
 function nextTimelapseImg() {
     var tldisp = document.getElementById("timelapse-display");
-    tldisp.children[tlFrame].classList.add("hidden");
+    var oldFrame = tlFrame;
     tlFrame++;
     if (tlFrame >= tldisp.children.length) {
         tlFrame = 0;
     }
     tldisp.children[tlFrame].classList.remove("hidden");
+    tldisp.children[oldFrame].classList.add("hidden");
 }
 
 function prevTimelapseImg() {
     var tldisp = document.getElementById("timelapse-display");
-    tldisp.children[tlFrame].classList.add("hidden");
+    var oldFrame = tlFrame;
     tlFrame--;
     if (tlFrame < 0) {
         tlFrame = tldisp.children.length - 1;
     }
     tldisp.children[tlFrame].classList.remove("hidden");
+    tldisp.children[oldFrame].classList.add("hidden");
 }
 
 function playTimelapse() {
