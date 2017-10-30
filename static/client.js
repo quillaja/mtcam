@@ -3,15 +3,14 @@ var scrapes = null; // the scraperecords from the api (upon user action)
 var urlBase = ""; // the base url on which to build api requests.
 var tlFrame = 0; // frame the timelapse is displaying
 var tlFrameTime = 1.0; // time in sec between each timelapse frame, from speed dropdown
-var tlIntervalID = 0; // ID of the call to SetInterval().
-var tlPaused = true;
+var tlPaused = true; // to pause/play the timelapse
 
 // tabs data structure
 var tabData = {
     "Help": "help",
-    "Log": "scrapes",
+    "Location Info": "info",
     "Timelapse": "timelapse",
-    "Location Info": "info"
+    "Log": "scrapes",
 };
 
 // Sets up urlBase, the mountain/camera 'dropdowns' + associated data,

@@ -61,6 +61,11 @@ body {
 
 
 
+#help {
+    padding: 1rem 3rem;
+}
+
+
 
 #scrapes tr {
     transition: background-color 200ms;
@@ -117,9 +122,9 @@ body {
     font-variant: normal;
 }
 
-/* .info-box .value {
+.info-box .value {
     /* font-style: italic; */
-} */
+} 
 
 
 #timelapse {
@@ -137,5 +142,5 @@ body {
 }
 
 #timelapse img {
-    
+
 }
