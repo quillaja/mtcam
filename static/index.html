@@ -14,63 +14,61 @@
 <body>
     <h2 id="title">Mountain Cameras</h1>
 
-    <div class="controls-area">
-        <div class="control-box">
-            <label for="mountain" id="label-mountain">Mountain:</label>
-            <select id="mountain" name="mountainselect"></select>
+        <div class="controls-area">
+            <div class="control-box">
+                <label for="mountain" id="label-mountain">Mountain:</label>
+                <select id="mountain" name="mountainselect"></select>
 
-            <label for="cam" id="label-cam">Camera:</label>
-            <select id="cam" name="camselect"></select>
-        </div>
-
-        <div class="control-box">
-            <label for="start" id="label-start">From:</label>
-            <input id="start" type="datetime-local" name="startdate">
-
-            <label for="end" id="label-end">To:</label>
-            <input id="end" type="datetime-local" name="enddate">
-
-            <input id="as-local" type="checkbox" checked>
-            <label for="as-local">Times local to mountain</label>
-        </div>
-
-        <div class="control-box">
-            <button id="submit">Load Data</button>
-        </div>
-    </div>
-
-    <div id="tab-area" class="tab-area">
-    </div>
-
-    <div class="display-area">
-        <div id="help" class="hidden">
-            <p>Help goes here.</p>
-        </div>
-
-        <table id="scrapes" class="hidden"></table>
-
-        <div id="timelapse" class="hidden">
-            <div id="timelapse-controls">
-                <select id="speed">
-                    <option value="1">1 fps</option>
-                    <option value="2">2 fps</option>
-                    <option value="5">5 fps</option>
-                    <option value="10">10 fps</option>
-                    <option value="15">15 fps</option>
-                    <option value="20">20 fps</option>
-                    <option value="30">30 fps</option>
-                </select>
-                <button id="play">Play</button>
-                <button id="previous">&#8678;</button>
-                <button id="next">&#8680;</button>
+                <label for="cam" id="label-cam">Camera:</label>
+                <select id="cam" name="camselect"></select>
             </div>
-            <div id="timelapse-display">
-                <img src="https://rpi.one/img/mt_hood_or/palmer/1508971204.jpg"/>
+
+            <div class="control-box">
+                <label for="start" id="label-start">From:</label>
+                <input id="start" type="datetime-local" name="startdate">
+
+                <label for="end" id="label-end">To:</label>
+                <input id="end" type="datetime-local" name="enddate">
+
+                <input id="as-local" type="checkbox" checked>
+                <label for="as-local">Times local to mountain</label>
+            </div>
+
+            <div class="control-box">
+                <button id="submit">Load Data</button>
             </div>
         </div>
 
-        <div id="info" class="hidden"></div>
-    </div>
+        <div id="tab-area" class="tab-area">
+        </div>
+
+        <div class="display-area">
+            <div id="help" class="hidden">
+                <p>Help goes here.</p>
+            </div>
+
+            <table id="scrapes" class="hidden"></table>
+
+            <div id="timelapse" class="hidden">
+                <div id="timelapse-controls">
+                    <select id="speed">
+                        <option value="1">1 fps</option>
+                        <option value="2">2 fps</option>
+                        <option value="5">5 fps</option>
+                        <option value="10">10 fps</option>
+                        <option value="15">15 fps</option>
+                        <option value="20">20 fps</option>
+                        <option value="30">30 fps</option>
+                    </select>
+                    <button id="play">Play</button>
+                    <button id="previous">&#8678;</button>
+                    <button id="next">&#8680;</button>
+                </div>
+                <div id="timelapse-display"></div>
+            </div>
+
+            <div id="info" class="hidden"></div>
+        </div>
 </body>
 
 </html>

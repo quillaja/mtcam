@@ -4,6 +4,7 @@ var urlBase = ""; // the base url on which to build api requests.
 var tlFrame = 0; // frame the timelapse is displaying
 var tlFrameTime = 1.0; // time in sec between each timelapse frame, from speed dropdown
 var tlIntervalID = 0; // ID of the call to SetInterval().
+var tlPaused = true;
 
 // tabs data structure
 var tabData = {
@@ -361,18 +362,25 @@ function makeTimelapse() {
     };
     setTimelapseSpeed();
 
-    document.getElementById("previous").onclick = prevTimelapseImg;
-    document.getElementById("next").onclick = nextTimelapseImg;
-    document.getElementById("play").onclick = function () {
-        alert("not implemented\n timelapse speed = " + tlFrameTime);
-    };
-
     // create img children
-    createTimelapseImages();
+    hasImgs = createTimelapseImages();
+
+    // do not make buttons work if there are no images to play
+    if (hasImgs) {
+        document.getElementById("previous").onclick = prevTimelapseImg;
+        document.getElementById("next").onclick = nextTimelapseImg;
+        document.getElementById("play").onclick = function () {
+            toggleTimelapsePause();
+        };
+    }
+
 }
 
 function createTimelapseImages() {
     var tldisp = document.getElementById("timelapse-display");
+    rmAllChildren(tldisp); // clear it out
+
+    // fill it up
     scrapes.forEach(function (scrape) {
         if (scrape["result"] == "success") {
             var img = document.createElement("img");
@@ -381,6 +389,14 @@ function createTimelapseImages() {
             tldisp.appendChild(img);
         }
     }, this);
+
+    if (tldisp.children.length > 0) {
+        tldisp.children[0].classList.remove("hidden"); // unhide first
+        return true;
+    } else {
+        tldisp.innerText = "No images to display.";
+        return false;
+    }
 }
 
 function setTimelapseSpeed(speedDropdown = null) {
@@ -412,9 +428,20 @@ function prevTimelapseImg() {
 }
 
 function playTimelapse() {
-
+    nextTimelapseImg();
+    if (!tlPaused) {
+        window.setTimeout(playTimelapse, tlFrameTime * 1000);
+    }
 }
 
-function pauseTimelapse() {
-
+function toggleTimelapsePause() {
+    var playBtn = document.getElementById("play");
+    if (tlPaused) {
+        playBtn.innerText = "Pause";
+        tlPaused = false;
+        playTimelapse();
+    } else {
+        playBtn.innerText = "Play";
+        tlPaused = true;
+    }
 }
