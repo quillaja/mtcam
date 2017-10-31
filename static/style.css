@@ -11,6 +11,12 @@ body {
     background: #F0F0F0 top right url("background.png") no-repeat;
 }
 
+@media screen and (max-width: 640px) {
+    body {
+        background: #F0F0F0 top center url("background.png") no-repeat;
+    }
+}
+
 #title {
     /* background-color: #F0F0F0; */
     margin: 0rem;
@@ -32,14 +38,13 @@ body {
 
 .tab-area {
     display: flex;
-    /* background-color: white; */
+    border-bottom: 1px solid lightgray;
 }
 
 .tab {
     padding: 0.3rem 1rem;
     margin: 0rem 0.2rem;
-    border: 1px solid grey;
-    border-bottom: 1px solid white;
+    border: 1px solid lightgray;
     color: gray;
 }
 
@@ -51,6 +56,8 @@ body {
     color: black;
     background-color: white;
     font-weight: bold;
+    border-bottom: 1px solid white;
+    box-shadow: 0 1px 0 white;
 }
 
 .display-area {
@@ -139,6 +146,11 @@ body {
     padding: 0.25rem 0.75rem;
     margin-right: 0.5rem;
     font-size: 1.1rem;
+}
+
+#timelapse #progress {
+    font-size: 0.7rem;
+    vertical-align: bottom;
 }
 
 #timelapse img {

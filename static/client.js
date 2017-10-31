@@ -1,6 +1,8 @@
 var data = null; // the mountain and camera info recieved from the api.
 var scrapes = null; // the scraperecords from the api (upon user action)
 var urlBase = ""; // the base url on which to build api requests.
+var tldisp = null; // element holding the timelapse images
+var tlProg = null; // elemebt holding timelapse 'progress' text
 var tlFrame = 0; // frame the timelapse is displaying
 var tlFrameTime = 1.0; // time in sec between each timelapse frame, from speed dropdown
 var tlPaused = true; // to pause/play the timelapse
@@ -8,7 +10,7 @@ var tlPaused = true; // to pause/play the timelapse
 // tabs data structure
 var tabData = {
     "Help": "help",
-    "Location Info": "info",
+    "Info": "info",
     "Timelapse": "timelapse",
     "Log": "scrapes",
 };
@@ -359,6 +361,8 @@ function makeTimelapse() {
     // initialize/reset state
     tlFrame = 0;
     tlPaused = true;
+    tldisp = document.getElementById("timelapse-display");
+    tlProg = document.getElementById("progress");
 
     // attach button actions
     document.getElementById("speed").onchange = function () {
@@ -373,15 +377,13 @@ function makeTimelapse() {
     if (hasImgs) {
         document.getElementById("previous").onclick = prevTimelapseImg;
         document.getElementById("next").onclick = nextTimelapseImg;
-        document.getElementById("play").onclick = function () {
-            toggleTimelapsePause();
-        };
+        document.getElementById("play").onclick = toggleTimelapsePause;
+        updateTimelapseProgress();
     }
 
 }
 
 function createTimelapseImages() {
-    var tldisp = document.getElementById("timelapse-display");
     rmAllChildren(tldisp); // clear it out
 
     // fill it up
@@ -403,6 +405,10 @@ function createTimelapseImages() {
     }
 }
 
+function updateTimelapseProgress() {
+    tlProg.innerText = tlFrame + "/" + tldisp.children.length;
+}
+
 function setTimelapseSpeed(speedDropdown = null) {
     if (speedDropdown == null) {
         speedDropdown = document.getElementById("speed");
@@ -412,7 +418,6 @@ function setTimelapseSpeed(speedDropdown = null) {
 }
 
 function nextTimelapseImg() {
-    var tldisp = document.getElementById("timelapse-display");
     var oldFrame = tlFrame;
     tlFrame++;
     if (tlFrame >= tldisp.children.length) {
@@ -420,10 +425,10 @@ function nextTimelapseImg() {
     }
     tldisp.children[tlFrame].classList.remove("hidden");
     tldisp.children[oldFrame].classList.add("hidden");
+    updateTimelapseProgress();
 }
 
 function prevTimelapseImg() {
-    var tldisp = document.getElementById("timelapse-display");
     var oldFrame = tlFrame;
     tlFrame--;
     if (tlFrame < 0) {
@@ -431,6 +436,7 @@ function prevTimelapseImg() {
     }
     tldisp.children[tlFrame].classList.remove("hidden");
     tldisp.children[oldFrame].classList.add("hidden");
+    updateTimelapseProgress();
 }
 
 function playTimelapse() {
@@ -443,11 +449,11 @@ function playTimelapse() {
 function toggleTimelapsePause() {
     var playBtn = document.getElementById("play");
     if (tlPaused) {
-        playBtn.innerText = "Pause";
+        playBtn.innerHTML = "&#10074;&#10074; Pause";
         tlPaused = false;
         playTimelapse();
     } else {
-        playBtn.innerText = "Play";
+        playBtn.innerHTML = "&#9658; Play";
         tlPaused = true;
     }
 }

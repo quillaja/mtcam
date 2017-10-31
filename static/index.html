@@ -12,90 +12,92 @@
 </head>
 
 <body>
-    <h2 id="title">Mountain Cameras</h1>
+    <h2 id="title">Mountain Cameras</h2>
 
-        <div class="controls-area">
-            <div class="control-box">
-                <label for="mountain" id="label-mountain">Mountain:</label>
-                <select id="mountain" name="mountainselect"></select>
+    <div class="controls-area">
+        <div class="control-box">
+            <label for="mountain" id="label-mountain">Mountain:</label>
+            <select id="mountain" name="mountainselect"></select>
 
-                <label for="cam" id="label-cam">Camera:</label>
-                <select id="cam" name="camselect"></select>
-            </div>
-
-            <div class="control-box">
-                <label for="start" id="label-start">From:</label>
-                <input id="start" type="datetime-local" name="startdate">
-
-                <label for="end" id="label-end">To:</label>
-                <input id="end" type="datetime-local" name="enddate">
-
-                <input id="as-local" type="checkbox" checked>
-                <label for="as-local">Times local to mountain</label>
-            </div>
-
-            <div class="control-box">
-                <button id="submit">Load Data</button>
-            </div>
+            <label for="cam" id="label-cam">Camera:</label>
+            <select id="cam" name="camselect"></select>
         </div>
 
-        <div id="tab-area" class="tab-area">
+        <div class="control-box">
+            <label for="start" id="label-start">From:</label>
+            <input id="start" type="datetime-local" name="startdate">
+
+            <label for="end" id="label-end">To:</label>
+            <input id="end" type="datetime-local" name="enddate">
+
+            <input id="as-local" type="checkbox" checked>
+            <label for="as-local">Times local to mountain</label>
         </div>
 
-        <div class="display-area">
-            <div id="help" class="hidden">
-                <h3>Overview</h3>
-                <p>Mountain Cameras collects images from webcams on various mountains around the world, though mostly in the
-                    Pacific Northwest and mostly Mount Hood. It allows one to view actual conditions and watch a "timelapse"
-                    of the mountains.
-                </p>
-                <h3>Use</h3>
-                <p>Select the mountain and camera from the dropdown boxes. Many mountains may have only 1 camera, though some
-                    may have 2 or more.
-                </p>
-                <p>Then, enter a complete date and time (Y-M-D and 12hr format) in the "From" and "To" fields to select a time
-                    range from which to view camera images and data. Selecting "Times local to mountain" will cause the database
-                    to convert the times from Pacifc Time to the timezone of the mountain being viewed. If not checked, the
-                    "From" and "To" fields represent Pacific Time.
-                </p>
-                <p>If only the "From" field is entered, images beginning at the "From" date and time and ending at
-                    <i>now</i> will be shown, if any exist in the database. If only the "To" field is entered, images beginning
-                    at "To" minus 24 hours and ending at "To" will be shown, if any exist in the database.
-                </p>
-                <p>When the desired mountain, camera, and time frame are selected, press "Load Data" to query the database.
-                    When this successfully completes, tabs for the log, timelapse, and other information will appear. Please
-                    keep in mind that loading a large date range will cause many images to load in the timelapse, and could
-                    take a few moments to download.
-                </p>
-                <h3>Questions</h3>
-                <p>This web app was concieved and created by Ben Stabley. If you have any questions or comments, including potential
-                    quality mountain webcams to be added, please mail
-                    <a href="mailto:quillaja@hotmail.com">quillaja@hotmail.com</a> with the subject "mountain cams".
-                </p>
-            </div>
-
-            <table id="scrapes" class="hidden"></table>
-
-            <div id="timelapse" class="hidden">
-                <div id="timelapse-controls">
-                    <select id="speed">
-                        <option value="1">1 fps</option>
-                        <option value="2">2 fps</option>
-                        <option value="5">5 fps</option>
-                        <option value="10">10 fps</option>
-                        <option value="15">15 fps</option>
-                        <option value="20">20 fps</option>
-                        <option value="30">30 fps</option>
-                    </select>
-                    <button id="play">Play</button>
-                    <button id="previous">&#8678;</button>
-                    <button id="next">&#8680;</button>
-                </div>
-                <div id="timelapse-display"></div>
-            </div>
-
-            <div id="info" class="hidden"></div>
+        <div class="control-box">
+            <button id="submit">Load Data</button>
         </div>
+    </div>
+
+    <div id="tab-area" class="tab-area">
+    </div>
+
+    <div class="display-area">
+        <div id="help" class="hidden">
+            <h3>Overview</h3>
+            <p>Mountain Cameras collects images from webcams on various mountains around the world, though mostly in the Pacific
+                Northwest and mostly Mount Hood. It allows one to view actual conditions and watch a "timelapse" of the mountains.
+            </p>
+            <h3>Use</h3>
+            <p>Select the mountain and camera from the dropdown boxes. Many mountains may have only 1 camera, though some may
+                have 2 or more.
+            </p>
+            <p>Then, enter a complete date and time (Y-M-D and 12hr format) in the "From" and "To" fields to select a time range
+                from which to view camera images and data. Selecting "Times local to mountain" will cause the database to
+                convert the times from Pacifc Time to the timezone of the mountain being viewed. If not checked, the "From"
+                and "To" fields represent Pacific Time.
+            </p>
+            <p>If only the "From" field is entered, images beginning at the "From" date and time and ending at
+                <i>now</i> will be shown, if any exist in the database. If only the "To" field is entered, images beginning
+                at "To" minus 24 hours and ending at "To" will be shown, if any exist in the database.
+            </p>
+            <p>When the desired mountain, camera, and time frame are selected, press "Load Data" to query the database. When
+                this successfully completes, tabs for the log, timelapse, and other information will appear. Please keep
+                in mind that loading a large date range will cause many images to load in the timelapse, and could take a
+                few moments to download.
+            </p>
+            <h3>Questions</h3>
+            <p>This web app was concieved and created by Ben Stabley. If you have any questions or comments, including potential
+                quality mountain webcams to be added, please mail
+                <a href="mailto:quillaja@hotmail.com?subject=mountain%20cams">quillaja@hotmail.com</a> with the subject "mountain cams".
+            </p>
+            <p>Version: 1.0 beta</p>
+        </div>
+
+        <div id="info" class="hidden"></div>
+
+        <div id="timelapse" class="hidden">
+            <div id="timelapse-controls">
+                <select id="speed">
+                    <option value="1">1 fps</option>
+                    <option value="2">2 fps</option>
+                    <option value="5">5 fps</option>
+                    <option value="10">10 fps</option>
+                    <option value="15">15 fps</option>
+                    <option value="20">20 fps</option>
+                    <option value="30">30 fps</option>
+                </select>
+                <button id="play">&#9658; Play</button>
+                <button id="previous">&#8678;</button>
+                <button id="next">&#8680;</button>
+                <span id="progress"></span>
+            </div>
+            <div id="timelapse-display"></div>
+        </div>
+
+        <table id="scrapes" class="hidden"></table>
+
+    </div>
 </body>
 
 </html>
