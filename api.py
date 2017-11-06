@@ -12,17 +12,18 @@ app = Flask(__name__)
 
 def to_sys_time(t: dt.datetime, mttz: dict) -> dt.datetime:
     '''Uses mttz and system tz info to recalculate `t` into system time.'''
-    # print(mttz, time.timezone, time.daylight)
+
     if 'rawOffset' not in mttz or 'dstOffset' not in mttz:
         return t
 
-    return (t - dt.timedelta(
-        seconds=(mttz['rawOffset'] + mttz['dstOffset']))) - (dt.timedelta(
-            seconds=time.timezone) - dt.timedelta(hours=time.daylight))
+    return (t - dt.timedelta(seconds=(mttz['rawOffset'] + mttz['dstOffset']))
+            ) - (dt.timedelta(seconds=time.timezone) -
+                 dt.timedelta(hours=time.localtime().tm_isdst))
 
 
-def convert_input(time_input: str, as_local_time: bool=False,
-                  mttz: dict=None) -> dt.datetime:
+def convert_input(time_input: str,
+                  as_local_time: bool = False,
+                  mttz: dict = None) -> dt.datetime:
     '''
     Parses a time string. If `as_local_time` is True, it will use the
     timezone info provided in `mttz` and the system's timezone info to
