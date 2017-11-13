@@ -210,11 +210,7 @@ function strDatetimeLocal(date) {
         MM = ten(date.getMonth() + 1),
         DD = ten(date.getDate()),
         HH = ten(date.getHours()),
-<<<<<<< HEAD
         II = ten(date.getMinutes());
-=======
-        II = ten(date.getMinutes()),
->>>>>>> b610686a9771e7f63e719470bdc88e66492344f9
         //SS = ten(date.getSeconds());
 
     return YYYY + '-' + MM + '-' + DD + 'T' +
