@@ -361,6 +361,7 @@ function makeTimelapse() {
     // initialize/reset state
     tlFrame = 0;
     tlPaused = true;
+    document.getElementById("play").innerHTML = "Paused"; // meh, hackish
     tldisp = document.getElementById("timelapse-display");
     tlProg = document.getElementById("progress");
 
@@ -449,11 +450,11 @@ function playTimelapse() {
 function toggleTimelapsePause() {
     var playBtn = document.getElementById("play");
     if (tlPaused) {
-        playBtn.innerHTML = "&#10074;&#10074; Pause";
+        playBtn.innerHTML = "Pause";
         tlPaused = false;
         playTimelapse();
     } else {
-        playBtn.innerHTML = "&#9658; Play";
+        playBtn.innerHTML = "Play";
         tlPaused = true;
     }
 }
