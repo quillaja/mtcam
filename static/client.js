@@ -49,6 +49,14 @@ window.onload = function (e) {
 
     // attach functionality to "load data" button
     document.getElementById("submit").onclick = loadAndDisplayData;
+
+    // set the default 'start' to be Today at 00:00 (12am)
+    var dt = new Date();
+    dt.setHours(0);
+    dt.setMinutes(0);
+    dt.setSeconds(0);
+    dt.setMilliseconds(0);
+    document.getElementById("start").value = strDatetimeLocal(dt);
 }
 
 // Requests scraperecords from the api between the dates specified in the ui,
@@ -188,6 +196,24 @@ function rmAllChildren(element) {
     while (element.firstChild) {
         element.removeChild(element.firstChild);
     }
+}
+
+// converts a Date() object into a string for use in the datetime-local input.
+// use lame conversion function because JS+HTML is too fucking stupid
+function strDatetimeLocal(date) {
+    var
+        ten = function (i) {
+            return (i < 10 ? '0' : '') + i;
+        },
+        YYYY = date.getFullYear(),
+        MM = ten(date.getMonth() + 1),
+        DD = ten(date.getDate()),
+        HH = ten(date.getHours()),
+        II = ten(date.getMinutes()),
+        SS = ten(date.getSeconds());
+
+    return YYYY + '-' + MM + '-' + DD + 'T' +
+        HH + ':' + II + ':' + SS;
 }
 
 // create a single `<option>` element for the mountain 'dropdown'
@@ -361,7 +387,7 @@ function makeTimelapse() {
     // initialize/reset state
     tlFrame = 0;
     tlPaused = true;
-    document.getElementById("play").innerHTML = "Paused"; // meh, hackish
+    document.getElementById("play").innerHTML = "Play"; // meh, hackish
     tldisp = document.getElementById("timelapse-display");
     tlProg = document.getElementById("progress");
 
