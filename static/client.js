@@ -200,6 +200,7 @@ function rmAllChildren(element) {
 
 // converts a Date() object into a string for use in the datetime-local input.
 // use lame conversion function because JS+HTML is too fucking stupid
+// return format YYYY-MM-DDTHH:MM is necessary for api request.
 function strDatetimeLocal(date) {
     var
         ten = function (i) {
@@ -210,10 +211,10 @@ function strDatetimeLocal(date) {
         DD = ten(date.getDate()),
         HH = ten(date.getHours()),
         II = ten(date.getMinutes()),
-        SS = ten(date.getSeconds());
+        //SS = ten(date.getSeconds());
 
     return YYYY + '-' + MM + '-' + DD + 'T' +
-        HH + ':' + II + ':' + SS;
+        HH + ':' + II;
 }
 
 // create a single `<option>` element for the mountain 'dropdown'
