@@ -17,13 +17,12 @@ def to_sys_time(t: dt.datetime, mttz: dict) -> dt.datetime:
         return t
 
     return (t - dt.timedelta(seconds=(mttz['rawOffset'] + mttz['dstOffset']))
-            ) - (dt.timedelta(seconds=time.timezone) -
-                 dt.timedelta(hours=time.localtime().tm_isdst))
+            ) - (dt.timedelta(seconds=time.timezone) - dt.timedelta(
+                hours=time.localtime().tm_isdst))
 
 
-def convert_input(time_input: str,
-                  as_local_time: bool = False,
-                  mttz: dict = None) -> dt.datetime:
+def convert_input(time_input: str, as_local_time: bool=False,
+                  mttz: dict=None) -> dt.datetime:
     '''
     Parses a time string. If `as_local_time` is True, it will use the
     timezone info provided in `mttz` and the system's timezone info to
@@ -41,12 +40,12 @@ def convert_input(time_input: str,
 
 
 @app.route('/api/data')
-def data():
+def do_data():
     '''Gets all the mountain and camera info, reformulates it into an
     easily JSONified data structure, and then returns it as JSON.'''
 
     r = queries.prefetch_all_mts_cams()
-    data = list()
+    data = dict()
     for m in r:
         md = {
             'id': m.id,
@@ -57,7 +56,7 @@ def data():
             'longitude': m.longitude,
             'tz': json.loads(m.tz_json),
             'pathname': m.as_pathname(),
-            'cams': list()
+            'cams': dict()
         }
 
         for c in m.cams_prefetch:
@@ -72,15 +71,15 @@ def data():
                 'comment': c.comment,
                 'pathname': c.as_pathname()
             }
-            md['cams'].append(cd)
+            md['cams'][c.id] = cd
 
-        data.append(md)
+        data[m.id] = md
 
     return json.dumps(data, indent=2, sort_keys=True)
 
 
 @app.route('/api/mountains/<int:mt_id>/cams/<int:cam_id>/scrapes')
-def scrapes(mt_id, cam_id):
+def do_scrapes(mt_id, cam_id):
     '''Gets and JSONifies the scrape records from the given mountain/cam 
     and dates, if provided.'''
 

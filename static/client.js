@@ -27,18 +27,15 @@ window.onload = function (e) {
 
     // attach functionality to the mountain selection dropdown
     mtSelect.onchange = function (ev) {
-        data.forEach(function (mt) { // inefficient 'search' for data
-            if (mt["id"] == mtSelect.value) {
-                // remove all old children
-                rmAllChildren(camSelect);
-                // make and add new children
-                mt["cams"].forEach(function (cam) {
-                    //create new element
-                    var e = createCamSelectOption(cam);
-                    camSelect.appendChild(e);
-                }, this);
-            }
-        }, this);
+        mt = data[mtSelect.value];
+        // remove all old children
+        rmAllChildren(camSelect);
+        // make and add new children
+        for (var k in mt["cams"]) {
+            var cam = mt["cams"][k];
+            //create new element
+            camSelect.appendChild(createCamSelectOption(cam));
+        }
     };
 
     // setup tab bar
@@ -134,10 +131,10 @@ function setupMtCamSelection() {
                 data = JSON.parse(request.responseText);
                 var mtSelect = document.getElementById("mountain");
 
-                // do mountain select
-                data.forEach(function (mt) {
-                    mtSelect.appendChild(createMtSelectOption(mt));
-                }, this);
+                // create mountain select options
+                for (var k in data) {
+                    mtSelect.appendChild(createMtSelectOption(data[k]));
+                }
                 mtSelect.onchange();
             }
             else if (request.status == 400) {
@@ -211,7 +208,7 @@ function strDatetimeLocal(date) {
         DD = ten(date.getDate()),
         HH = ten(date.getHours()),
         II = ten(date.getMinutes());
-        //SS = ten(date.getSeconds());
+    //SS = ten(date.getSeconds());
 
     return YYYY + '-' + MM + '-' + DD + 'T' +
         HH + ':' + II;
@@ -274,28 +271,15 @@ function createScrapeRow(scrape) {
     return tr;
 }
 
-// TODO: eliminate repetition. Each type of object (mt, cam, scrapes)
+// TODO: eliminate repetition? Each type of object (mt, cam, scrapes)
 // will get customized UI presentation, so can't totally refactor this =(
 function showInfo() {
 
-    // most of this section sucks
+    // get the keys (id) to access the correct data
     var mtId = document.getElementById("mountain").value;
     var camId = document.getElementById("cam").value;
-    var mt = null;
-    var cam = null;
-
-    data.forEach(function (m) {
-        if (m["id"] == mtId) {
-            mt = m;
-            mt["cams"].forEach(function (c) {
-                if (c["id"] == camId) {
-                    cam = c;
-                    return;
-                }
-            }, this);
-            return;
-        }
-    }, this);
+    var mt = data[mtId];
+    var cam = mt["cams"][camId];
 
     var locBox = document.getElementById("info");
     rmAllChildren(locBox);
