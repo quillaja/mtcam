@@ -42,13 +42,13 @@ at each scrape:
 1. DONE - write API
     1. queries.py
     2. views.py (using flask)
-2. Change JSON returned from API to be dict<id,obj> instead of just a list.
+2. DONE - Change JSON returned from API to be dict<id,obj> instead of just a list.
 2. clean up util.py
 2. DONE - decide (in db or file) and create program settings
 3. Done - decide on timestamp or datetime for 'modified' ModelBase field
 4. DONE - Write script to update Mountain.tz_json field
 5. write script to convert/import original palmer data to mtcam data
-6. Create "client" (webpage/javascript/css)
+6. DONE - Create "client" (webpage/javascript/css)
     1. html (index.html)
     2. javascript (client.js)
         1. timelapse.js or gallery.js for the "moving picture" display?
@@ -62,7 +62,7 @@ Was previously in `api.md`.
     /api
         root of api. returns nothing.
     /api/data
-        returns json with list of mountains containing list of cams
+        GET: returns json with list of mountains containing list of cams
     /api/mountains/<mt_id>/cams/<cam_id>/scrapes[?start=<datetime>&end=<datetime>]
-        returns json list of scrape records
+        GET: returns json list of scrape records
 
