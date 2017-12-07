@@ -1,3 +1,4 @@
+import sys
 import json
 from datetime import datetime
 
@@ -191,7 +192,10 @@ def plot(series):
 
 
 if __name__ == '__main__':
-    # soup_obj = scrape()
-    # data = clean(soup_obj)
-    # write(data)
-    plot(to_series(read()))
+    if len(sys.argv) > 1 and sys.argv[1] == 'plot':
+        plot(to_series(read()))
+    else:
+        soup_obj = scrape()
+        data = clean(soup_obj)
+        write(data)
+
