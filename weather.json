@@ -1,0 +1,31 @@
+{"temp_max": "34", "rain": "0.00", "temp_min": "25", "wind_spd": "15", "retrieved": "2017-12-06T03:00:06", "temp": "26", "wind_dir": "110", "snow": "0.00"}
+{"snow": "0.00", "wind_dir": "90", "wind_spd": "14", "temp_min": "25", "rain": "0.00", "temp": "26", "retrieved": "2017-12-06T04:00:05", "temp_max": "34"}
+{"temp_max": "34", "rain": "0.00", "retrieved": "2017-12-06T05:00:06", "wind_dir": "90", "wind_spd": "14", "temp": "27", "snow": "0.00", "temp_min": "23"}
+{"rain": "0.00", "retrieved": "2017-12-06T06:00:06", "snow": "0.00", "temp_max": "34", "temp": "29", "temp_min": "25", "wind_spd": "14", "wind_dir": "90"}
+{"wind_dir": "90", "temp_max": "34", "rain": "0.00", "wind_spd": "14", "snow": "0.00", "temp": "29", "temp_min": "25", "retrieved": "2017-12-06T07:00:06"}
+{"temp_max": "34", "snow": "0.00", "rain": "0.00", "wind_dir": "120", "temp_min": "25", "wind_spd": "10", "retrieved": "2017-12-06T08:00:04", "temp": "32"}
+{"snow": "0.00", "retrieved": "2017-12-06T09:00:05", "temp": "32", "wind_spd": "10", "temp_min": "25", "rain": "0.00", "temp_max": "34", "wind_dir": "120"}
+{"wind_dir": "120", "temp_max": "34", "rain": "0.00", "snow": "0.00", "temp_min": "25", "temp": "32", "retrieved": "2017-12-06T10:00:04", "wind_spd": "10"}
+{"temp": "34", "snow": "0.00", "wind_spd": "10", "retrieved": "2017-12-06T11:00:04", "temp_max": "34", "rain": "0.00", "temp_min": "25", "wind_dir": "120"}
+{"temp_max": "34", "temp_min": "25", "wind_spd": "10", "rain": "0.00", "retrieved": "2017-12-06T12:00:04", "wind_dir": "120", "snow": "0.00", "temp": "33"}
+{"retrieved": "2017-12-06T13:00:05", "temp_max": "34", "wind_dir": "120", "snow": "0.00", "wind_spd": "10", "temp_min": "25", "temp": "33", "rain": "0.00"}
+{"snow": "0.00", "wind_dir": "140", "temp": "28", "temp_min": "25", "wind_spd": "11", "rain": "0.00", "retrieved": "2017-12-06T14:00:05", "temp_max": "34"}
+{"snow": "0.00", "retrieved": "2017-12-06T15:00:06", "temp": "28", "wind_dir": "140", "temp_min": "25", "wind_spd": "11", "rain": "0.00", "temp_max": "34"}
+{"retrieved": "2017-12-06T16:00:11", "snow": "0.00", "wind_dir": "140", "rain": "0.00", "temp": "28", "wind_spd": "11", "temp_max": "34", "temp_min": "25"}
+{"temp_max": "34", "temp": "29", "retrieved": "2017-12-06T17:00:04", "rain": "0.00", "snow": "0.00", "wind_spd": "11", "wind_dir": "140", "temp_min": "29"}
+{"snow": "0.00", "temp_max": "34", "temp": "29", "rain": "0.00", "retrieved": "2017-12-06T18:00:05", "wind_dir": "140", "temp_min": "29", "wind_spd": "11"}
+{"temp_min": "29", "wind_spd": "11", "temp_max": "34", "wind_dir": "140", "snow": "0.00", "temp": "29", "rain": "0.00", "retrieved": "2017-12-06T19:00:05"}
+{"temp": "30", "temp_min": "29", "wind_dir": "120", "temp_max": "34", "retrieved": "2017-12-06T20:00:05", "snow": "0.00", "rain": "0.00", "wind_spd": "7"}
+{"retrieved": "2017-12-06T21:00:04", "temp_min": "29", "rain": "0.00", "temp_max": "34", "wind_spd": "7", "wind_dir": "120", "temp": "30", "snow": "0.00"}
+{"rain": "0.00", "snow": "0.00", "wind_dir": "120", "temp_max": "34", "wind_spd": "7", "temp": "30", "retrieved": "2017-12-06T22:00:04", "temp_min": "29"}
+{"rain": "0.00", "temp": "30", "temp_min": "29", "wind_dir": "140", "wind_spd": "10", "snow": "0.00", "retrieved": "2017-12-06T23:00:04", "temp_max": "33"}
+{"temp_min": "29", "wind_spd": "10", "snow": "0.00", "retrieved": "2017-12-07T00:00:04", "wind_dir": "140", "temp_max": "33", "rain": "0.00", "temp": "30"}
+{"temp": "30", "wind_dir": "140", "snow": "0.00", "rain": "0.00", "wind_spd": "10", "temp_min": "29", "retrieved": "2017-12-07T01:00:04", "temp_max": "33"}
+{"wind_spd": "10", "temp_max": "33", "rain": "0.00", "retrieved": "2017-12-07T02:00:06", "temp": "30", "snow": "0.00", "wind_dir": "140", "temp_min": "29"}
+{"wind_dir": "140", "snow": "0.00", "temp": "30", "temp_max": "33", "wind_spd": "10", "rain": "0.00", "temp_min": "29", "retrieved": "2017-12-07T03:00:05"}
+{"snow": "0.00", "rain": "0.00", "temp_max": "33", "retrieved": "2017-12-07T04:00:04", "temp": "30", "wind_spd": "10", "wind_dir": "140", "temp_min": "29"}
+{"rain": "0.00", "wind_dir": "150", "wind_spd": "9", "temp_max": "33", "temp_min": "27", "snow": "0.00", "temp": "30", "retrieved": "2017-12-07T05:00:04"}
+{"retrieved": "2017-12-07T05:25:13", "temp_max": "39", "temp_min": "27", "temp": "31", "rain": "0.00", "snow": "0.00", "wind_spd": "9", "wind_gust": "14", "wind_dir": "150"}
+{"retrieved": "2017-12-07T05:27:28", "temp_max": "39", "temp_min": "27", "temp": "31", "rain": "0.00", "snow": "0.00", "wind_spd": "9", "wind_gust": "14", "wind_dir": "150"}
+{"retrieved": "2017-12-07T05:37:32", "temp_max": "39", "temp_min": "27", "temp": "31", "rain": "0.00", "snow": "0.00", "wind_spd": "9", "wind_gust": "14", "wind_dir": "150"}
+{"retrieved": "2017-12-07T05:39:27", "temp_max": "39", "temp_min": "27", "temp": "31", "rain": "0.00", "snow": "0.00", "wind_spd": "9", "wind_gust": "14", "wind_dir": "150"}
