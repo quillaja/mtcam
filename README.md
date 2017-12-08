@@ -20,11 +20,12 @@ updating at this time should prevent most DST oddities, compared to using UTC.
 Mounains/cams in other timezones will just have potential time errors.
 
 cron jobs:
-1. scrape every 5 mins
+1. scrape every 5 mins (in scrape.py)
     1. Done - set delay for cams?? --10 sec seems good in early testing
-2. update Mountain.tz daily at 3AM PT
+2. update Mountain.tz daily at 3AM PT (in tz_update.py)
+3. get weather data every hour (TODO)
 
-should program configuration can also be saved in database?
+should program configuration also be saved in database?
 
 path to save each scraped image is `/archiveroot/mountain/cam/timestamp.jpg`
 
@@ -45,7 +46,7 @@ at each scrape:
 2. DONE - Change JSON returned from API to be dict<id,obj> instead of just a list.
 2. clean up util.py
 2. DONE - decide (in db or file) and create program settings
-3. Done - decide on timestamp or datetime for 'modified' ModelBase field
+3. DONE - decide on timestamp or datetime for 'modified' ModelBase field
 4. DONE - Write script to update Mountain.tz_json field
 5. write script to convert/import original palmer data to mtcam data
 6. DONE - Create "client" (webpage/javascript/css)
@@ -53,6 +54,15 @@ at each scrape:
     2. javascript (client.js)
         1. timelapse.js or gallery.js for the "moving picture" display?
     3. style (style.css)
+7. Weather
+    1. write scraper to get weather data for each (US) mountain each hour
+        1. data: min temp, max temp, temp, wind spd, wind gust, wind direction, amount rain, amount snow
+        2. DONE (yes, get all) - also get this data? probabilty of precip, sky cover (%), ...
+        3. DONE - convert values to float, datetime; convert to correct units (knots->mph)
+        4. do NOT invert wind direction--this will be done only when a bokeh plot is requested.
+    2. update model.py
+        1. class(es) for weather data, FK to Mountain
+        2. add flag to Mountain indicating if its weather should/n't be queried?
 
 # API
 Was previously in `api.md`.
@@ -62,7 +72,10 @@ Was previously in `api.md`.
     /api
         root of api. returns nothing.
     /api/data
-        GET: returns json with list of mountains containing list of cams
+        GET: returns json dict<id,obj> of mountains containing dict<id,obj> of cams
     /api/mountains/<mt_id>/cams/<cam_id>/scrapes[?start=<datetime>&end=<datetime>]
         GET: returns json list of scrape records
+    /api/mountains/<mt_id>/weather[?start=<datetime>&end=<datetime>&format=<'json'|'bokeh'>]
+        GET: returns weather data for the time period, 
+        either as json list or a bunch of html for a bokeh graph.
 
