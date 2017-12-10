@@ -82,6 +82,8 @@ def clean(soup_obj):
     return data
 
 
+# NOTE: will not work with above functions because datetime cannot be
+# jsonified. Doesn't matter because data will ultimately in a database.
 def write(data):
     '''append jsonified data to file'''
     data_json = json.dumps(data, sort_keys=True)
@@ -180,6 +182,12 @@ def plot(series):
         line_width=2,
         color='lightgreen',
         legend='Wind (knots)')
+    p.vbar(  # looks better than circle for wind gusts
+        x=series['retrieved'],
+        bottom=series['wind_spd'],
+        color='lightgreen',
+        width=0.5,
+        top=series['wind_gust'])  # not pretty for missing values (drawn as 0)
     p.inverted_triangle(  # use inverted_triangle to make display 'map view'
         series['retrieved'],
         series['wind_spd'],
@@ -196,12 +204,6 @@ def plot(series):
         width=0.5,
         height=16,
         height_units='screen')
-    p.vbar(  # looks better than circle for wind gusts
-        x=series['retrieved'],
-        bottom=series['wind_spd'],
-        color='lightgreen',
-        width=0.5,
-        top=series['wind_gust'])  # not pretty for missing values (drawn as 0)
 
     # precipitation related graphs
     shifted_time = series['retrieved'][1:] + [
