@@ -34,6 +34,7 @@ class Mountain(ModelBase):
     latitude = p.FloatField()
     longitude = p.FloatField()
     tz_json = p.TextField(default='')  #timezone info from google. req Lat,Lon
+    get_weather = p.BooleanField(default=True) #if should scrape nws weather
 
     def get_location(self):
         '''Return 3-tuple of latitude, logitude, and elevation(ft).'''
@@ -92,11 +93,36 @@ class ScrapeRecord(ModelBase):
     def __repr__(self):
         return '{}\t{}\t{}'.format(self.created, self.cam.name, self.result)
 
+class WeatherForecast(ModelBase):
+    mountain = p.ForeignKeyField(Mountain, related_name='weather')
+    #retrieved = p.DateTimeField() # just set created to sec=0,microsec=0
+    temp = p.FloatField(null=True, default=None)
+    temp_max = p.FloatField(null=True, default=None)
+    temp_min = p.FloatField(null=True, default=None)
+    wind_spd = p.FloatField(null=True, default=None)
+    wind_gust = p.FloatField(null=True, default=None)
+    wind_dir = p.FloatField(null=True, default=None)
+    prob_precip = p.FloatField(null=True, default=None)
+    rain = p.FloatField(null=True, default=None)
+    snow = p.FloatField(null=True, default=None)
+    cloud = p.FloatField(null=True, default=None)
+
+
 
 def create_tables():
     _db.connect()
-    _db.create_tables([Mountain, Cam, ScrapeRecord], safe=True)
+    _db.create_tables([Mountain, Cam, ScrapeRecord, WeatherForecast], safe=True)
     _db.close()
+
+def _migrate_add_weather():
+    import playhouse.migrate as m
+    migrator = m.SqliteMigrator(_db)
+
+    m.migrate(
+        migrator.add_column('mountain','get_weather', Mountain.get_weather)
+    )
+
+    _db.create_table(WeatherForecast,safe=True)
 
 
 def create_test_data():
