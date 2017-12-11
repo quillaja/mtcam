@@ -24,32 +24,38 @@ nws_xml = {
 }
 
 
-def scrape():
+def get_weather():
+    '''process all the Mountain instances (in the US) and save their 
+    respective weather forecasts to the database.'''
+    # 1. query for mountains
+    # 2. generate points_list
+    # 3. use scrape() and clean() to get back usable data
+    # 4. generate new weather instances and write them to the database
+    pass
+
+
+def do_mock():
+    mts = [('hood', (45.373439, -121.695962)),
+           ('rainier', (46.851736, -121.760398)), 
+           ('ssister', (44.103241, -121.769253))]
+
+    soup_obj = scrape([point for _, point in mts])
+    return clean(soup_obj, mts)
+
+
+def scrape(points_list):
     '''get xml from NWS'''
+    # create a string of points in the format required for the nws service,
+    # and an initial request parameters dict
+    pts = ' '.join(['{},{}'.format(lat, lon) for lat, lon in points_list])
     params = {
-        # Mt Hood, approximate in Devil's Kitchen
-        'lat': '45.373439',
-        'lon': '-121.695962',
+        'listLatLon': pts,
         'product': 'time-series',
-        # regular (forecast)
-        'temp': 'temp',
-        'maxt': 'maxt',
-        'mint': 'mint',
-        'snow': 'snow',
-        'qpf': 'qpf',
-        'wspd': 'wspd',
-        'wgust': 'wgust',
-        'wdir': 'wdir',
-        'pop12': 'pop12',
-        'sky': 'sky'
-        # real time mesoscale analysis
-        # 'precipa_r': 'precipa_r',
-        # 'sky_r': 'sky_r',
-        # 'td_r': 'td_r',
-        # 'temp_r': 'temp_r',
-        # 'wdir_r': 'wdir_r',
-        # 'wspd_r': 'wspd_r'
     }
+
+    # add nws data names to the request parameters
+    for _,_,req in nws_xml.values():
+        params[req]=req
 
     # TODO: make more robust, timeouts, etc
     url_non_summarized = "https://graphical.weather.gov/xml/sample_products/browser_interface/ndfdXMLclient.php"
@@ -58,28 +64,36 @@ def scrape():
     return soup_obj
 
 
-def clean(soup_obj):
+def clean(soup_obj, mts):
     '''use bs4 to parse xml and extract data. put data into dict'''
 
     # TODO: check for 'error' results
+    all_data = dict()
+    for i, mt in enumerate(mts):
+        name = mt[0]
 
-    data = {'retrieved': datetime.now().replace(second=0, microsecond=0)}
+        data = {
+            'retrieved': datetime.now().replace(second=0, microsecond=0),
+        }
 
-    # NOTE: value.string throws AttributeError if no 'value' is found
-    # TODO: make this able to accept response from multi-point request
-    #
-    # iterate the data items i want, extracting each from xml via the
-    # beautifulsoup 'find' method. If the data item is not in the xml
-    # the 'value.string' will throw AttributeError.
-    point_xml = soup_obj.find('parameters', **{'applicable-location': 'point1'})
-    for var, v in nws_xml.items():
-        tag, ttype, _ = v
-        try:
-            data[var] = float(point_xml.find(tag, type=ttype).value.string)
-        except AttributeError:
-            data[var] = None
+        # NOTE: value.string throws AttributeError if no 'value' is found
+        # TODO: make this able to accept response from multi-point request
+        #
+        # iterate the data items i want, extracting each from xml via the
+        # beautifulsoup 'find' method. If the data item is not in the xml
+        # the 'value.string' will throw AttributeError.
+        point_xml = soup_obj.find(
+            'parameters', **{'applicable-location': 'point' + str(i + 1)})
+        for var, v in nws_xml.items():
+            tag, ttype, _ = v
+            try:
+                data[var] = float(point_xml.find(tag, type=ttype).value.string)
+            except AttributeError:
+                data[var] = None
 
-    return data
+        all_data[name] = data
+
+    return all_data
 
 
 # NOTE: will not work with above functions because datetime cannot be
@@ -91,7 +105,9 @@ def write(data):
     with open('weather.json', 'a') as f:
         f.write(data_json + '\n')
 
+
 #endregion
+
 
 #region: plotting
 def read():
@@ -243,7 +259,9 @@ def plot(series):
     output_file('weather_plot.html')
     show(p)
 
+
 #endregion
+
 
 def main():
     if len(sys.argv) > 1 and sys.argv[1] == 'plot':
