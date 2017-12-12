@@ -54,15 +54,24 @@ at each scrape:
     2. javascript (client.js)
         1. timelapse.js or gallery.js for the "moving picture" display?
     3. style (style.css)
-7. Weather
-    1. write scraper to get weather data for each (US) mountain each hour
+7. DONE - Weather
+    1. DONE - write scraper to get weather data for each (US) mountain each hour
         1. data: min temp, max temp, temp, wind spd, wind gust, wind direction, amount rain, amount snow
         2. DONE (yes, get all) - also get this data? probabilty of precip, sky cover (%), ...
         3. DONE - convert values to float, datetime; convert to correct units (knots->mph)
         4. do NOT invert wind direction--this will be done only when a bokeh plot is requested.
-    2. update model.py
-        1. class(es) for weather data, FK to Mountain
-        2. add flag to Mountain indicating if its weather should/n't be queried?
+    2. DONE - update model.py
+        1. DONE - class(es) for weather data, FK to Mountain
+        2. DONE - add flag to Mountain indicating if its weather should/n't be queried?
+            1. Boolean flag for older xml API, but for new API just use the existence of a request url to signal that data should be gotten.
+    3. Oh hey, NOAA has new interface that returns JSON... good i guess. Now I have to re-write the whole thing.
+        1. The data I can get hasn't changed. (good)
+        2. easier to parse--just use python's great json support. (good.. don't need beautifulsoup and lxml)
+        3. all data is in SI (metric) units.(?) (bad)
+            1. have to convert
+            2. is there a way to request imperial/english units? -- no documentation of this
+        4. Documentation is pretty crappy. (bad)
+        5. Basic pattern: `<data-dict>['properties']['<parameter>']['values'][0]['value']`
 
 # API
 Was previously in `api.md`.
