@@ -126,3 +126,62 @@ def do_scrapes(mt_id, cam_id):
         data.append(sd)
 
     return json.dumps(data, indent=2, sort_keys=True)
+
+
+def weather_to_json(forecasts):
+    '''
+    Make list of WeatherForecast into JSON list of dicts.
+    '''
+
+    data = list()
+
+    for f in forecasts:
+        f_dict = {
+            'date': f.created.strftime('%Y-%m-%d %H:%M'),
+            'temp': f.temp,
+            'temp_min': f.temp_min,
+            'temp_max': f.temp_max,
+            'wind_spd': f.wind_spd,
+            'wind_gust': f.wind_gust,
+            'wind_dir': f.wind_dir,
+            'prob_precip': f.prob_precip,
+            'cloud': f.cloud,
+            'snow_level': f.snow_level,
+            'rain': f.rain,
+            'snow': f.snow
+        }
+
+        data.append(f_dict)
+
+    return data
+
+
+@app.route('/api/mountains/<int:mt_id>/weather')
+def do_weather(mt_id):
+    '''Returns weather data for the mountain during the dates specified by
+    the params 'start' and 'end'. Data can be had in JSON format or 'Bokeh
+    format' (html for a plot).'''
+
+    mt = Mountain.get(Mountain.id == mt_id)
+
+    end = request.args.get('end', '')
+    start = request.args.get('start', '')
+    as_local_time = strtobool(request.args.get('as_local_time', 'false'))
+    frmt = request.args.get('format', 'bokeh')
+
+    try:
+        mttz = json.loads(mt.tz_json)
+    except ValueError:
+        # mt.tz_json was invalid json (including '')
+        mttz = None
+
+    # convert GET date params into datetime objects
+    # also will adjust the datetimes to the provided timezone
+    # if as_local_time is True and mttz is a valid data structure
+    end = convert_input(end, as_local_time, mttz)
+    start = convert_input(start, as_local_time, mttz)
+
+    forecasts = queries.weatherforecasts_for_mt(mt.id)
+
+    # TODO: add bokeh format stuff
+    return weather_to_json(forecasts)
