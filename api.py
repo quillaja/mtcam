@@ -153,7 +153,7 @@ def weather_to_json(forecasts):
 
         data.append(f_dict)
 
-    return data
+    return json.dumps(data, indent=2, sort_keys=True)
 
 
 @app.route('/api/mountains/<int:mt_id>/weather')
