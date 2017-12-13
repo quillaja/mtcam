@@ -2,7 +2,8 @@ import json
 import datetime as dt
 import time
 from distutils.util import strtobool
-from flask import Flask, request
+from flask import Flask, request, abort
+from peewee import DoesNotExist
 import queries
 from model import Mountain, Cam, ScrapeRecord
 import settings
@@ -83,8 +84,11 @@ def do_scrapes(mt_id, cam_id):
     '''Gets and JSONifies the scrape records from the given mountain/cam 
     and dates, if provided.'''
 
-    mt = Mountain.get(Mountain.id == mt_id)
-    cam = Cam.get(Cam.id == cam_id)
+    try:
+        mt = Mountain.get(Mountain.id == mt_id)
+        cam = Cam.get(Cam.id == cam_id)
+    except DoesNotExist:
+        return abort(404)
 
     end = request.args.get('end', '')
     start = request.args.get('start', '')
@@ -162,7 +166,10 @@ def do_weather(mt_id):
     the params 'start' and 'end'. Data can be had in JSON format or 'Bokeh
     format' (html for a plot).'''
 
-    mt = Mountain.get(Mountain.id == mt_id)
+    try:
+        mt = Mountain.get(Mountain.id == mt_id)
+    except DoesNotExist:
+        abort(404)
 
     end = request.args.get('end', '')
     start = request.args.get('start', '')
