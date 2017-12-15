@@ -1,6 +1,3 @@
-import json
-import datetime as dt
-
 import requests
 
 import settings

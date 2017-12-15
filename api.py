@@ -3,8 +3,8 @@ import json
 import time
 from distutils.util import strtobool
 
-from bokeh.plotting import figure, output_file, show
-from bokeh.embed import components, file_html
+from bokeh.embed import components
+from bokeh.plotting import figure
 from flask import Flask, abort, request
 from peewee import DoesNotExist
 
@@ -172,7 +172,7 @@ def weather_to_bokeh(forecasts, mt_name):
         x_axis_label='time',
         x_axis_type='datetime',
         y_axis_label='unit',
-        width=1000)
+        width=800)
 
     created = [w.created for w in forecasts]
 
@@ -267,8 +267,18 @@ def weather_to_bokeh(forecasts, mt_name):
     p.ygrid.minor_grid_line_color = 'gray'
     p.ygrid.minor_grid_line_alpha = 0.2
 
-    from bokeh.resources import CDN
-    return file_html(p, CDN, mt_name)
+    script, div = components(p)
+
+    # hackish, but I had to remove the <script> tags here in order to 'inject'
+    # the javascript into the DOM on the client side. Could also consider
+    # using regex or something to do this, but simply slicing was easy
+    # and convenient, and probably faster.
+    script = script[32:-9]
+
+    return json.dumps({'script': script, 'div': div})
+
+    # from bokeh.resources import CDN
+    # return file_html(p, CDN, mt_name)
 
 
 @app.route('/api/mountains/<int:mt_id>/weather')

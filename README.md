@@ -64,7 +64,9 @@ at each scrape:
         1. DONE - class(es) for weather data, FK to Mountain
         2. DONE - add flag to Mountain indicating if its weather should/n't be queried?
             1. Boolean flag for older xml API, but for new API just use the existence of a request url to signal that data should be gotten.
-    3. Oh hey, NOAA has new interface that returns JSON... good i guess. Now I have to re-write the whole thing.
+    3. DONE - update api.py
+    4. DONE - update client.js and index.html
+    5. DONE - Oh hey, NOAA has new interface that returns JSON... good i guess. Now I have to re-write the whole thing.
         1. The data I can get hasn't changed. (good)
         2. easier to parse--just use python's great json support. (good.. don't need beautifulsoup and lxml)
         3. all data is in SI (metric) units.(?) (bad)

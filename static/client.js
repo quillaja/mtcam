@@ -13,6 +13,7 @@ var tabData = {
     "Info": "info",
     "Timelapse": "timelapse",
     "Log": "scrapes",
+    "Weather": "weather",
 };
 
 // Sets up urlBase, the mountain/camera 'dropdowns' + associated data,
@@ -45,7 +46,21 @@ window.onload = function (e) {
     setupMtCamSelection();
 
     // attach functionality to "load data" button
-    document.getElementById("submit").onclick = loadAndDisplayData;
+    document.getElementById("submit").onclick = function () {
+        loadAndDisplayPhotos();
+        loadAndDisplayWeather();
+
+        Array.from(document.getElementById("tab-area").children).
+            forEach(function (element) {
+                element.classList.remove("hidden");
+            });
+
+        // for space savings on narrower devices (phones), hide 'help'
+        // tab. I decided to show the 'info' tab by default instead.
+        tabClicked(document.getElementById("info-tab")); // 1 should be info
+        document.getElementById("help-tab").classList.add("hidden");
+
+    };
 
     // set the default 'start' to be Today at 00:00 (12am)
     var dt = new Date();
@@ -58,7 +73,7 @@ window.onload = function (e) {
 
 // Requests scraperecords from the api between the dates specified in the ui,
 // then populates rows of the table.
-function loadAndDisplayData() {
+function loadAndDisplayPhotos() {
 
     var request = new XMLHttpRequest();
     request.onreadystatechange = function () {
@@ -73,10 +88,11 @@ function loadAndDisplayData() {
                 makeTimelapse();
 
                 // show tabs for the 3 displays created above
-                Array.from(document.getElementById("tab-area").children).
-                    forEach(function (element) {
-                        element.classList.remove("hidden");
-                    });
+                // weather tab is unhidden here, but populated with content
+                // in another independent function because it's a separate
+                // API call.
+                // TODO: streamline this? if separate, then should be really
+                // separate.
             }
             else if (request.status == 400) {
                 alert('There was an error 400');
@@ -120,6 +136,49 @@ function populateScrapeTable() {
     }, this);
 }
 
+// Request bokeh html elements from the API for the weather data of the
+// mountain and dates desired. Show the result in the client page.
+function loadAndDisplayWeather() {
+    var request = new XMLHttpRequest();
+    request.onreadystatechange = function () {
+        if (request.readyState == XMLHttpRequest.DONE) {
+            if (request.status == 200) {
+                // take recieved html and javascript, insert into document,
+                // and unhide weather tab.
+                var data = JSON.parse(request.responseText);
+
+                var weather = document.getElementById("weather");
+                rmAllChildren(weather);
+                weather.innerHTML = data['div'];
+
+                // the cleanest way I found to 'inject' a script into the DOM
+                // had to remove <script> tags from bokeh output on back end
+                var script = document.createElement("script");
+                var innerScript = document.createTextNode(data["script"]);
+                script.appendChild(innerScript);
+                weather.appendChild(script);
+            }
+            else {
+                alert('(loadWeather) error ' + request.status + ' was returned');
+            }
+        }
+    };
+
+    var start = document.getElementById("start").value;
+    var end = document.getElementById("end").value;
+    var mt = document.getElementById("mountain").value;
+    var asLocal = document.getElementById("as-local").checked;
+
+    var url = urlBase + "/api/mountains/" + mt +
+        "/weather?format=bokeh" +
+        "&start=" + start +
+        "&end=" + end +
+        "&as_local_time=" + asLocal;
+
+    request.open("GET", url, true);
+    request.send();
+}
+
 // Gets mountain and cam data from the api, then populates the
 // respective 'dropdown' items in the ui.
 function setupMtCamSelection() {
@@ -158,6 +217,7 @@ function setupTabBar() {
 
     for (var k in tabData) {
         t = document.createElement("span");
+        t.id = tabData[k] + "-tab";
         t.classList.add("tab");
         t.classList.add("hidden");
         t.innerText = k;
@@ -166,7 +226,7 @@ function setupTabBar() {
     }
 
     // remove 'hidden' from tab, then simulate click to unhide the
-    // associated content and apply corrent styles.
+    // associated content and apply correct styles.
     tabBar.children[0].classList.remove("hidden");
     tabClicked(tabBar.children[0]);
 }
