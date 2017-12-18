@@ -5,6 +5,8 @@ from distutils.util import strtobool
 
 from bokeh.embed import components
 from bokeh.plotting import figure
+from bokeh.layouts import column
+from bokeh.models import Range1d, LinearAxis
 from flask import Flask, abort, request
 from peewee import DoesNotExist
 
@@ -167,28 +169,39 @@ def weather_to_json(forecasts):
 
 def weather_to_bokeh(forecasts, mt_name):
     '''makes nice plot from the forecast data'''
-    p = figure(
+
+    if len(forecasts) == 0:
+        return json.dumps({'script': '', 'div': '<div>No data.</div>'})
+
+    xend = forecasts[-1].created + dt.timedelta(hours=1)
+    xstart = forecasts[-1].created - dt.timedelta(days=1)
+
+    # used for all x axes
+    created = [w.created for w in forecasts]
+
+    top = figure(
         title=mt_name + ' Summit - Forecast Weather Each Hour',
+        x_range=(xstart, xend),
         x_axis_label='time',
         x_axis_type='datetime',
         y_axis_label='unit',
-        width=800)
-
-    created = [w.created for w in forecasts]
+        tools='xpan,wheel_zoom,box_zoom,reset,save',
+        width=640,
+        height=400)
 
     # temperature related lines
-    p.line(
+    top.line(
         created, [w.temp for w in forecasts],
         line_width=2,
         color='black',
         legend='Temp (F)')
-    p.line(
+    top.line(
         created, [w.temp_max for w in forecasts],
         legend='Max Temp',
         line_dash='4 4',
         color='red',
         line_width=0.5)
-    p.line(
+    top.line(
         created, [w.temp_min for w in forecasts],
         legend='Min Temp',
         line_dash='4 4',
@@ -203,27 +216,27 @@ def weather_to_bokeh(forecasts, mt_name):
         -(w.wind_dir if w.wind_dir is not None else 0) for w in forecasts
     ]
     wind_spd = [w.wind_spd for w in forecasts]
-    p.line(
+    top.line(
         created,
         wind_spd,
         line_width=2,
         color='lightgreen',
         legend='Wind (mph)')
-    p.vbar(  # looks better than circle for wind gusts
+    top.vbar(  # looks better than circle for wind gusts
         x=created,
         bottom=wind_spd,
         color='lightgreen',
         width=0.5,
         top=[w.wind_gust
              for w in forecasts])  # not pretty for missing values (drawn as 0)
-    p.inverted_triangle(  # use inverted_triangle to make display 'map view'
+    top.inverted_triangle(  # use inverted_triangle to make display 'map view'
         created,
         wind_spd,
         angle=wind_dir_inverted,
         angle_units='deg',
         color='green',
         size=8)
-    p.rect(
+    top.rect(
         created,
         wind_spd,
         angle=wind_dir_inverted,
@@ -233,10 +246,35 @@ def weather_to_bokeh(forecasts, mt_name):
         height=16,
         height_units='screen')
 
+    # legend setting has to be here to actually take effect
+    top.legend.location = 'top_left'
+    top.legend.orientation = 'horizontal'
+    top.legend.background_fill_alpha = 0.5
+    top.legend.click_policy = 'hide'
+
+    # grid settings
+    top.xaxis.minor_tick_line_color = 'black'
+    top.xaxis.minor_tick_line_width = 1
+    top.xgrid.minor_grid_line_color = 'gray'
+    top.xgrid.minor_grid_line_alpha = 0.2
+    top.ygrid.minor_grid_line_color = 'gray'
+    top.ygrid.minor_grid_line_alpha = 0.2
+
+    bottom = figure(
+        title=mt_name + ' Summit - Forecast Weather Each Hour',
+        x_axis_label='time',
+        x_axis_type='datetime',
+        x_range=top.x_range,
+        y_axis_label='unit',
+        y_range=(0, 24),
+        tools='xpan,wheel_zoom,box_zoom,reset,save',
+        width=640,
+        height=400)
+
     # precipitation related graphs
     shifted_time = created[1:] + [created[-1] + dt.timedelta(hours=1)
                                   ] if len(forecasts) > 0 else []
-    p.quad(
+    bottom.quad(
         legend='Rain (in)',
         left=created,
         right=shifted_time,
@@ -244,7 +282,7 @@ def weather_to_bokeh(forecasts, mt_name):
         bottom=0,
         color='blue',
         alpha=0.2)
-    p.quad(
+    bottom.quad(
         legend='Snow (in)',
         left=created,
         right=shifted_time,
@@ -253,21 +291,39 @@ def weather_to_bokeh(forecasts, mt_name):
         color='red',
         alpha=0.2)
 
+    # probability of precipitation and cloud cover, on 2nd axis
+    bottom.extra_y_ranges = {'prob': Range1d(start=0, end=105)}
+    bottom.line(
+        created, [w.prob_precip for w in forecasts],
+        legend='Prob.Precip (%)',
+        color='blue',
+        line_width=1,
+        y_range_name='prob')
+    bottom.line(
+        created, [w.cloud for w in forecasts],
+        legend='Cloud Cover (%)',
+        color='black',
+        line_width=1,
+        y_range_name='prob')
+
     # legend setting has to be here to actually take effect
-    p.legend.location = 'top_left'
-    p.legend.orientation = 'horizontal'
-    p.legend.background_fill_alpha = 0.5
-    p.legend.click_policy = 'hide'
+    bottom.legend.location = 'top_left'
+    bottom.legend.orientation = 'horizontal'
+    bottom.legend.background_fill_alpha = 0.5
+    bottom.legend.click_policy = 'hide'
 
     # grid settings
-    p.xaxis.minor_tick_line_color = 'black'
-    p.xaxis.minor_tick_line_width = 1
-    p.xgrid.minor_grid_line_color = 'gray'
-    p.xgrid.minor_grid_line_alpha = 0.2
-    p.ygrid.minor_grid_line_color = 'gray'
-    p.ygrid.minor_grid_line_alpha = 0.2
+    bottom.add_layout(
+        LinearAxis(y_range_name='prob', axis_label='percent'), 'left')
 
-    script, div = components(p)
+    bottom.xaxis.minor_tick_line_color = 'black'
+    bottom.xaxis.minor_tick_line_width = 1
+    bottom.xgrid.minor_grid_line_color = 'gray'
+    bottom.xgrid.minor_grid_line_alpha = 0.2
+    bottom.ygrid.minor_grid_line_color = 'gray'
+    bottom.ygrid.minor_grid_line_alpha = 0.2
+
+    script, div = components(column(top, bottom))
 
     # hackish, but I had to remove the <script> tags here in order to 'inject'
     # the javascript into the DOM on the client side. Could also consider
@@ -276,9 +332,6 @@ def weather_to_bokeh(forecasts, mt_name):
     script = script[32:-9]
 
     return json.dumps({'script': script, 'div': div})
-
-    # from bokeh.resources import CDN
-    # return file_html(p, CDN, mt_name)
 
 
 @app.route('/api/mountains/<int:mt_id>/weather')
