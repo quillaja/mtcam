@@ -53,19 +53,19 @@ window.onload = function (e) {
         //     forEach(function (element) {
         //         element.classList.remove("hidden");
         //     });
-        tabVisible("info-tab",true);
-        tabVisible("timelapse-tab",true);
-        tabVisible("scrapes-tab",true);
+        tabVisible("info-tab", true);
+        tabVisible("timelapse-tab", true);
+        tabVisible("scrapes-tab", true);
 
         // for space savings on narrower devices (phones), hide 'help'
         // tab. I decided to show the 'info' tab by default instead.
-        tabClicked(document.getElementById("info-tab")); 
+        tabClicked("info-tab");
         tabVisible("help-tab", false);
 
     };
 
     // attach functionality to "load weather" button
-    document.getElementById("submit-weather").onclick = function() {
+    document.getElementById("submit-weather").onclick = function () {
         loadAndDisplayWeather();
 
         tabVisible("weather-tab", true);
@@ -230,14 +230,14 @@ function setupTabBar() {
         t.classList.add("tab");
         t.classList.add("hidden");
         t.innerText = k;
-        t.onclick = function () { tabClicked(this); }
+        t.onclick = function () { tabClicked(this.id); }
         tabBar.appendChild(t);
     }
 
     // remove 'hidden' from tab, then simulate click to unhide the
     // associated content and apply correct styles.
-    tabBar.children[0].classList.remove("hidden");
-    tabClicked(tabBar.children[0]);
+    tabVisible("help-tab", true);
+    tabClicked("help-tab");
 }
 
 // set tab visbility.
@@ -251,7 +251,7 @@ function tabVisible(tabId, visible) {
 }
 
 // toggles the tab clicked.
-function tabClicked(tab) {
+function tabClicked(tabId) {
 
     var selected = document.querySelector(".tab.selected");
     if (selected != null) {
@@ -260,6 +260,7 @@ function tabClicked(tab) {
         tabVisible(oldContentId, false);
     }
 
+    var tab = document.getElementById(tabId);
     tab.classList.add("selected");
     var newContentId = tabData[tab.innerText];
     tabVisible(newContentId, true);

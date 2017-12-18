@@ -36,14 +36,14 @@ body {
     margin: 0.25rem;
 }
 
-.tab-area {
-    display: flex;
-    border-bottom: 1px solid lightgray;
-}
-
 .submit-button {
     grid-column: 1 / span 2;
 }
+
+.tab-area {
+    display: flex;
+    border-bottom: 1px solid lightgray;
+}    
 
 .tab {
     padding: 0.3rem 1rem;
