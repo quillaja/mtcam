@@ -41,6 +41,10 @@ body {
     border-bottom: 1px solid lightgray;
 }
 
+.submit-button {
+    grid-column: 1 / span 2;
+}
+
 .tab {
     padding: 0.3rem 1rem;
     margin: 0rem 0.2rem;

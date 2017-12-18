@@ -45,21 +45,30 @@ window.onload = function (e) {
     // get data for 'dropdowns' from api
     setupMtCamSelection();
 
-    // attach functionality to "load data" button
-    document.getElementById("submit").onclick = function () {
+    // attach functionality to "load photos" button
+    document.getElementById("submit-photos").onclick = function () {
         loadAndDisplayPhotos();
-        loadAndDisplayWeather();
 
-        Array.from(document.getElementById("tab-area").children).
-            forEach(function (element) {
-                element.classList.remove("hidden");
-            });
+        // Array.from(document.getElementById("tab-area").children).
+        //     forEach(function (element) {
+        //         element.classList.remove("hidden");
+        //     });
+        tabVisible("info-tab",true);
+        tabVisible("timelapse-tab",true);
+        tabVisible("scrapes-tab",true);
 
         // for space savings on narrower devices (phones), hide 'help'
         // tab. I decided to show the 'info' tab by default instead.
-        tabClicked(document.getElementById("info-tab")); // 1 should be info
-        document.getElementById("help-tab").classList.add("hidden");
+        tabClicked(document.getElementById("info-tab")); 
+        tabVisible("help-tab", false);
 
+    };
+
+    // attach functionality to "load weather" button
+    document.getElementById("submit-weather").onclick = function() {
+        loadAndDisplayWeather();
+
+        tabVisible("weather-tab", true);
     };
 
     // set the default 'start' to be Today at 00:00 (12am)
@@ -83,8 +92,8 @@ function loadAndDisplayPhotos() {
                 scrapes = JSON.parse(request.responseText);
 
                 // display various data
-                populateScrapeTable();
                 showInfo();
+                populateScrapeTable();
                 makeTimelapse();
 
                 // show tabs for the 3 displays created above
@@ -231,21 +240,29 @@ function setupTabBar() {
     tabClicked(tabBar.children[0]);
 }
 
+// set tab visbility.
+function tabVisible(tabId, visible) {
+    tab = document.getElementById(tabId)
+    if (visible) {
+        tab.classList.remove("hidden");
+    } else {
+        tab.classList.add("hidden");
+    }
+}
+
 // toggles the tab clicked.
-// TODO: make tab click change display area visibility
-// TODO: Ignore above TODO. Decided "load data" will initiate everything
 function tabClicked(tab) {
 
     var selected = document.querySelector(".tab.selected");
     if (selected != null) {
         var oldContentId = tabData[selected.innerText];
         selected.classList.remove("selected");
-        document.getElementById(oldContentId).classList.add("hidden");
+        tabVisible(oldContentId, false);
     }
 
     tab.classList.add("selected");
     var newContentId = tabData[tab.innerText];
-    document.getElementById(newContentId).classList.remove("hidden");
+    tabVisible(newContentId, true);
 }
 
 // remove all child elements of element.
@@ -257,7 +274,7 @@ function rmAllChildren(element) {
 
 // converts a Date() object into a string for use in the datetime-local input.
 // use lame conversion function because JS+HTML is too fucking stupid
-// return format YYYY-MM-DDTHH:MM is necessary for api request.
+// return format YYYY-MM-DDTHH:MM which is necessary for api request.
 function strDatetimeLocal(date) {
     var
         ten = function (i) {
