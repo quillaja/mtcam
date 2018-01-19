@@ -4,6 +4,7 @@ import os
 import sys
 import threading
 import traceback
+import time
 
 import ephem
 import requests
@@ -11,7 +12,7 @@ import requests
 import settings
 from model import Cam, Mountain, ScrapeRecord, _db
 from queries import prefetch_all_mts_cams
-from util import floor, ft_m
+from util import floor, ft_to_m
 
 
 class ScrapeJob(threading.Thread):
@@ -83,7 +84,7 @@ class ScrapeJob(threading.Thread):
 
         obs = ephem.Observer()
         obs.horizon = settings.HORIZON
-        obs.elevation = ft_m(mt.elevation_ft)
+        obs.elevation = ft_to_m(mt.elevation_ft)
         obs.lat = str(mt.latitude)
         obs.lon = str(mt.longitude)
 
@@ -113,6 +114,9 @@ def main():
         minute = dt.datetime.now().minute
         filename_time = str(int(dt.datetime.utcnow().timestamp()))
         jobs = list()
+
+        # delay the scrape a few seconds, which seems to help avoid errors
+        time.sleep(settings.SCRAPE_DELAY)
 
         # perform scrapes on every cam which
         # 1) is active

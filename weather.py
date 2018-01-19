@@ -1,6 +1,7 @@
 import requests
 
 import settings
+from util import c_to_f, ms_to_mph, mm_to_in, m_to_ft, identity
 from model import Mountain, WeatherForecast
 
 
@@ -19,31 +20,6 @@ def get_forecast_url(lat, lon):
         return result.json()['properties']['forecastGridData']
     else:
         result.raise_for_status()
-
-
-def identity(value):
-    '''returns the value unchanged'''
-    return value
-
-
-def c_to_f(temp_c):
-    '''converts deg C to deg F'''
-    return temp_c * 1.8 + 32
-
-
-def ms_to_mph(speed_ms):
-    '''converts meters per second to miles per hour'''
-    return speed_ms * 2.23694
-
-
-def mm_to_in(mm):
-    '''converts mm to inch'''
-    return mm * 0.0393701
-
-
-def m_to_ft(meters):
-    '''converts meters to feet'''
-    return meters * 3.28084
 
 
 # This is used to make it easy to process all the information contained
@@ -106,6 +82,8 @@ def noaa_accessor(raw, key):
         return None
 
 
+# TODO: consider looping over SCHEMA as in above methods, instead of
+# hard coding each case.
 def noaa_to_model(raw_noaa):
     '''gets and converts the raw data from NOAA to the internal weather
     forecast representation in model.py. Does not set WeatherForecast.mountain,

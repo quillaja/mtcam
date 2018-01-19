@@ -44,7 +44,7 @@ at each scrape:
     1. queries.py
     2. views.py (using flask)
 2. DONE - Change JSON returned from API to be dict<id,obj> instead of just a list.
-2. clean up util.py
+2. DONE - clean up util.py
 2. DONE - decide (in db or file) and create program settings
 3. DONE - decide on timestamp or datetime for 'modified' ModelBase field
 4. DONE - Write script to update Mountain.tz_json field
