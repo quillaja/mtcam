@@ -122,7 +122,7 @@ def main():
         # 1) is active
         # 2) it's the appropriate time of the hour
         for mt in data:
-            for cam in mt.cams_prefetch:
+            for cam in mt:
                 if cam.is_active and minute % cam.interval == 0:
                     j = ScrapeJob(cam, filename_time)
                     jobs.append(j)

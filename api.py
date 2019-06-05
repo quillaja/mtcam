@@ -34,7 +34,7 @@ def do_data():
             'cams': dict()
         }
 
-        for c in m.cams_prefetch:
+        for c in m.cams:
             cd = {
                 'id': c.id,
                 'name': c.name,
