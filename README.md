@@ -46,6 +46,13 @@ This new version is in Go.
 - remove
     - weather? kinda sucks
 
+## Dependencies
+1. github.com/mattn/go-sqlite3 - for sqlite
+1. github.com/disintegration/imaging - for image resizing
+1. github.com/gorilla/mux - easier handling of api routes
+1. http://github.com/sirupsen/logrus - might have to make my own formatter for systemd
+1. github.com/shibukawa/configdir - don't really need if i assume linux (can just use os.GetEnv())
+
 # API
 Generally not changed from python version
 
