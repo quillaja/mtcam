@@ -46,6 +46,14 @@ This new version is in Go.
 - remove
     - weather? kinda sucks
 
+### internal packages
+- astro - gets sun/moon data from navy api
+    - `func Get(lat, lon double, date time.Time, apikey string) (data SOMESTRUCT)`
+    - various constants for phemonenon
+- db
+- model
+- scheduler
+
 ## Dependencies
 1. github.com/mattn/go-sqlite3 - for sqlite
 1. github.com/disintegration/imaging - for image resizing
