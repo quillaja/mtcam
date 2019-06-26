@@ -34,7 +34,7 @@ func Get(lat, lon float64, date time.Time) (Data, error) {
 	resp, err := http.Get(url)
 	switch {
 	case err != nil:
-		return Data{}, errors.Wrap(err, "failed request to GET "+url)
+		return Data{}, errors.Wrap(err, "failed request to GET ")
 
 	case resp.StatusCode != http.StatusOK:
 		return Data{}, errors.New("request to GET " + url + " returned status code " + string(resp.StatusCode))
@@ -68,13 +68,13 @@ func Get(lat, lon float64, date time.Time) (Data, error) {
 // extractData is a function to pick through the JSON returned from
 // the api request, stored in `raw`, and write the useful info into `data`.
 func extractData(data *Data, raw map[string]interface{}) {
-	const tlayout = "15:04" // time format that phenom are in (HH:MM)
 
 	date := data.Date
 
-	// extract sun data
-	if sundata, ok := raw["sundata"].([]interface{}); ok {
-		for _, p := range sundata {
+	// create helper func to extract transit phenomenon data
+	transit := func(data map[Phenom]time.Time, transmap []interface{}) {
+		const tlayout = "15:04" // time format that phenom are in (HH:MM)
+		for _, p := range transmap {
 			if phen, ok := p.(map[string]interface{}); ok {
 				phenom := phenomKeys[phen["phen"].(string)]
 				t, terr := time.Parse(tlayout, phen["time"].(string))
@@ -83,29 +83,21 @@ func extractData(data *Data, raw map[string]interface{}) {
 					continue // skip if the time cannot be parsed
 				}
 				// build transit map combining date with phenom time
-				data.SunTransit[phenom] = time.Date(
+				data[phenom] = time.Date(
 					date.Year(), date.Month(), date.Day(),
 					t.Hour(), t.Minute(), 0, 0, date.Location())
 			}
 		}
 	}
 
+	// extract sun data
+	if sundata, ok := raw["sundata"].([]interface{}); ok {
+		transit(data.SunTransit, sundata)
+	}
+
 	// extract moon data
 	if moondata, ok := raw["moondata"].([]interface{}); ok {
-		for _, p := range moondata {
-			if phen, ok := p.(map[string]interface{}); ok {
-				phenom := phenomKeys[phen["phen"].(string)]
-				t, terr := time.Parse(tlayout, phen["time"].(string))
-				if terr != nil {
-					continue
-				}
-				data.MoonTransit[phenom] = time.Date(
-					date.Year(), date.Month(), date.Day(),
-					t.Hour(), t.Minute(), 0, 0, date.Location())
-			}
-		}
-	} else {
-		fmt.Println("fail", moondata)
+		transit(data.MoonTransit, moondata)
 	}
 
 	// extract moon phase

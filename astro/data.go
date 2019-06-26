@@ -19,13 +19,21 @@ const (
 
 // Data is the astronomical information.
 type Data struct {
-	SunTransit  map[Phenom]time.Time
+	// The times of various transit phemonenon for the sun.
+	SunTransit map[Phenom]time.Time
+	// The times of various transit phemonenon for the moon.
 	MoonTransit map[Phenom]time.Time
-	MoonPhase   string
-	Date        time.Time
-	Lat, Lon    float64
+	// The moon's phase, such as "Last Quarter" or "Full Moon".
+	MoonPhase string
+	// The date for which the data applies. The 'time' portion
+	// of the Date is irrelevant.
+	Date time.Time
+	// The location for the data.
+	Lat, Lon float64
 }
 
+// a mapping of the string keys used in JSON to the
+// constants used in this package.
 var phenomKeys = map[string]Phenom{
 	"BC": StartCivilTwilight,
 	"R":  Rise,

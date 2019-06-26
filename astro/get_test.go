@@ -1,8 +1,3 @@
-// Package astro fetchest sun and moon data from the US Navy's
-// "Astronomical Applications API".
-//
-// Website: https://aa.usno.navy.mil/data/docs/api.php
-// API version: 2.2.1
 package astro
 
 import (
@@ -13,6 +8,7 @@ import (
 // TODO: write a real test
 func TestGet(t *testing.T) {
 	pacificTZ, _ := time.LoadLocation("America/Los_Angeles")
+	japanTZ, _ := time.LoadLocation("Asia/Tokyo")
 
 	type args struct {
 		lat  float64
@@ -33,14 +29,18 @@ func TestGet(t *testing.T) {
 			lat: 45.34511, lon: -121.711769,
 			date: time.Date(2019, 6, 25, 0, 0, 0, 0, pacificTZ)},
 		},
+		{name: "mt fuji 6/25/19", args: args{
+			lat: 35.360388, lon: 138.727724,
+			date: time.Date(2019, 6, 25, 0, 0, 0, 0, japanTZ)},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := Get(tt.args.lat, tt.args.lon, tt.args.date)
-			t.Logf("%+v\n", got)
 			if err != nil {
 				t.Fatal(err)
 			}
+			t.Logf("%+v\n", got)
 			// if (err != nil) != tt.wantErr {
 			// 	t.Errorf("Get() error = %v, wantErr %v", err, tt.wantErr)
 			// 	return
