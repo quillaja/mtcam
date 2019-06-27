@@ -17,17 +17,24 @@ func TestNewScheduler(t *testing.T) {
 		}
 	}
 
+	fmt.Println("start:", nowplus(0))
+
 	sch := NewScheduler()
-	sch.Add(NewTask(time.Now().Add(30*time.Second), f(1)))
+	sch.Add(NewTask(nowplus(30), f(1)))
 
 	ctx, _ := context.WithTimeout(context.Background(), 35*time.Second)
 	sch.Start(ctx)
 
 	for i := 2; i < 6; i++ {
-		sch.Add(NewTask(time.Now().Add(time.Duration(i*5)*time.Second), f(i)))
+		sch.Add(NewTask(nowplus(i*5), f(i)))
 	}
 
 	sch.Wait()
 	// time.Sleep(10 * time.Millisecond)
-	fmt.Println("queue is empty. done.")
+	fmt.Println("35 sec since start. done.")
+}
+
+func nowplus(sec int) time.Time {
+	n := time.Now().Add(time.Duration(sec) * time.Second)
+	return time.Date(n.Year(), n.Month(), n.Day(), n.Hour(), n.Minute(), n.Second(), 0, n.Location())
 }
