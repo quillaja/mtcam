@@ -19,13 +19,12 @@ CREATE TABLE IF NOT EXISTS "camera" (
     "longitude" REAL NOT NULL, 
     "url" TEXT NOT NULL, -- will be text template 
     "file_ext" TEXT NOT NULL, 
-    "is_active" INTEGER NOT NULL, 
+    "is_active" BOOLEAN NOT NULL, 
     "interval" INTEGER NOT NULL, 
     "rules" TEXT NOT NULL, -- text template evaluating to True/False
     "comment" TEXT NOT NULL DEFAULT '', 
     "mountain_id" INTEGER NOT NULL, 
     FOREIGN KEY ("mountain_id") REFERENCES "mountain" ("rowid"));
-    /* add field for 'rules' text template? */
 
 CREATE INDEX "camera_mountain_id" ON "camera" ("mountain_id");
 
