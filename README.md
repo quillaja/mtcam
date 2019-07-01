@@ -53,6 +53,7 @@ This new version is in Go.
 - db
 - model
 - scheduler
+- googletz - get tz location id (eg "America/Los_Angeles") for lat/lon
 
 ## Dependencies
 1. github.com/mattn/go-sqlite3 - for sqlite

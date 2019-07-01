@@ -27,7 +27,7 @@ type Camera struct {
 	Rules               string // template
 }
 
-type ScrapeRecord struct {
+type Scrape struct {
 	ID       int // primary key
 	CameraID int // FK to camera
 	Created  time.Time
