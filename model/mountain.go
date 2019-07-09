@@ -20,7 +20,7 @@ type Camera struct {
 	ElevationFt         float64
 	Latitude, Longitude float64
 	Comment             string
-	Interval            int
+	Interval, Delay     int
 	FileExtension       string
 	Url                 string // template
 	IsActive            bool   // master on/off switch

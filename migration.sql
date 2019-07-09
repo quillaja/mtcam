@@ -11,11 +11,11 @@ INSERT INTO mountain (rowid, created, modified, name, state, elevation_ft, latit
 
 /* 
 convert cam.
-will have to manually add rules
+will have to manually add rules, delay,
 and update url.
 */
-INSERT INTO camera (rowid, created, modified, name, elevation_ft, latitude, longitude, url, file_ext, is_active, interval, comment, mountain_id, rules)
-    SELECT rowid, created, modified, name, elevation_ft, latitude, longitude, url, file_ext, is_active, interval, comment, mountain_id, ''
+INSERT INTO camera (rowid, created, modified, name, elevation_ft, latitude, longitude, url, file_ext, is_active, interval, delay, comment, mountain_id, rules)
+    SELECT rowid, created, modified, name, elevation_ft, latitude, longitude, url, file_ext, is_active, interval, 0, comment, mountain_id, ''
     FROM old.cam;
 
 /* 

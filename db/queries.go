@@ -44,13 +44,39 @@ func Mountains() (mts map[int]model.Mountain, err error) {
 	return
 }
 
+func Mountain(id int) (m model.Mountain, err error) {
+	const query = `
+	SELECT rowid, created, modified, name, state, elevation_ft, latitude, longitude, tz_location
+	FROM mountain
+	WHERE
+		rowid=?
+	LIMIT 1`
+
+	row := db.QueryRow(query, id)
+	err = row.Scan(
+		&m.ID,
+		&m.Created,
+		&m.Modified,
+		&m.Name,
+		&m.State,
+		&m.ElevationFt,
+		&m.Latitude,
+		&m.Longitude,
+		&m.TzLocation)
+	if err != nil {
+		return m, errors.Wrap(err, "db.Mountain(id)")
+	}
+
+	return
+}
+
 func Cameras() (cams map[int]model.Camera, err error) {
 	const query = `
 	SELECT 
 		rowid, created, modified, name,
 		elevation_ft, latitude, longitude,
 		url,
-		file_ext, is_active, interval, rules,
+		file_ext, is_active, interval, delay, rules,
 		comment,
 		mountain_id 
 	FROM 
@@ -77,6 +103,7 @@ func Cameras() (cams map[int]model.Camera, err error) {
 			&cam.FileExtension,
 			&cam.IsActive,
 			&cam.Interval,
+			&cam.Delay,
 			&cam.Rules,
 			&cam.Comment,
 			&cam.MountainID)
@@ -94,6 +121,43 @@ func GroupCamerasByMountain(cams map[int]model.Camera) (groups map[int][]model.C
 	for _, c := range cams {
 		groups[c.MountainID] = append(groups[c.MountainID], c)
 	}
+	return
+}
+
+func Camera(id int) (c model.Camera, err error) {
+	const query = `
+	SELECT
+		rowid, created, modified, name,
+		elevation_ft, latitude, longitude,
+		url, file_ext,
+		is_active, interval, delay, rules,
+		comment, mountain_id
+	FROM camera
+	WHERE
+		rowid=?
+	LIMIT 1`
+
+	row := db.QueryRow(query, id)
+	err = row.Scan(
+		&c.ID,
+		&c.Created,
+		&c.Modified,
+		&c.Name,
+		&c.ElevationFt,
+		&c.Latitude,
+		&c.Longitude,
+		&c.Url,
+		&c.FileExtension,
+		&c.IsActive,
+		&c.Interval,
+		&c.Delay,
+		&c.Rules,
+		&c.Comment,
+		&c.MountainID)
+	if err != nil {
+		return c, errors.Wrap(err, "db.Camera(id)")
+	}
+
 	return
 }
 
@@ -124,13 +188,39 @@ func Scrapes(camID int, start, end time.Time) (scrapes []model.Scrape, err error
 			&s.Detail,
 			&s.Filename,
 			&s.CameraID)
-		s.Created = time.Date(s.Created.Year(), s.Created.Month(), s.Created.Day(),
-			s.Created.Hour(), s.Created.Minute(), s.Created.Second(), s.Created.Nanosecond(),
-			time.Local)
+		// TODO: no longer needed because all tables converted to contain tz info
+		// s.Created = time.Date(s.Created.Year(), s.Created.Month(), s.Created.Day(),
+		// 	s.Created.Hour(), s.Created.Minute(), s.Created.Second(), s.Created.Nanosecond(),
+		// 	time.Local)
 		if err2 != nil {
 			// TODO: something with the error
 		}
 		scrapes = append(scrapes, s)
+	}
+
+	return
+}
+
+func MostRecentScrape(camID int) (s model.Scrape, err error) {
+	const query = `
+	SELECT rowid, created, result, detail, filename, camera_id
+	FROM scrape
+	WHERE
+		camera_id=?
+	ORDER BY
+		created DESC
+	LIMIT 1`
+
+	row := db.QueryRow(query, camID)
+	err = row.Scan(
+		&s.ID,
+		&s.Created,
+		&s.Result,
+		&s.Detail,
+		&s.Filename,
+		&s.CameraID)
+	if err != nil {
+		return s, errors.Wrap(err, "db.MostRecentScrape()")
 	}
 
 	return
@@ -168,6 +258,7 @@ func InsertScrape(s *model.Scrape) error {
 	return nil
 }
 
+// floorToSec zeros the nanosecond component of a time.
 func floorToSec(t time.Time) time.Time {
 	return time.Date(t.Year(), t.Month(), t.Day(),
 		t.Hour(), t.Minute(), t.Second(), 0, t.Location())

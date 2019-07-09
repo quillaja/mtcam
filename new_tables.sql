@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS "camera" (
     "file_ext" TEXT NOT NULL, 
     "is_active" BOOLEAN NOT NULL, 
     "interval" INTEGER NOT NULL, 
+    "delay" INTEGER NOT NULL DEFAULT 0, -- number of sec to wait before actually scraping
     "rules" TEXT NOT NULL, -- text template evaluating to True/False
     "comment" TEXT NOT NULL DEFAULT '', 
     "mountain_id" INTEGER NOT NULL, 

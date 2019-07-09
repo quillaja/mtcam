@@ -24,6 +24,21 @@ func TestMountains(t *testing.T) {
 	t.Log(mts)
 }
 
+func TestMountain(t *testing.T) {
+	err := Connect(testConnection)
+	defer Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	mt, err := Mountain(1)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log(mt)
+}
+
 func TestCameras(t *testing.T) {
 	err := Connect(testConnection)
 	defer Close()
@@ -37,6 +52,21 @@ func TestCameras(t *testing.T) {
 	}
 
 	t.Log(cams)
+}
+
+func TestCamera(t *testing.T) {
+	err := Connect(testConnection)
+	defer Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cam, err := Camera(1)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log(cam)
 }
 
 func TestGroupCamerasByMountain(t *testing.T) {
