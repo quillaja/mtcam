@@ -79,7 +79,7 @@ func extractData(data *Data, raw map[string]interface{}) {
 				phenom := phenomKeys[phen["phen"].(string)]
 				t, terr := time.Parse(tlayout, phen["time"].(string))
 				if terr != nil {
-					fmt.Println(terr)
+					// TODO: somehow log the error?
 					continue // skip if the time cannot be parsed
 				}
 				// build transit map combining date with phenom time
