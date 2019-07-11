@@ -17,6 +17,18 @@ const (
 	LowerTransit
 )
 
+// Constants for moon phases.
+// See: https://aa.usno.navy.mil/faq/docs/moon_phases.php
+const (
+	NewMoon        = "New Moon"
+	WaxingCrescent = "Waxing Crescent"
+	FirstQuarter   = "First Quarter"
+	WaxingGibbous  = "Waxing Gibbous"
+	FullMoon       = "Full Moon"
+	LastQuarter    = "Last Quarter"
+	WaningCrescent = "Waning Crescent"
+)
+
 // Data is the astronomical information.
 type Data struct {
 	// The times of various transit phemonenon for the sun.
@@ -34,6 +46,7 @@ type Data struct {
 
 // a mapping of the string keys used in JSON to the
 // constants used in this package.
+// see: https://aa.usno.navy.mil/data/docs/api.php#rstt
 var phenomKeys = map[string]Phenom{
 	"BC": StartCivilTwilight,
 	"R":  Rise,
