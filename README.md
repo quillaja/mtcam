@@ -33,7 +33,7 @@ This new version is in Go.
 #### binaries
 - scrape daemon
 - frontend server
-- cmd line tool to manipulate (CRUD) mountains and cams
+- ~~cmd line tool to manipulate (CRUD) mountains and cams~~
 
 #### front end
 - frontend changes
@@ -55,6 +55,7 @@ This new version is in Go.
 - scheduler
 - googletz - get tz location id (eg "America/Los_Angeles") for lat/lon
 - log - provides simple logging to systemd via stdout
+- config
 
 ## Dependencies
 1. github.com/mattn/go-sqlite3 - for sqlite

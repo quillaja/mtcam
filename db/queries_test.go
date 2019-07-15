@@ -1,6 +1,7 @@
 package db
 
 import (
+	"math/rand"
 	"testing"
 	"time"
 
@@ -39,6 +40,65 @@ func TestMountain(t *testing.T) {
 	t.Log(mt)
 }
 
+func TestInsertMountain(t *testing.T) {
+	err := Connect(testConnection)
+	defer Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	m := model.Mountain{
+		Name:        "TestPiss Peek",
+		State:       "ASS",
+		ElevationFt: rand.Intn(50000),
+		Latitude:    1.0000,
+		Longitude:   -10.000,
+		TzLocation:  "America/New_York"}
+
+	err = InsertMountain(&m)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if m.ID == 0 {
+		t.Fatal("id was 0")
+	}
+	t.Logf("new rowid = %d", m.ID)
+}
+
+func TestUpdateMountain(t *testing.T) {
+	err := Connect(testConnection)
+	defer Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	orig, err := Mountain(1)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	modified := orig
+	modified.Name = "MODIFIED IN TEST"
+	err = UpdateMountain(modified)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	modified, err = Mountain(modified.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(modified)
+
+	// restore data, update modified to show change
+	orig.Modified = time.Now()
+	err = UpdateMountain(orig)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestCameras(t *testing.T) {
 	err := Connect(testConnection)
 	defer Close()
@@ -67,6 +127,71 @@ func TestCamera(t *testing.T) {
 	}
 
 	t.Log(cam)
+}
+
+func TestInsertCamera(t *testing.T) {
+	err := Connect(testConnection)
+	defer Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	c := model.Camera{
+		Name:          "TEST PISS CAM",
+		ElevationFt:   rand.Intn(3000),
+		Latitude:      -99.9,
+		Longitude:     69.69,
+		Url:           "{{ http://piss.com }}",
+		FileExtension: ".piss",
+		IsActive:      true,
+		Interval:      5,
+		Delay:         20,
+		Rules:         "{{ True }}",
+		Comment:       "sucks",
+		MountainID:    10}
+
+	err = InsertCamera(&c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if c.ID == 0 {
+		t.Fatal("id was 0")
+	}
+	t.Logf("new rowid = %d", c.ID)
+}
+
+func TestUpdateCamera(t *testing.T) {
+	err := Connect(testConnection)
+	defer Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	orig, err := Camera(1)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	modified := orig
+	modified.Name = "MODIFIED IN TEST"
+	err = UpdateCamera(modified)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	modified, err = Camera(modified.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(modified)
+
+	// restore data. update modified to show change
+	orig.Modified = time.Now()
+	err = UpdateCamera(orig)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestGroupCamerasByMountain(t *testing.T) {
