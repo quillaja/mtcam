@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 	"os"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 // Read will open the JSON file at filename and attempt to unmarshal it
@@ -15,24 +17,28 @@ import (
 func Read(filename string, data interface{}) error {
 	bytes, err := ioutil.ReadFile(filename)
 	if err != nil {
+		return errors.Wrap(err, "attempting to read file")
 	}
 
 	err = json.Unmarshal(bytes, data)
 	if err != nil {
+		return errors.Wrap(err, "attempting to unmarshal data")
 	}
 
 	return nil
 }
 
 // Write will attempt to marshal data into JSON and write it to filename.
+// 'data' should be a pointer, per standard json.Marshal() rules.
 func Write(filename string, data interface{}) error {
 	bytes, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {
+		return errors.Wrap(err, "attempting to marshal data")
 	}
 
 	err = ioutil.WriteFile(filename, bytes, 0666)
 	if err != nil {
-
+		return errors.Wrap(err, "attempting to write file")
 	}
 
 	return nil
