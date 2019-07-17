@@ -196,6 +196,54 @@ func Cameras() (cams map[int]model.Camera, err error) {
 	return
 }
 
+func CamerasOnMountain(mID int) (cams map[int]model.Camera, err error) {
+	const query = `
+	SELECT 
+		rowid, created, modified, name,
+		elevation_ft, latitude, longitude,
+		url,
+		file_ext, is_active, interval, delay, rules,
+		comment,
+		mountain_id 
+	FROM 
+		camera
+	WHERE
+		mountain_id=?`
+
+	rows, err := db.Query(query, mID)
+	if err != nil {
+		return nil, errors.Wrap(err, "db.Camera()")
+	}
+	defer rows.Close()
+
+	cams = make(map[int]model.Camera)
+	var cam model.Camera
+	for rows.Next() {
+		err2 := rows.Scan(
+			&cam.ID,
+			&cam.Created,
+			&cam.Modified,
+			&cam.Name,
+			&cam.ElevationFt,
+			&cam.Latitude,
+			&cam.Longitude,
+			&cam.Url,
+			&cam.FileExtension,
+			&cam.IsActive,
+			&cam.Interval,
+			&cam.Delay,
+			&cam.Rules,
+			&cam.Comment,
+			&cam.MountainID)
+		if err2 != nil {
+			// TODO: something with the error
+		}
+		cams[cam.ID] = cam
+	}
+
+	return
+}
+
 func GroupCamerasByMountain(cams map[int]model.Camera) (groups map[int][]model.Camera) {
 	groups = make(map[int][]model.Camera)
 	for _, c := range cams {
