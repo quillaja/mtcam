@@ -7,9 +7,11 @@ import (
 	"time"
 )
 
-// Task encapsulates a function that will be run at Nominal+Offset.
+// Task encapsulates a function that will be run at a specific time.
 type Task interface {
+	// When returns the time at which the task is to be performed.
 	When() time.Time
+	// Run is called when the task is performed.
 	Run(time.Time)
 }
 
@@ -18,6 +20,7 @@ type task struct {
 	run  func(time.Time)
 }
 
+// NewTask creates a task that calls run at when.
 func NewTask(when time.Time, run func(time.Time)) Task {
 	return &task{
 		when: when,

@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// Scheduler keeps a queue of tasks and processes them at their scheduled time.
 type Scheduler struct {
 	queue            *safeTaskQueue
 	timer            *time.Timer
@@ -14,12 +15,14 @@ type Scheduler struct {
 	mutex            sync.Mutex
 }
 
+// NewScheduler creates a new Scheduler for use.
 func NewScheduler() *Scheduler {
 	return &Scheduler{
 		queue: newSafeQueue(),
 		timer: time.NewTimer(-1)}
 }
 
+// Start begins the scheduler process using the given context.
 func (s *Scheduler) Start(ctx context.Context) {
 	s.done = make(chan struct{})
 
@@ -46,10 +49,14 @@ func (s *Scheduler) Start(ctx context.Context) {
 	}()
 }
 
+// Wait blocks the current goroutine until the context passed to Start()
+// is canceled.
 func (s *Scheduler) Wait() {
 	<-s.done
 }
 
+// WaitUntilQueueEmpty will block the current goroutine until there are no more
+// tasks in the queue or the context passed to Start() is canceled.
 func (s *Scheduler) WaitUntilQueueEmpty() {
 	s.stopOnEmptyQueue = true
 	s.Wait()
@@ -68,6 +75,7 @@ func (s *Scheduler) resetTimer(t time.Time) {
 	s.timer.Reset(time.Until(t))
 }
 
+// Add enqueues a task.
 func (s *Scheduler) Add(t Task) {
 	s.queue.Append(t)
 	s.resetTimer(s.queue.Next())
