@@ -24,7 +24,20 @@ import (
 // user agent header
 const useragent = "User-Agent"
 
+// Scrape returns a function to be used in a Task. The returned function
+// will attempt to scrape the cam with camID using the time passed to it.
+//
+// This process will take perhaps 10-30 seconds depending on the network and
+// camera configuration. It involves reading from the database multiple times,
+// downloading an image, resizing and comparing this image, saving the image
+// to disk, and ultimately adding a scrape record to the database.
+//
+// In the event of errors, generally the task is abandoned but a detailed
+// error is logged and, if it makes sense, a "failure" scrape is recorded
+// in the database with a note about the failure. This note also appears in the
+// error log.
 func Scrape(mtID, camID int, cfg *ScrapedConfig) func(time.Time) {
+	// TODO: this is kinda a shitshow (is it?) and could use refactoring
 
 	return func(now time.Time) {
 
@@ -39,8 +52,9 @@ func Scrape(mtID, camID int, cfg *ScrapedConfig) func(time.Time) {
 		defer func() {
 			err := db.InsertScrape(&scrape)
 			if err != nil {
-				log.Print(log.Error, err) // TODO: better error message
-				// can't do anything now
+				err = errors.Wrapf(err, "(mtID=%d camID=%d) failed to insert scrape into db", mtID, camID)
+				log.Print(log.Critical, err)
+				// can't do anything now... total failure
 			}
 		}()
 
@@ -124,8 +138,8 @@ func Scrape(mtID, camID int, cfg *ScrapedConfig) func(time.Time) {
 			prevImgPath := filepath.Join(camImgDir, prevScrape.Filename)
 			prevImg, err := imaging.Open(prevImgPath)
 			if err != nil {
-				err = errors.Wrapf(err, "(mtID=%d camID=%d) couldn't open previous img %s", mtID, camID, prevImgPath)
-				log.Print(log.Error, "open prev img", err)
+				err = errors.Wrapf(err, "(mtID=%d camID=%d) couldn't open previous image", mtID, camID)
+				log.Print(log.Error, err)
 				return nil
 			}
 
@@ -135,12 +149,15 @@ func Scrape(mtID, camID int, cfg *ScrapedConfig) func(time.Time) {
 		// a function to "encapsulate" processing of the downloaded image
 		// so it can be tested against previously scraped image
 		getTestImage := func() image.Image {
-			// NOTE: !!!!! JPEG quality altering scraped vs saved images, which
-			//   prevents equality testing from working. Need to use same quality
-			//   when saving as the original.
-			//   OR
-			//   save to disk, open, then delete if the same. this will perform the
-			//   same processing steps on each image.
+			// NOTE: !important! the JPEG quality setting alters the scraped images
+			// beyond resizing, which prevents simple equality testing from working.
+			//
+			// Fix: encode to a memory buffer and decode back to image.Image. This will
+			// perform the same processing on the freshly downloaded image as was
+			// previously preformed on the prior images.
+			//
+			// Question: given the same input, will jpeg compression produce
+			// identical output??
 			buf := new(bytes.Buffer)
 			err = imaging.Encode(buf, img, imaging.JPEG, imaging.JPEGQuality(cfg.ImageQuality))
 			testimg, err := imaging.Decode(buf)
@@ -164,10 +181,12 @@ func Scrape(mtID, camID int, cfg *ScrapedConfig) func(time.Time) {
 		// save image to disk
 		// filename is sec since unix epoc in UTC
 		scrape.Filename = strings.ToLower(fmt.Sprintf("%d.%s", now.UTC().Unix(), cam.FileExtension))
-		err = imaging.Save(img, filepath.Join(camImgDir, scrape.Filename), imaging.JPEGQuality(cfg.ImageQuality))
+		imgPath := filepath.Join(camImgDir, scrape.Filename)
+		err = imaging.Save(img, imgPath, imaging.JPEGQuality(cfg.ImageQuality))
 		if fail("couldn't save image " + scrape.Filename + " to disk") {
 			return
 		}
+		log.Printf(log.Info, "wrote %s", imgPath)
 
 		// if we make it this far, everything was ok
 		scrape.Result = model.Success
