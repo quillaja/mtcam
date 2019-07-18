@@ -64,6 +64,12 @@ This new version is in Go.
 1. ~~http://github.com/sirupsen/logrus - might have to make my own formatter for systemd~~
 1. github.com/shibukawa/configdir - don't really need if i assume linux (can just use os.GetEnv())
 
+## Directories
+- binaries in /opt/mtcam
+- config files in /etc/mtcam
+- database in /var/opt/mtcam
+- images in /var/opt/mtcam/img
+
 # API
 Generally not changed from python version
 
