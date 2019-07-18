@@ -428,17 +428,17 @@ func Scrapes(camID int, start, end time.Time) (scrapes []model.Scrape, err error
 	return
 }
 
-func MostRecentScrape(camID int) (s model.Scrape, err error) {
+func MostRecentScrape(camID int, result string) (s model.Scrape, err error) {
 	const query = `
 	SELECT rowid, created, result, detail, filename, camera_id
 	FROM scrape
 	WHERE
-		camera_id=?
+		camera_id=? AND result=?
 	ORDER BY
 		created DESC
 	LIMIT 1`
 
-	row := db.QueryRow(query, camID)
+	row := db.QueryRow(query, camID, result)
 	err = row.Scan(
 		&s.ID,
 		&s.Created,
