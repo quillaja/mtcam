@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/lucasb-eyer/go-colorful"
+
 	"github.com/pkg/errors"
 
 	"github.com/quillaja/mtcam/model"
@@ -60,20 +62,22 @@ func Scrape(mtID, camID int, cfg *ScrapedConfig) func(time.Time) {
 
 		// func to simplify life
 		var err error // used throughout Scrape()
-		fail := func(detail string) bool {
+		setDetailAndLog := func(detail string) {
+			scrape.Detail = detail
+			msg := fmt.Sprintf("(mtID=%d camID=%d) %s", mtID, camID, detail)
 			if err != nil {
-				scrape.Detail = detail
-				err = errors.Wrapf(err, "(mtID=%d camID=%d) %s", mtID, camID, detail)
-				log.Print(log.Error, err)
-				return true
+				err = errors.Wrapf(err, msg)
+			} else {
+				err = errors.New(msg)
 			}
-			return false
+			log.Print(log.Error, err)
 		}
 
 		// read mt and cam
 		mt, err := db.Mountain(mtID)
 		cam, err := db.Camera(camID)
-		if fail("could't read db") {
+		if err != nil {
+			setDetailAndLog("could't read db")
 			return
 		}
 
@@ -87,7 +91,8 @@ func Scrape(mtID, camID int, cfg *ScrapedConfig) func(time.Time) {
 			Mountain: mt,
 			Now:      now.In(tz)} // send the url template the local time
 		url, err := cam.ExecuteUrl(data)
-		if fail("couldn't execute url template") {
+		if err != nil {
+			setDetailAndLog("couldn't execute url template")
 			return
 		}
 
@@ -100,14 +105,16 @@ func Scrape(mtID, camID int, cfg *ScrapedConfig) func(time.Time) {
 		if resp.StatusCode != http.StatusOK {
 			err = errors.Wrapf(err, "status code %d %s", resp.StatusCode, resp.Status)
 		}
-		if fail("trouble downloading image") {
+		if err != nil {
+			setDetailAndLog("trouble downloading image")
 			return
 		}
 		defer resp.Body.Close()
 
 		// extract the image
 		img, err := imaging.Decode(resp.Body)
-		if fail("couldn't decode downloaded image") {
+		if err != nil {
+			setDetailAndLog("couldn't decode downloaded image")
 			return
 		}
 		// resize the image
@@ -126,56 +133,57 @@ func Scrape(mtID, camID int, cfg *ScrapedConfig) func(time.Time) {
 			return
 		}
 
-		// a function to "encapsulate" getting the previously scraped image
-		getPreviousImage := func() image.Image {
-			// fetch previously (successfully) scraped image
-			prevScrape, err := db.MostRecentScrape(camID, model.Success)
-			if err != nil {
-				err = errors.Wrapf(err, "(mtID=%d camID=%d) couldn't get previous scrape from db", mtID, camID)
-				log.Print(log.Error, err)
-				return nil
-			}
-			prevImgPath := filepath.Join(camImgDir, prevScrape.Filename)
-			prevImg, err := imaging.Open(prevImgPath)
-			if err != nil {
-				err = errors.Wrapf(err, "(mtID=%d camID=%d) couldn't open previous image", mtID, camID)
-				log.Print(log.Error, err)
-				return nil
-			}
+		if cfg.ImageEqualityTesting {
+			// a function to "encapsulate" getting the previously scraped image
+			getPreviousImage := func() image.Image {
+				// fetch previously (successfully) scraped image
+				prevScrape, err := db.MostRecentScrape(camID, model.Success)
+				if err != nil {
+					err = errors.Wrapf(err, "(mtID=%d camID=%d) couldn't get previous scrape from db", mtID, camID)
+					log.Print(log.Error, err)
+					return nil
+				}
+				prevImgPath := filepath.Join(camImgDir, prevScrape.Filename)
+				prevImg, err := imaging.Open(prevImgPath)
+				if err != nil {
+					err = errors.Wrapf(err, "(mtID=%d camID=%d) couldn't open previous image", mtID, camID)
+					log.Print(log.Error, err)
+					return nil
+				}
 
-			return prevImg
-		}
-
-		// a function to "encapsulate" processing of the downloaded image
-		// so it can be tested against previously scraped image
-		getTestImage := func() image.Image {
-			// NOTE: !important! the JPEG quality setting alters the scraped images
-			// beyond resizing, which prevents simple equality testing from working.
-			//
-			// Fix: encode to a memory buffer and decode back to image.Image. This will
-			// perform the same processing on the freshly downloaded image as was
-			// previously preformed on the prior images.
-			//
-			// Question: given the same input, will jpeg compression produce
-			// identical output??
-			buf := new(bytes.Buffer)
-			err = imaging.Encode(buf, img, imaging.JPEG, imaging.JPEGQuality(cfg.ImageQuality))
-			testimg, err := imaging.Decode(buf)
-			if err != nil {
-				err = errors.Wrapf(err, "(mtID=%d camID=%d) mem encode/decode of downloaded img", mtID, camID)
-				log.Print(log.Error, err)
-				return nil
+				return prevImg
 			}
 
-			return testimg
-		}
+			// a function to "encapsulate" processing of the downloaded image
+			// so it can be tested against previously scraped image
+			getTestImage := func() image.Image {
+				// NOTE: !important! the JPEG quality setting alters the scraped images
+				// beyond resizing, which prevents simple equality testing from working.
+				//
+				// Fix: encode to a memory buffer and decode back to image.Image. This will
+				// perform the same processing on the freshly downloaded image as was
+				// previously preformed on the prior images.
+				//
+				// Question: given the same input, will jpeg compression produce
+				// identical output?? Minor testing shows same-in-same-out.
+				buf := new(bytes.Buffer)
+				err = imaging.Encode(buf, img, imaging.JPEG, imaging.JPEGQuality(cfg.ImageQuality))
+				testimg, err := imaging.Decode(buf)
+				if err != nil {
+					err = errors.Wrapf(err, "(mtID=%d camID=%d) mem encode/decode of downloaded img", mtID, camID)
+					log.Print(log.Error, err)
+					return nil
+				}
 
-		prev, cur := getPreviousImage(), getTestImage()
-		// actually test for equality
-		if equal(prev, cur) {
-			err = errors.New("") // just to set err non-nil
-			fail("image identical to previously scraped image")
-			return
+				return testimg
+			}
+
+			prev, cur := getPreviousImage(), getTestImage()
+			// actually test for equality
+			if equal(prev, cur, cfg.ImageEqualityTolerance) {
+				setDetailAndLog("image identical to previously scraped image")
+				return
+			}
 		}
 
 		// save image to disk
@@ -183,7 +191,8 @@ func Scrape(mtID, camID int, cfg *ScrapedConfig) func(time.Time) {
 		scrape.Filename = strings.ToLower(fmt.Sprintf("%d.%s", now.UTC().Unix(), cam.FileExtension))
 		imgPath := filepath.Join(camImgDir, scrape.Filename)
 		err = imaging.Save(img, imgPath, imaging.JPEGQuality(cfg.ImageQuality))
-		if fail("couldn't save image " + scrape.Filename + " to disk") {
+		if err != nil {
+			setDetailAndLog("couldn't save image " + scrape.Filename + " to disk")
 			return
 		}
 		log.Printf(log.Info, "wrote %s", imgPath)
@@ -278,19 +287,25 @@ func startOfNextDay(t time.Time) time.Time {
 	return time.Date(next.Year(), next.Month(), next.Day(), 0, 0, 0, 0, next.Location())
 }
 
-// equal determines if 2 images are the same
-func equal(a, b image.Image) bool {
+// equal determines if 2 images are (about) the same
+func equal(a, b image.Image, tolerance float64) bool {
 	if a == nil || b == nil {
+		log.Print(log.Debug, "a or b nil")
 		return false
 	}
 	if a.Bounds() != b.Bounds() {
+		log.Print(log.Debug, "a and b have different sizes")
 		return false
 	}
 
 	for y := 0; y < a.Bounds().Dy(); y++ {
 		for x := 0; x < a.Bounds().Dx(); x++ {
-			if a.At(x, y) != b.At(x, y) {
-				log.Print(log.Debug, a.At(x, y), b.At(x, y))
+			ca, cb := a.At(x, y), b.At(x, y)
+			la, _ := colorful.MakeColor(ca) // images don't have alpha, so no
+			lb, _ := colorful.MakeColor(cb) // worry about 0 in alpha channel
+			dE := la.DistanceLab(lb)
+			if dE > tolerance {
+				log.Printf(log.Debug, "(%d, %d) %v != %v dE=%f", x, y, ca, cb, dE)
 				return false
 			}
 		}

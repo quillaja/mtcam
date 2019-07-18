@@ -8,8 +8,10 @@ import (
 type ScrapedConfig struct {
 	config.SuiteConfig `json:"-"`
 
-	ImageWidth   int
-	ImageQuality int
+	ImageWidth             int
+	ImageQuality           int
+	ImageEqualityTesting   bool
+	ImageEqualityTolerance float64
 
 	UserAgent         string
 	RequestTimeoutSec int

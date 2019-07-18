@@ -4,3 +4,6 @@
 
 # for trial programs
 test/*
+
+# garbage test images
+cmd/scraped/img
