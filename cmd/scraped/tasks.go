@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/quillaja/mtcam/scheduler"
+
 	"github.com/lucasb-eyer/go-colorful"
 
 	"github.com/pkg/errors"
@@ -118,7 +120,7 @@ func Scrape(mtID, camID int, cfg *ScrapedConfig) func(time.Time) {
 			return
 		}
 		// resize the image
-		img = imaging.Resize(img, cfg.ImageWidth, 0, imaging.Lanczos)
+		img = imaging.Resize(img, cfg.Image.Width, 0, imaging.Lanczos)
 
 		// build (and create if necessary) the directory where the scraped
 		// images will live
@@ -133,7 +135,7 @@ func Scrape(mtID, camID int, cfg *ScrapedConfig) func(time.Time) {
 			return
 		}
 
-		if cfg.ImageEqualityTesting {
+		if cfg.Image.EqualityTesting {
 			// a function to "encapsulate" getting the previously scraped image
 			getPreviousImage := func() image.Image {
 				// fetch previously (successfully) scraped image
@@ -167,7 +169,7 @@ func Scrape(mtID, camID int, cfg *ScrapedConfig) func(time.Time) {
 				// Question: given the same input, will jpeg compression produce
 				// identical output?? Minor testing shows same-in-same-out.
 				buf := new(bytes.Buffer)
-				err = imaging.Encode(buf, img, imaging.JPEG, imaging.JPEGQuality(cfg.ImageQuality))
+				err = imaging.Encode(buf, img, imaging.JPEG, imaging.JPEGQuality(cfg.Image.Quality))
 				testimg, err := imaging.Decode(buf)
 				if err != nil {
 					err = errors.Wrapf(err, "(mtID=%d camID=%d) mem encode/decode of downloaded img", mtID, camID)
@@ -180,7 +182,7 @@ func Scrape(mtID, camID int, cfg *ScrapedConfig) func(time.Time) {
 
 			prev, cur := getPreviousImage(), getTestImage()
 			// actually test for equality
-			if equal(prev, cur, cfg.ImageEqualityTolerance) {
+			if equal(prev, cur, cfg.Image.EqualityTolerance) {
 				setDetailAndLog("image identical to previously scraped image")
 				return
 			}
@@ -190,7 +192,7 @@ func Scrape(mtID, camID int, cfg *ScrapedConfig) func(time.Time) {
 		// filename is sec since unix epoc in UTC
 		scrape.Filename = strings.ToLower(fmt.Sprintf("%d.%s", now.UTC().Unix(), cam.FileExtension))
 		imgPath := filepath.Join(camImgDir, scrape.Filename)
-		err = imaging.Save(img, imgPath, imaging.JPEGQuality(cfg.ImageQuality))
+		err = imaging.Save(img, imgPath, imaging.JPEGQuality(cfg.Image.Quality))
 		if err != nil {
 			setDetailAndLog("couldn't save image " + scrape.Filename + " to disk")
 			return
@@ -204,48 +206,69 @@ func Scrape(mtID, camID int, cfg *ScrapedConfig) func(time.Time) {
 	}
 }
 
-func ScheduleScrapes(mID int, app *Application) func(time.Time) {
+func ScheduleScrapes(mtID int, attempt int, app *Application) func(time.Time) {
+
+	retry := func(at time.Time) {
+		if attempt < app.Config.Scheduling.MaxAttempts {
+			log.Printf(log.Warning, "attempt %d to schedule scrapes for mtID=%d will retry at %s",
+				attempt+2, mtID, at.Format(time.RFC3339))
+			app.Scheduler.Add(scheduler.NewTask(
+				at,
+				ScheduleScrapes(mtID, attempt+1, app)))
+		} else {
+			log.Printf(log.Warning, "exceeded max attempts (%d) to schedule scrapes for mtID=%d).", attempt, mtID)
+			app.Scheduler.Add(scheduler.NewTask(
+				startOfNextDay(at),
+				ScheduleScrapes(mtID, 0, app)))
+			// fmt.Println(app.Scheduler)
+		}
+	}
 
 	return func(now time.Time) {
 
-		// read mt and cams
-		mt, err := db.Mountain(mID)
-		cams, err := db.CamerasOnMountain(mID)
-		if err != nil {
+		fail := func(err error) {
 			log.Print(log.Error, err)
+			at := now.Add(time.Duration(app.Config.Scheduling.WaitTime) * time.Minute)
+			retry(at)
+		}
+
+		// read mt and cams
+		mt, err := db.Mountain(mtID)
+		cams, err := db.CamerasOnMountain(mtID)
+		if err != nil {
+			fail(err)
 			return // can't continue if can't read DB
 		}
 
 		// get tz info for mt
 		tz, err := time.LoadLocation(mt.TzLocation)
 		if err != nil {
-			log.Print(log.Error, err)
+			fail(err)
 			return // can't continue if can't get tz
 		}
 		now = now.In(tz) // convert time to correct tz
 		log.Printf(log.Debug, "processing mountain %s at %s", mt.Name, now.Format(time.RFC3339))
 
 		// get astro data for mt
-		const maxTries = 5
+		const maxTries = 1
 		var tries int
 		var sun astro.Data
 		for ; tries < maxTries; tries++ {
 			sun, err = astro.Get(mt.Latitude, mt.Longitude, now)
 			if err == nil {
-				log.Printf(log.Info, "got astro data after %d tries", tries+1)
 				break
 			}
-			// log.Print(log.Error, err)
 			time.Sleep(1 * time.Second)
 		}
 		if tries >= maxTries {
-			log.Print(log.Error, "too many tries")
+			err = errors.Wrapf(err, "too many tries to get astro data for %s(id=%d)", mt.Name, mt.ID)
+			fail(err)
 			return
 		}
+		log.Printf(log.Info, "took %d/%d tries to get astro data for %s(id=%d)", tries+1, maxTries, mt.Name, mt.ID)
 
 		// for each cam
-		// byMt := db.GroupCamerasByMountain(cams)
-		for _, cam := range cams { //byMt[mt.ID] {
+		for _, cam := range cams {
 			log.Printf(log.Debug, " processing camera %s", cam.Name)
 			// skip inactive cams
 			if !cam.IsActive {
@@ -257,16 +280,31 @@ func ScheduleScrapes(mID int, app *Application) func(time.Time) {
 			interval := time.Duration(cam.Interval) * time.Minute
 			stop := startOfNextDay(now)
 			for t := roundup(now, interval); t.Before(stop); t = t.Add(interval) {
-				// determine if the cam should be scraped
-				if sun.SunTransit[astro.StartCivilTwilight].Before(t) && t.Before(sun.SunTransit[astro.EndCivilTwilight]) {
+				// determine if the cam should be scraped at time t
+				data := RulesData{
+					Astro:    sun,
+					Mountain: mt,
+					Camera:   cam,
+					Now:      t}
+				do, err := cam.ExecuteRules(data)
+				if do {
 					// schedule a scrape
 					log.Printf(log.Info, "   scrape scheduled for %s at %s", cam.Name, t.Format(time.RFC3339))
+					app.Scheduler.Add(scheduler.NewTask(
+						t,
+						Scrape(mt.ID, cam.ID, app.Config)))
+				} else if err != nil {
+					fail(err)
+					return
 				}
 			}
 		}
 
 		// schedule ScheduleScrapes() for next day
 		next := startOfNextDay(now)
+		app.Scheduler.Add(scheduler.NewTask(
+			next,
+			ScheduleScrapes(mtID, 0, app)))
 		log.Printf(log.Info, "ScheduleScrapes(%s) scheduled at %s", mt.Name, next.Format(time.RFC3339))
 	}
 }
