@@ -134,6 +134,8 @@ func Scrape(mtID, camID int, cfg *ScrapedConfig) func(time.Time) {
 			log.Print(log.Critical, err)
 			return
 		}
+		// NOTE: no way to determine if MkDirAll() made a dir or not =(
+		// log.Printf(log.Info, "created directory %s", camImgDir)
 
 		if cfg.Image.EqualityTesting {
 			// a function to "encapsulate" getting the previously scraped image
@@ -197,7 +199,7 @@ func Scrape(mtID, camID int, cfg *ScrapedConfig) func(time.Time) {
 			setDetailAndLog("couldn't save image " + scrape.Filename + " to disk")
 			return
 		}
-		log.Printf(log.Info, "wrote %s", imgPath)
+		log.Printf(log.Info, "(mtID=%d camID=%d) wrote %s", mtID, camID, imgPath)
 
 		// if we make it this far, everything was ok
 		scrape.Result = model.Success
@@ -250,7 +252,7 @@ func ScheduleScrapes(mtID int, attempt int, app *Application) func(time.Time) {
 		log.Printf(log.Debug, "processing mountain %s at %s", mt.Name, now.Format(time.RFC3339))
 
 		// get astro data for mt
-		const maxTries = 1
+		const maxTries = 5
 		var tries int
 		var sun astro.Data
 		for ; tries < maxTries; tries++ {
@@ -265,14 +267,14 @@ func ScheduleScrapes(mtID int, attempt int, app *Application) func(time.Time) {
 			fail(err)
 			return
 		}
-		log.Printf(log.Info, "took %d/%d tries to get astro data for %s(id=%d)", tries+1, maxTries, mt.Name, mt.ID)
+		log.Printf(log.Info, "took %d/%d tries to get astro data for %s(id=%d)", tries, maxTries, mt.Name, mt.ID)
 
 		// for each cam
 		for _, cam := range cams {
 			log.Printf(log.Debug, " processing camera %s", cam.Name)
 			// skip inactive cams
 			if !cam.IsActive {
-				log.Printf(log.Info, " skipping inactive cam %s", cam.Name)
+				log.Printf(log.Debug, " skipping inactive cam %s", cam.Name)
 				continue
 			}
 			// round current time to nearest cam interval
@@ -289,7 +291,7 @@ func ScheduleScrapes(mtID int, attempt int, app *Application) func(time.Time) {
 				do, err := cam.ExecuteRules(data)
 				if do {
 					// schedule a scrape
-					log.Printf(log.Info, "   scrape scheduled for %s at %s", cam.Name, t.Format(time.RFC3339))
+					log.Printf(log.Debug, "   scrape scheduled for %s at %s", cam.Name, t.Format(time.RFC3339))
 					app.Scheduler.Add(scheduler.NewTask(
 						t,
 						Scrape(mt.ID, cam.ID, app.Config)))
@@ -305,7 +307,7 @@ func ScheduleScrapes(mtID int, attempt int, app *Application) func(time.Time) {
 		app.Scheduler.Add(scheduler.NewTask(
 			next,
 			ScheduleScrapes(mtID, 0, app)))
-		log.Printf(log.Info, "ScheduleScrapes(%s) scheduled at %s", mt.Name, next.Format(time.RFC3339))
+		log.Printf(log.Debug, "NEXT ScheduleScrapes(%s) scheduled at %s", mt.Name, next.Format(time.RFC3339))
 	}
 }
 

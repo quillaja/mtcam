@@ -16,6 +16,10 @@ This new version is in Go.
 - url to scrape is generated via go text template.
     - allows more 'dynamic' urls, such as ones containing a date/time
     - many urls will still just be static
+- image processing:
+    - resize image (save disk space for large images)
+    - check if scraped image is identical (or nearly so) to previously scraped (resized)
+        image, and discard if so (to avoid duplicates/"frozen" cams)
 - get sunrise/set data from us navy api
     - https://aa.usno.navy.mil/data/docs/api.php
     - also has moon phase data
@@ -23,12 +27,6 @@ This new version is in Go.
 #### config
 - program config in a file (ie config.json)
     - config system 'watches' file for updates and reloads settings live
-
-#### post-scrape
-- image processing:
-    - resize image (save disk space for large images)
-    - (?) check if scraped image is identical to previously scraped (resized)
-        image, and discard if so (to avoid duplicates/"frozen" cams)
 
 #### binaries
 - scrape daemon
@@ -48,7 +46,6 @@ This new version is in Go.
 
 ### internal packages
 - astro - gets sun/moon data from navy api
-    - `func Get(lat, lon double, date time.Time, apikey string) (data SOMESTRUCT)`
     - various constants for phemonenon
 - db
 - model

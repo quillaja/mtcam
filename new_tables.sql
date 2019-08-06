@@ -39,3 +39,9 @@ CREATE TABLE IF NOT EXISTS "scrape" (
     FOREIGN KEY ("camera_id") REFERENCES "camera" ("rowid"));
     
 CREATE INDEX "scrape_camera_id" ON "scrape" ("camera_id");
+
+/*
+TODO:
+add "directory name" to mountain and camera so that 'name' (display name) can
+be changed without affecting the directory in which the images are stored.
+*/
