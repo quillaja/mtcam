@@ -2,9 +2,7 @@ package model
 
 import (
 	"bytes"
-	"fmt"
 	"strconv"
-	"strings"
 	"text/template"
 	"time"
 
@@ -19,12 +17,7 @@ type Mountain struct {
 	ElevationFt         int
 	Latitude, Longitude float64
 	TzLocation          string
-}
-
-func (m Mountain) AsPathname() string {
-	path := fmt.Sprintf("%s_%s", m.Name, m.State)
-	path = strings.ToLower(path)
-	return strings.ReplaceAll(path, " ", "_")
+	Pathname            string
 }
 
 type Camera struct {
@@ -40,11 +33,7 @@ type Camera struct {
 	Url                 string // template
 	IsActive            bool   // master on/off switch
 	Rules               string // template
-}
-
-func (c Camera) AsPathname() string {
-	path := strings.ToLower(c.Name)
-	return strings.ReplaceAll(path, " ", "_")
+	Pathname            string
 }
 
 func (c Camera) ExecuteUrl(data interface{}) (string, error) {

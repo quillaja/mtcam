@@ -7,7 +7,8 @@ CREATE TABLE IF NOT EXISTS "mountain" (
     "elevation_ft" INTEGER NOT NULL, 
     "latitude" REAL NOT NULL, 
     "longitude" REAL NOT NULL, 
-    "tz_location" TEXT NOT NULL); -- will only contain tz name eg "Los_Angeles/America"
+    "tz_location" TEXT NOT NULL, -- will only contain tz name eg "Los_Angeles/America"
+    "pathname" TEXT NOT NULL DEFAULT ''); -- must be unique, but not adding that constraint since it's kinda a pain
 
 CREATE TABLE IF NOT EXISTS "camera" (
     -- rowid auto PK
@@ -23,7 +24,8 @@ CREATE TABLE IF NOT EXISTS "camera" (
     "interval" INTEGER NOT NULL, 
     "delay" INTEGER NOT NULL DEFAULT 0, -- number of sec to wait before actually scraping
     "rules" TEXT NOT NULL, -- text template evaluating to True/False
-    "comment" TEXT NOT NULL DEFAULT '', 
+    "comment" TEXT NOT NULL DEFAULT '',
+    "pathname" TEXT NOT NULL DEFAULT '', -- must be unique
     "mountain_id" INTEGER NOT NULL, 
     FOREIGN KEY ("mountain_id") REFERENCES "mountain" ("rowid"));
 
@@ -39,9 +41,3 @@ CREATE TABLE IF NOT EXISTS "scrape" (
     FOREIGN KEY ("camera_id") REFERENCES "camera" ("rowid"));
     
 CREATE INDEX "scrape_camera_id" ON "scrape" ("camera_id");
-
-/*
-TODO:
-add "directory name" to mountain and camera so that 'name' (display name) can
-be changed without affecting the directory in which the images are stored.
-*/

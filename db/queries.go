@@ -13,7 +13,7 @@ func Mountains() (mts map[int]model.Mountain, err error) {
 	SELECT 
 		rowid, created, modified, 
 		name, state, 
-		elevation_ft, latitude, longitude, tz_location 
+		elevation_ft, latitude, longitude, tz_location, pathname 
 	FROM 
 		mountain`
 
@@ -35,7 +35,8 @@ func Mountains() (mts map[int]model.Mountain, err error) {
 			&mt.ElevationFt,
 			&mt.Latitude,
 			&mt.Longitude,
-			&mt.TzLocation)
+			&mt.TzLocation,
+			&mt.Pathname)
 		if err2 != nil {
 			// TODO: something with the error
 		}
@@ -47,7 +48,7 @@ func Mountains() (mts map[int]model.Mountain, err error) {
 
 func Mountain(id int) (m model.Mountain, err error) {
 	const query = `
-	SELECT rowid, created, modified, name, state, elevation_ft, latitude, longitude, tz_location
+	SELECT rowid, created, modified, name, state, elevation_ft, latitude, longitude, tz_location, pathname
 	FROM mountain
 	WHERE
 		rowid=?
@@ -63,7 +64,8 @@ func Mountain(id int) (m model.Mountain, err error) {
 		&m.ElevationFt,
 		&m.Latitude,
 		&m.Longitude,
-		&m.TzLocation)
+		&m.TzLocation,
+		&m.Pathname)
 	if err != nil {
 		return m, errors.Wrap(err, "db.Mountain(id)")
 	}
@@ -75,9 +77,9 @@ func InsertMountain(m *model.Mountain) error {
 	const query = `
 	INSERT INTO mountain
 		(created, modified, name, state,
-		elevation_ft, latitude, longitude, tz_location)
+		elevation_ft, latitude, longitude, tz_location, pathname)
 	VALUES
-		(?, ?, ?, ?, ?, ?, ?, ?)`
+		(?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
 	// ensure the user doesn't try to assign rowid
 	if m.ID != 0 {
@@ -99,7 +101,8 @@ func InsertMountain(m *model.Mountain) error {
 		m.ElevationFt,
 		m.Latitude,
 		m.Longitude,
-		m.TzLocation)
+		m.TzLocation,
+		m.Pathname)
 	if err != nil {
 		return errors.Wrapf(err, "while inserting mountain (name: %s)", m.Name)
 	}
@@ -123,7 +126,8 @@ func UpdateMountain(m model.Mountain) error {
 		elevation_ft = ?,
 		latitude = ?,
 		longitude = ?,
-		tz_location = ?
+		tz_location = ?,
+		pathname = ?
 	WHERE
 		rowid=?`
 
@@ -135,6 +139,7 @@ func UpdateMountain(m model.Mountain) error {
 		m.Latitude,
 		m.Longitude,
 		m.TzLocation,
+		m.Pathname,
 		m.ID)
 	if err != nil {
 		return errors.Wrapf(err, "updating mountain(id=%d)", m.ID)
@@ -157,7 +162,7 @@ func Cameras() (cams map[int]model.Camera, err error) {
 		elevation_ft, latitude, longitude,
 		url,
 		file_ext, is_active, interval, delay, rules,
-		comment,
+		comment, pathname,
 		mountain_id 
 	FROM 
 		camera`
@@ -186,6 +191,7 @@ func Cameras() (cams map[int]model.Camera, err error) {
 			&cam.Delay,
 			&cam.Rules,
 			&cam.Comment,
+			&cam.Pathname,
 			&cam.MountainID)
 		if err2 != nil {
 			// TODO: something with the error
@@ -203,7 +209,7 @@ func CamerasOnMountain(mID int) (cams map[int]model.Camera, err error) {
 		elevation_ft, latitude, longitude,
 		url,
 		file_ext, is_active, interval, delay, rules,
-		comment,
+		comment, pathname,
 		mountain_id 
 	FROM 
 		camera
@@ -234,6 +240,7 @@ func CamerasOnMountain(mID int) (cams map[int]model.Camera, err error) {
 			&cam.Delay,
 			&cam.Rules,
 			&cam.Comment,
+			&cam.Pathname,
 			&cam.MountainID)
 		if err2 != nil {
 			// TODO: something with the error
@@ -259,7 +266,7 @@ func Camera(id int) (c model.Camera, err error) {
 		elevation_ft, latitude, longitude,
 		url, file_ext,
 		is_active, interval, delay, rules,
-		comment, mountain_id
+		comment, pathname, mountain_id
 	FROM camera
 	WHERE
 		rowid=?
@@ -281,6 +288,7 @@ func Camera(id int) (c model.Camera, err error) {
 		&c.Delay,
 		&c.Rules,
 		&c.Comment,
+		&c.Pathname,
 		&c.MountainID)
 	if err != nil {
 		return c, errors.Wrap(err, "db.Camera(id)")
@@ -295,9 +303,9 @@ func InsertCamera(c *model.Camera) error {
 		(created, modified, name, elevation_ft, latitude, longitude,
 		url, file_ext,
 		is_active, interval, delay, rules,
-		comment, mountain_id)
+		comment, pathname, mountain_id)
 	VALUES
-		(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+		(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
 	// ensure the user doesn't try to assign rowid
 	if c.ID != 0 {
@@ -325,6 +333,7 @@ func InsertCamera(c *model.Camera) error {
 		c.Delay,
 		c.Rules,
 		c.Comment,
+		c.Pathname,
 		c.MountainID)
 	if err != nil {
 		return errors.Wrapf(err, "while inserting cam (name: %s)", c.Name)
@@ -355,6 +364,7 @@ func UpdateCamera(c model.Camera) error {
 		delay = ?,
 		rules = ?,
 		comment = ?,
+		pathname = ?,
 		mountain_id = ?
 	WHERE
 		rowid=?`
@@ -372,6 +382,7 @@ func UpdateCamera(c model.Camera) error {
 		c.Delay,
 		c.Rules,
 		c.Comment,
+		c.Pathname,
 		c.MountainID,
 		c.ID)
 	if err != nil {

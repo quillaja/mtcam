@@ -124,7 +124,7 @@ func Scrape(mtID, camID int, cfg *ScrapedConfig) func(time.Time) {
 
 		// build (and create if necessary) the directory where the scraped
 		// images will live
-		camImgDir := filepath.Join(cfg.ImageRoot, mt.AsPathname(), cam.AsPathname())
+		camImgDir := filepath.Join(cfg.ImageRoot, mt.Pathname, cam.Pathname)
 		// check if directory exists and create if not
 		err = os.MkdirAll(camImgDir, 0755)
 		if err != nil {
@@ -210,28 +210,42 @@ func Scrape(mtID, camID int, cfg *ScrapedConfig) func(time.Time) {
 
 func ScheduleScrapes(mtID int, attempt int, app *Application) func(time.Time) {
 
-	retry := func(at time.Time) {
-		if attempt < app.Config.Scheduling.MaxAttempts {
-			log.Printf(log.Warning, "attempt %d to schedule scrapes for mtID=%d will retry at %s",
-				attempt+2, mtID, at.Format(time.RFC3339))
-			app.Scheduler.Add(scheduler.NewTask(
-				at,
-				ScheduleScrapes(mtID, attempt+1, app)))
-		} else {
-			log.Printf(log.Warning, "exceeded max attempts (%d) to schedule scrapes for mtID=%d).", attempt, mtID)
-			app.Scheduler.Add(scheduler.NewTask(
-				startOfNextDay(at),
-				ScheduleScrapes(mtID, 0, app)))
-			// fmt.Println(app.Scheduler)
-		}
-	}
+	// retry := func(at time.Time) {
+	// 	if attempt < app.Config.Scheduling.MaxAttempts {
+	// 		log.Printf(log.Warning, "attempt %d to schedule scrapes for mtID=%d will retry at %s",
+	// 			attempt+2, mtID, at.Format(time.RFC3339))
+	// 		app.Scheduler.Add(scheduler.NewTask(
+	// 			at,
+	// 			ScheduleScrapes(mtID, attempt+1, app)))
+	// 	} else {
+	// 		log.Printf(log.Warning, "exceeded max attempts (%d) to schedule scrapes for mtID=%d).", attempt, mtID)
+	// 		app.Scheduler.Add(scheduler.NewTask(
+	// 			startOfNextDay(at),
+	// 			ScheduleScrapes(mtID, 0, app)))
+	// 	}
+	// }
 
 	return func(now time.Time) {
 
 		fail := func(err error) {
 			log.Print(log.Error, err)
 			at := now.Add(time.Duration(app.Config.Scheduling.WaitTime) * time.Minute)
-			retry(at)
+			// retry(at)
+
+			// schedule another attempt unless max attempts have been done.
+			// if max attempts exceeded, schedule the next day's task
+			if attempt < app.Config.Scheduling.MaxAttempts {
+				log.Printf(log.Warning, "attempt %d to schedule scrapes for mtID=%d will retry at %s",
+					attempt+2, mtID, at.Format(time.RFC3339))
+				app.Scheduler.Add(scheduler.NewTask(
+					at,
+					ScheduleScrapes(mtID, attempt+1, app)))
+			} else {
+				log.Printf(log.Warning, "exceeded max attempts (%d) to schedule scrapes for mtID=%d).", attempt, mtID)
+				app.Scheduler.Add(scheduler.NewTask(
+					startOfNextDay(at),
+					ScheduleScrapes(mtID, 0, app)))
+			}
 		}
 
 		// read mt and cams
@@ -267,7 +281,7 @@ func ScheduleScrapes(mtID int, attempt int, app *Application) func(time.Time) {
 			fail(err)
 			return
 		}
-		log.Printf(log.Info, "took %d/%d tries to get astro data for %s(id=%d)", tries, maxTries, mt.Name, mt.ID)
+		log.Printf(log.Info, "took %d/%d tries to get astro data for %s(id=%d)", tries+1, maxTries, mt.Name, mt.ID)
 
 		// for each cam
 		for _, cam := range cams {
