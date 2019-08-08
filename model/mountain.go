@@ -6,6 +6,8 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/quillaja/mtcam/astro"
+
 	"github.com/pkg/errors"
 )
 
@@ -38,7 +40,16 @@ type Camera struct {
 
 func (c Camera) ExecuteUrl(data interface{}) (string, error) {
 
-	t, err := template.New("url").Parse(c.Url)
+	funcs := template.FuncMap{
+		"add":   func(i, j int) int { return i + j },
+		"sub":   func(i, j int) int { return i - j },
+		"mul":   func(i, j int) int { return i * j },
+		"div":   func(i, j int) int { return i / j },
+		"mod":   func(i, j int) int { return i % j },
+		"floor": func(i, j int) int { return i - (i % j) },
+	}
+
+	t, err := template.New("url").Funcs(funcs).Parse(c.Url)
 	if err != nil {
 		return "", errors.Wrapf(err, "parsing camera url template (id=%d, name=%s)", c.ID, c.Name)
 	}
@@ -54,7 +65,31 @@ func (c Camera) ExecuteUrl(data interface{}) (string, error) {
 
 func (c Camera) ExecuteRules(data interface{}) (bool, error) {
 
-	t, err := template.New("rules").Parse(c.Rules)
+	funcs := template.FuncMap{
+		"add":   func(i, j int) int { return i + j },
+		"sub":   func(i, j int) int { return i - j },
+		"mul":   func(i, j int) int { return i * j },
+		"div":   func(i, j int) int { return i / j },
+		"mod":   func(i, j int) int { return i % j },
+		"floor": func(i, j int) int { return i - (i % j) },
+
+		"betweenRiseSet": func(now time.Time, sun astro.Data, hourOffset int) bool {
+			offset := time.Duration(hourOffset)
+			start := sun.SunTransit[astro.StartCivilTwilight].Add(-offset * time.Hour)
+			end := sun.SunTransit[astro.EndCivilTwilight].Add(offset * time.Hour)
+			return now.After(start) && now.Before(end)
+		},
+
+		"brightMoon": func(moon astro.Data) bool {
+			switch moon.MoonPhase {
+			case astro.FullMoon, astro.WaningGibbous, astro.WaxingGibbous:
+				return true
+			}
+			return false
+		},
+	}
+
+	t, err := template.New("rules").Funcs(funcs).Parse(c.Rules)
 	if err != nil {
 		return false, errors.Wrapf(err, "parsing camera rules template (id=%d, name=%s)", c.ID, c.Name)
 	}
