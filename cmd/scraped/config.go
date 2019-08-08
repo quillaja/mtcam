@@ -8,6 +8,9 @@ import (
 type ScrapedConfig struct {
 	config.SuiteConfig `json:"-"`
 
+	SuiteConfigPath string
+	ConfigWatchSec  int
+
 	UserAgent         string
 	RequestTimeoutSec int
 
