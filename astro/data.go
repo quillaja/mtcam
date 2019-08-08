@@ -25,6 +25,7 @@ const (
 	FirstQuarter   = "First Quarter"
 	WaxingGibbous  = "Waxing Gibbous"
 	FullMoon       = "Full Moon"
+	WaningGibbous  = "Waning Gibbous"
 	LastQuarter    = "Last Quarter"
 	WaningCrescent = "Waning Crescent"
 )
