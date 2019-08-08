@@ -28,6 +28,9 @@ import (
 // user agent header
 const useragent = "User-Agent"
 
+// content type header
+const contenttype = "Content-Type"
+
 // Scrape returns a function to be used in a Task. The returned function
 // will attempt to scrape the cam with camID using the time passed to it.
 //
@@ -104,14 +107,21 @@ func Scrape(mtID, camID int, cfg *ScrapedConfig) func(time.Time) {
 		request, err := http.NewRequest(http.MethodGet, url, nil)
 		request.Header.Set(useragent, cfg.UserAgent)
 		resp, err := client.Do(request)
-		if resp.StatusCode != http.StatusOK {
-			err = errors.Wrapf(err, "status code %d %s", resp.StatusCode, resp.Status)
-		}
 		if err != nil {
 			setDetailAndLog("trouble downloading image")
 			return
 		}
 		defer resp.Body.Close()
+		if resp.StatusCode != http.StatusOK {
+			err = errors.Errorf("status code %s", resp.Status)
+			setDetailAndLog("trouble downloading image")
+			return
+		}
+		if !strings.Contains(resp.Header.Get(contenttype), "image") {
+			err = errors.Errorf("non-image content type: %s", resp.Header[contenttype])
+			setDetailAndLog("trouble downloading image")
+			return
+		}
 
 		// extract the image
 		img, err := imaging.Decode(resp.Body)
@@ -344,11 +354,11 @@ func startOfNextDay(t time.Time) time.Time {
 // equal determines if 2 images are (about) the same
 func equal(a, b image.Image, tolerance float64) bool {
 	if a == nil || b == nil {
-		log.Print(log.Debug, "a or b nil")
+		// log.Print(log.Debug, "a or b nil")
 		return false
 	}
 	if a.Bounds() != b.Bounds() {
-		log.Print(log.Debug, "a and b have different sizes")
+		// log.Print(log.Debug, "a and b have different sizes")
 		return false
 	}
 
@@ -359,7 +369,7 @@ func equal(a, b image.Image, tolerance float64) bool {
 			lb, _ := colorful.MakeColor(cb) // worry about 0 in alpha channel
 			dE := la.DistanceLab(lb)
 			if dE > tolerance {
-				log.Printf(log.Debug, "(%d, %d) %v != %v dE=%f", x, y, ca, cb, dE)
+				// log.Printf(log.Debug, "(%d, %d) %v != %v dE=%f", x, y, ca, cb, dE)
 				return false
 			}
 		}
