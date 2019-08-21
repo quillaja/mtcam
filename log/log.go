@@ -59,6 +59,7 @@ func Printf(lvl Level, format string, v ...interface{}) {
 	}
 
 	msg := fmt.Sprintf(fmt.Sprintf(sysdfmt, lvl, format), v...)
+	msg = strings.TrimSpace(msg)
 	msg = strings.ReplaceAll(msg, "\n", "|") // remove newlines
 	fmt.Println(msg)
 }
