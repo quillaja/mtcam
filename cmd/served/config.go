@@ -21,4 +21,8 @@ type ServerdConfig struct {
 
 	// static root directory
 	StaticRoot string
+
+	// api and image routes
+	ApiRoute   string
+	ImageRoute string
 }

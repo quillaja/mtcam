@@ -3,14 +3,13 @@ package main
 import (
 	"context"
 	"flag"
+	stdlog "log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
 	"github.com/quillaja/mtcam/db"
-
-	stdlog "log"
 
 	"github.com/quillaja/mtcam/config"
 	"github.com/quillaja/mtcam/log"
@@ -84,6 +83,8 @@ func NewApplication(cfg *ServerdConfig) *Application {
 
 	dohttps := cfg.TLSCertificateFile != "" && cfg.TLSKeyFile != ""
 
+	// configure HTTPS server as main and HTTP as redirect
+	// or HTTP as main, depending on if TLS files are provided
 	if dohttps {
 		app.HttpsServer = &http.Server{
 			Addr:         cfg.HttpsAddress,
@@ -115,6 +116,7 @@ func NewApplication(cfg *ServerdConfig) *Application {
 	return &app
 }
 
+// run starts each server
 func (app *Application) run() {
 	if app.HttpsServer != nil {
 		go func() {
@@ -137,6 +139,7 @@ func (app *Application) run() {
 	}()
 }
 
+// shutdown attempts to shutdown each server, waiting up to 30 sec.
 func (app *Application) shutdown() {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -178,6 +181,8 @@ func redirectHTTPS(cfg *ServerdConfig) *http.Server {
 	return &srv
 }
 
+// used to "forward" the server's internal logging to the application's
+// systemd log system
 type serverlogwriter struct{}
 
 func (w serverlogwriter) Write(p []byte) (n int, err error) {

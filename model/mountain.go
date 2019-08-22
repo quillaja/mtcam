@@ -12,30 +12,36 @@ import (
 )
 
 type Mountain struct {
-	ID                  int // primary key
-	Created, Modified   time.Time
-	Name                string
-	State               string
-	ElevationFt         int
-	Latitude, Longitude float64
-	TzLocation          string
-	Pathname            string
+	ID          int            `json:"id"` // primary key
+	Created     time.Time      `json:"-"`
+	Modified    time.Time      `json:"-"`
+	Name        string         `json:"name"`
+	State       string         `json:"state"`
+	ElevationFt int            `json:"elevation_ft"`
+	Latitude    float64        `json:"latitude"`
+	Longitude   float64        `json:"longitude"`
+	TzLocation  string         `json:"tz"`
+	Pathname    string         `json:"pathname"`
+	Cameras     map[int]Camera `json:"cams"`
 }
 
 type Camera struct {
-	ID                  int // primary key
-	MountainID          int // FK to mountain
-	Created, Modified   time.Time
-	Name                string
-	ElevationFt         int
-	Latitude, Longitude float64
-	Comment             string
-	Interval, Delay     int
-	FileExtension       string
-	Url                 string // template
-	IsActive            bool   // master on/off switch
-	Rules               string // template
-	Pathname            string
+	ID            int       `json:"id"` // primary key
+	MountainID    int       `json:"-"`  // FK to mountain
+	Created       time.Time `json:"-"`
+	Modified      time.Time `json:"-"`
+	Name          string    `json:"name"`
+	ElevationFt   int       `json:"elevation_ft"`
+	Latitude      float64   `json:"latitude"`
+	Longitude     float64   `json:"longitude"`
+	Comment       string    `json:"comment"`
+	Interval      int       `json:"interval"`
+	Delay         int       `json:"-"`
+	FileExtension string    `json:"-"`
+	Url           string    `json:"-"`         // template
+	IsActive      bool      `json:"is_active"` // master on/off switch
+	Rules         string    `json:"-"`         // template
+	Pathname      string    `json:"pathname"`
 }
 
 func (c Camera) ExecuteUrl(data interface{}) (string, error) {
@@ -109,12 +115,12 @@ func (c Camera) ExecuteRules(data interface{}) (bool, error) {
 }
 
 type Scrape struct {
-	ID       int // primary key
-	CameraID int // FK to camera
-	Created  time.Time
-	Result   string
-	Detail   string
-	Filename string
+	ID       int       `json:"-"` // primary key
+	CameraID int       `json:"-"` // FK to camera
+	Created  time.Time `json:"time"`
+	Result   string    `json:"result"`
+	Detail   string    `json:"detail"`
+	Filename string    `json:"filename"`
 }
 
 // Constants for Scrape.Result.
