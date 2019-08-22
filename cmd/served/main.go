@@ -14,7 +14,7 @@ import (
 	"github.com/quillaja/mtcam/log"
 )
 
-//go:generate go run generate_client.go "../../static"
+//go:generate go run generate_client.go "../../client"
 
 func main() {
 
