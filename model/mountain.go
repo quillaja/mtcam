@@ -120,7 +120,7 @@ type Scrape struct {
 	Created  time.Time `json:"time"`
 	Result   string    `json:"result"`
 	Detail   string    `json:"detail"`
-	Filename string    `json:"filename"`
+	Filename string    `json:"file"`
 }
 
 // Constants for Scrape.Result.
