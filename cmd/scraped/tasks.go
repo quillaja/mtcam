@@ -10,19 +10,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/quillaja/mtcam/scheduler"
-
-	"github.com/lucasb-eyer/go-colorful"
-
-	"github.com/pkg/errors"
-
-	"github.com/quillaja/mtcam/model"
-
 	"github.com/disintegration/imaging"
-
+	"github.com/lucasb-eyer/go-colorful"
+	"github.com/pkg/errors"
 	"github.com/quillaja/mtcam/astro"
 	"github.com/quillaja/mtcam/db"
 	"github.com/quillaja/mtcam/log"
+	"github.com/quillaja/mtcam/model"
+	"github.com/quillaja/mtcam/scheduler"
 )
 
 // user agent header

@@ -9,11 +9,12 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/quillaja/mtcam/db"
-
 	"github.com/quillaja/mtcam/config"
+	"github.com/quillaja/mtcam/db"
 	"github.com/quillaja/mtcam/log"
 )
+
+//go:generate go run generate_client.go "../../static"
 
 func main() {
 

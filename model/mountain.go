@@ -6,9 +6,8 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/quillaja/mtcam/astro"
-
 	"github.com/pkg/errors"
+	"github.com/quillaja/mtcam/astro"
 )
 
 type Mountain struct {

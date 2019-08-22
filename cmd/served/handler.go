@@ -10,11 +10,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/quillaja/mtcam/model"
-
 	"github.com/quillaja/mtcam/db"
-
 	"github.com/quillaja/mtcam/log"
+	"github.com/quillaja/mtcam/model"
 )
 
 // content type header
@@ -43,7 +41,7 @@ func CreateHandler(cfg *ServerdConfig) http.Handler {
 		cfg.ImageRoute, http.FileServer(http.Dir(cfg.ImageRoot))))
 
 	// add handler for root (static files)
-	mux.Handle("/", http.FileServer(http.Dir(cfg.StaticRoot)))
+	mux.Handle("/", http.FileServer(client)) //http.Dir(cfg.StaticRoot)))
 
 	return mux
 }
