@@ -49,6 +49,7 @@ body {
     padding: 0.3rem 1rem;
     margin: 0rem 0.2rem;
     border: 1px solid lightgray;
+    background-color: #F0F0F0;
     color: gray;
 }
 
@@ -93,7 +94,7 @@ body {
 
 #scrapes .time {
     display: block;
-    width: 9rem;
+    width: 11rem;
 }
 
 #scrapes .result {
