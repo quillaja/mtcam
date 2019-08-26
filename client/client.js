@@ -320,7 +320,7 @@ function createScrapeHeader() {
     var c1 = document.createElement("th");
     var c2 = document.createElement("th");
     var c3 = document.createElement("th");
-    c1.innerText = "Time (UTC)";
+    c1.innerText = "Time";
     c2.innerText = "Result";
     c3.innerText = "Detail";
     tr.appendChild(c1);

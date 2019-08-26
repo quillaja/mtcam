@@ -158,14 +158,18 @@ func ApiScrapes(apiRoute, imgRoute string) http.HandlerFunc {
 			return
 		}
 
-		// process scrapes by replaces their filename with the complete
+		// 1) process scrapes by replaces their filename with the complete
 		// path to the image file
+		// 2) change 'created' time to be in mountain's timezone
+		tz, _ := time.LoadLocation(mt.TzLocation)
 		for i := range scrapes {
 			if scrapes[i].Result == model.Success {
 				scrapes[i].Filename = path.Join(imgRoute, mt.Pathname, cam.Pathname, scrapes[i].Filename)
 			} else {
 				scrapes[i].Filename = ""
 			}
+
+			scrapes[i].Created = scrapes[i].Created.In(tz)
 		}
 		// log.Printf(log.Debug, "%s requested %d scrapes for %s(%d) %s(%d) in period (%s) to (%s)",
 		// 	r.RemoteAddr,
@@ -217,6 +221,13 @@ func processQuery(query url.Values, tzname string) (start, end time.Time) {
 
 	case !start.IsZero() && end.IsZero():
 		end = start.Add(posDay)
+	default:
+		// user entered both start and end.
+		// ensure end is the last moment of the day, so when start's
+		// date is equal to end's date, the user gets the scrapes
+		// from that day. AKA, make 'end' inclusive [start, end] instead
+		// of [start, end)
+		end = end.Add(23*time.Hour + 59*time.Minute + 59*time.Second)
 	}
 
 	return
