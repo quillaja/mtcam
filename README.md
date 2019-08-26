@@ -39,6 +39,7 @@ This new version is in Go.
     - show mt/cam info before fetching photos
         - add 'statistics' after fetch
         - changes when mt/cam selection changes
+    - show 'log' time in mountain's local time
 
 #### other
 - remove
@@ -47,21 +48,26 @@ This new version is in Go.
 ### internal packages
 - astro - gets sun/moon data from navy api
     - various constants for phemonenon
-- db
-- model
-- scheduler
+- db - database connection and queries
+- model - data structs
+- scheduler - executes tasks at pre-scheduled times
 - googletz - get tz location id (eg "America/Los_Angeles") for lat/lon
 - log - provides simple logging to systemd via stdout
-- config
+- config - suite wide config structure and helper functions for config file watching
 
 ## Dependencies
 1. github.com/mattn/go-sqlite3 - for sqlite
 1. github.com/disintegration/imaging - for image resizing
-1. github.com/gorilla/mux - easier handling of api routes
+1. ~~github.com/gorilla/mux - easier handling of api routes~~
 1. ~~http://github.com/sirupsen/logrus - might have to make my own formatter for systemd~~
-1. github.com/shibukawa/configdir - don't really need if i assume linux (can just use os.GetEnv())
+1. ~~github.com/shibukawa/configdir - don't really need if i assume linux (can just use os.GetEnv())~~
 
 ## Directories
+- all files (bin, cfg, db) in /opt/mtcam
+- images in /opt/mtcam/img
+
+or
+
 - binaries in /opt/mtcam
 - config files in /etc/mtcam
 - database in /var/opt/mtcam
@@ -73,13 +79,12 @@ Generally not changed from python version
     https://<whatever address>/ -> /
         homepage and static root
 
-    /api
+    /img/
+        root of image folders
+
+    /api/
         root of api. returns nothing.
-    /api/data
+    /api/data/
         GET: returns json dict<id,obj> of mountains containing dict<id,obj> of cams
     /api/mountains/<mt_id>/cams/<cam_id>/scrapes[?start=<datetime>&end=<datetime>]
         GET: returns json list of scrape records
-    /api/mountains/<mt_id>/weather[?start=<datetime>&end=<datetime>&format=<'json'|'bokeh'>]
-        GET: returns weather data for the time period, 
-        either as json list or a bunch of html for a bokeh graph.
-

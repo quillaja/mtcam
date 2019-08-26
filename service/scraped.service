@@ -1,0 +1,10 @@
+[Unit]
+Description=Mountain Cams scraper
+After=network.target
+PartOf=mtcam.target
+
+[Service]
+ExecStart=/opt/mtcam/scraped -cfg scraped_config.json
+
+[Install]
+WantedBy=multi-user.target
