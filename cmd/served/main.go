@@ -22,7 +22,7 @@ import (
 func main() {
 
 	// process command line flags
-	configPath := flag.String("cfg", "", "path to served config (required)")
+	configPath := flag.String("cfg", "", "path to served config (required)\n'default' to produce a default config file")
 	flag.Usage = func() {
 		fmt.Print("served is the web front-end server for mountain cameras.\n\n")
 		fmt.Printf("Version:  %s\nBuilt on: %s\n\nOptions:\n", version.Version, version.BuildTime)
@@ -30,8 +30,13 @@ func main() {
 	}
 	flag.Parse()
 
-	if *configPath == "" {
+	switch *configPath {
+	case "":
 		flag.Usage()
+		return
+	case "default":
+		config.Write("served_config_default.json", ServerdConfig{})
+		config.Write("suite_config_default.json", config.SuiteConfig{})
 		return
 	}
 

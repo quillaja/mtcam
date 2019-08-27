@@ -19,7 +19,7 @@ import (
 func main() {
 
 	// process command line flags
-	configPath := flag.String("cfg", "", "path to scraped config (required)")
+	configPath := flag.String("cfg", "", "path to scraped config (required)\n'default' to produce a default config file")
 	flag.Usage = func() {
 		fmt.Print("scraped is the web scraping daemon for mountain cameras.\n\n")
 		fmt.Printf("Version:  %s\nBuilt on: %s\n\nOptions:\n", version.Version, version.BuildTime)
@@ -27,8 +27,13 @@ func main() {
 	}
 	flag.Parse()
 
-	if *configPath == "" {
+	switch *configPath {
+	case "":
 		flag.Usage()
+		return
+	case "default":
+		config.Write("scraped_config_default.json", ScrapedConfig{})
+		config.Write("suite_config_default.json", config.SuiteConfig{})
 		return
 	}
 

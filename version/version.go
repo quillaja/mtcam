@@ -8,4 +8,4 @@ package version
 const Version = "testing"
 
 // time this package was built (format: time.UnixDate)
-const BuildTime = "Tue Aug 27 05:10:22 PDT 2019"
+const BuildTime = "now"
