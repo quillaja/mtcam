@@ -213,35 +213,21 @@ func Scrape(mtID, camID int, cfg *ScrapedConfig) func(time.Time) {
 	}
 }
 
+// ScheduleScrapes returns a task function which enqueues all scrape tasks for a single day
+// for mountain with mtID.
 func ScheduleScrapes(mtID int, attempt int, app *Application) func(time.Time) {
-
-	// retry := func(at time.Time) {
-	// 	if attempt < app.Config.Scheduling.MaxAttempts {
-	// 		log.Printf(log.Warning, "attempt %d to schedule scrapes for mtID=%d will retry at %s",
-	// 			attempt+2, mtID, at.Format(time.RFC3339))
-	// 		app.Scheduler.Add(scheduler.NewTask(
-	// 			at,
-	// 			ScheduleScrapes(mtID, attempt+1, app)))
-	// 	} else {
-	// 		log.Printf(log.Warning, "exceeded max attempts (%d) to schedule scrapes for mtID=%d).", attempt, mtID)
-	// 		app.Scheduler.Add(scheduler.NewTask(
-	// 			startOfNextDay(at),
-	// 			ScheduleScrapes(mtID, 0, app)))
-	// 	}
-	// }
 
 	return func(now time.Time) {
 
 		fail := func(err error) {
 			log.Print(log.Error, err)
 			at := now.Add(time.Duration(app.Config.Scheduling.WaitTime) * time.Minute)
-			// retry(at)
 
 			// schedule another attempt unless max attempts have been done.
 			// if max attempts exceeded, schedule the next day's task
 			if attempt < app.Config.Scheduling.MaxAttempts {
 				log.Printf(log.Warning, "attempt %d to schedule scrapes for mtID=%d will retry at %s",
-					attempt+2, mtID, at.Format(time.RFC3339))
+					attempt+2, mtID, at.Format(time.UnixDate))
 				app.Scheduler.Add(scheduler.NewTask(
 					at,
 					ScheduleScrapes(mtID, attempt+1, app)))
@@ -268,7 +254,7 @@ func ScheduleScrapes(mtID int, attempt int, app *Application) func(time.Time) {
 			return // can't continue if can't get tz
 		}
 		now = now.In(tz) // convert time to correct tz
-		log.Printf(log.Debug, "processing mountain %s at %s", mt.Name, now.Format(time.RFC3339))
+		log.Printf(log.Debug, "processing mountain %s(id=%d)", mt.Name, mt.ID)
 
 		// get astro data for mt
 		const maxTries = 5
@@ -286,21 +272,22 @@ func ScheduleScrapes(mtID int, attempt int, app *Application) func(time.Time) {
 			fail(err)
 			return
 		}
-		log.Printf(log.Info, "took %d/%d tries to get astro data for %s(id=%d)", tries+1, maxTries, mt.Name, mt.ID)
+		log.Printf(log.Debug, "took %d/%d tries to get astro data for %s(id=%d)", tries+1, maxTries, mt.Name, mt.ID)
 
 		// for each cam
 		for _, cam := range cams {
-			log.Printf(log.Debug, " processing camera %s", cam.Name)
 			// skip inactive cams
 			if !cam.IsActive {
-				log.Printf(log.Debug, " skipping inactive cam %s", cam.Name)
+				log.Printf(log.Debug, "skipping inactive cam %s(id=%d)", cam.Name, cam.ID)
 				continue
 			}
 			// round current time to nearest cam interval
-			// for each time+interval until end-of-day
 			interval := time.Duration(cam.Interval) * time.Minute
+			start := roundup(now, interval)
 			stop := startOfNextDay(now)
-			for t := roundup(now, interval); t.Before(stop); t = t.Add(interval) {
+			count := 0
+			// for each time+interval until end-of-day...
+			for t := start; t.Before(stop); t = t.Add(interval) {
 				// determine if the cam should be scraped at time t
 				data := RulesData{
 					Astro:    sun,
@@ -310,15 +297,19 @@ func ScheduleScrapes(mtID int, attempt int, app *Application) func(time.Time) {
 				do, err := cam.ExecuteRules(data)
 				if do {
 					// schedule a scrape
-					log.Printf(log.Debug, "   scrape scheduled for %s at %s", cam.Name, t.Format(time.RFC3339))
 					app.Scheduler.Add(scheduler.NewTask(
 						t,
 						Scrape(mt.ID, cam.ID, app.Config)))
+					count++
 				} else if err != nil {
 					fail(err)
 					return
 				}
 			}
+			log.Printf(log.Debug, "%d scrapes scheduled for %s(id=%d) from %s to %s every %s",
+				count, cam.Name, cam.ID,
+				start.Format(time.UnixDate), stop.Format(time.UnixDate),
+				interval)
 		}
 
 		// schedule ScheduleScrapes() for next day
@@ -326,7 +317,7 @@ func ScheduleScrapes(mtID int, attempt int, app *Application) func(time.Time) {
 		app.Scheduler.Add(scheduler.NewTask(
 			next,
 			ScheduleScrapes(mtID, 0, app)))
-		log.Printf(log.Debug, "NEXT ScheduleScrapes(%s) scheduled at %s", mt.Name, next.Format(time.RFC3339))
+		log.Printf(log.Debug, "next ScheduleScrapes(%s) at %s", mt.Name, next.Format(time.UnixDate))
 	}
 }
 
