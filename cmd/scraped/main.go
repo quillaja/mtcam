@@ -4,23 +4,27 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
 
-	"github.com/quillaja/mtcam/log"
-
 	"github.com/quillaja/mtcam/config"
-
 	"github.com/quillaja/mtcam/db"
+	"github.com/quillaja/mtcam/log"
 	"github.com/quillaja/mtcam/scheduler"
+	"github.com/quillaja/mtcam/version"
 )
 
 func main() {
-	// config.Write("scrape_config_default.json", ScrapedConfig{})
 
 	// process command line flags
 	configPath := flag.String("cfg", "", "path to scraped config (required)")
+	flag.Usage = func() {
+		fmt.Print("scraped is the web scraping daemon for mountain cameras.\n\n")
+		fmt.Printf("Version:  %s\nBuilt on: %s\n\nOptions:\n", version.Version, version.BuildTime)
+		flag.PrintDefaults()
+	}
 	flag.Parse()
 
 	if *configPath == "" {

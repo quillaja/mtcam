@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	stdlog "log"
 	"net/http"
 	"os"
@@ -13,6 +14,7 @@ import (
 	"github.com/quillaja/mtcam/config"
 	"github.com/quillaja/mtcam/db"
 	"github.com/quillaja/mtcam/log"
+	"github.com/quillaja/mtcam/version"
 )
 
 //go:generate go run generate_client.go "../../client"
@@ -21,6 +23,11 @@ func main() {
 
 	// process command line flags
 	configPath := flag.String("cfg", "", "path to served config (required)")
+	flag.Usage = func() {
+		fmt.Print("served is the web front-end server for mountain cameras.\n\n")
+		fmt.Printf("Version:  %s\nBuilt on: %s\n\nOptions:\n", version.Version, version.BuildTime)
+		flag.PrintDefaults()
+	}
 	flag.Parse()
 
 	if *configPath == "" {
