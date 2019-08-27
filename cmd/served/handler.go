@@ -33,12 +33,12 @@ func CreateHandler(cfg *ServerdConfig) http.Handler {
 	mux := http.NewServeMux()
 
 	// add handlers for API endpoints
-	mux.HandleFunc(cfg.ApiRoute+"data/", ApiData())
-	mux.HandleFunc(cfg.ApiRoute+"mountains/", ApiScrapes(cfg.ApiRoute, cfg.ImageRoute))
+	mux.HandleFunc(cfg.Routes.Api+"data/", ApiData())
+	mux.HandleFunc(cfg.Routes.Api+"mountains/", ApiScrapes(cfg.Routes.Api, cfg.Routes.Image))
 
 	// add handlers for image folder
-	mux.Handle(cfg.ImageRoute, http.StripPrefix(
-		cfg.ImageRoute, http.FileServer(http.Dir(cfg.ImageRoot))))
+	mux.Handle(cfg.Routes.Image, http.StripPrefix(
+		cfg.Routes.Image, http.FileServer(http.Dir(cfg.ImageRoot))))
 
 	// add handler for root (static files)
 	mux.Handle("/", http.FileServer(client)) //http.Dir(cfg.StaticRoot)))
@@ -193,12 +193,14 @@ func ApiScrapes(apiRoute, imgRoute string) http.HandlerFunc {
 	}
 }
 
+// converts the matched url params to mt and cam ids.
 func processIDs(matches []string) (mtID, camID int) {
 	mtID, _ = strconv.Atoi(matches[1])
 	camID, _ = strconv.Atoi(matches[2])
 	return
 }
 
+// converts the start/end query params to useable time.Times.
 func processQuery(query url.Values, tzname string) (start, end time.Time) {
 
 	tz, _ := time.LoadLocation(tzname)

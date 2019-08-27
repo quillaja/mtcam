@@ -14,15 +14,24 @@ type ServerdConfig struct {
 	TLSCertificateFile string
 	TLSKeyFile         string
 
-	// various timeouts for server, in seconds
-	WriteTimeout int
-	ReadTimeout  int
-	IdleTimeout  int
+	Timeout TimeoutConfig
 
 	// static root directory
-	StaticRoot string
+	// StaticRoot string
 
 	// api and image routes
-	ApiRoute   string
-	ImageRoute string
+	Routes RoutesConfig
+}
+
+// TimeoutConfig holds timeouts for server, in seconds.
+type TimeoutConfig struct {
+	Write int
+	Read  int
+	Idle  int
+}
+
+// RoutesConfig holds url routes.
+type RoutesConfig struct {
+	Api   string
+	Image string
 }

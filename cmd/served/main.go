@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/quillaja/mtcam/config"
@@ -52,24 +53,26 @@ func main() {
 	app := NewApplication(&cfg)
 
 	sig := make(chan os.Signal)
-	signal.Notify(sig, os.Kill, os.Interrupt)
+	signal.Notify(sig, os.Kill, os.Interrupt, syscall.SIGTERM)
 
 	log.Print(log.Info, "starting server daemon")
 	app.run()
 
-	<-sig // wait for SIGKILL or SIGINT
+	<-sig // wait for SIGKILL, SIGINT, or SIGTERM
 
 	log.Print(log.Info, "shutting down server daemon")
 	app.shutdown()
 	log.Print(log.Info, "server daemon finished")
 }
 
+// Application is the served application logic.
 type Application struct {
 	Config      *ServerdConfig
 	HttpsServer *http.Server
 	HttpServer  *http.Server
 }
 
+// NewApplication configures and returns an instance of Application.
 func NewApplication(cfg *ServerdConfig) *Application {
 	app := Application{
 		Config: cfg}
@@ -89,9 +92,9 @@ func NewApplication(cfg *ServerdConfig) *Application {
 	if dohttps {
 		app.HttpsServer = &http.Server{
 			Addr:         cfg.HttpsAddress,
-			IdleTimeout:  time.Duration(cfg.IdleTimeout) * time.Second,
-			ReadTimeout:  time.Duration(cfg.ReadTimeout) * time.Second,
-			WriteTimeout: time.Duration(cfg.WriteTimeout) * time.Second,
+			IdleTimeout:  time.Duration(cfg.Timeout.Idle) * time.Second,
+			ReadTimeout:  time.Duration(cfg.Timeout.Read) * time.Second,
+			WriteTimeout: time.Duration(cfg.Timeout.Write) * time.Second,
 			Handler:      CreateHandler(cfg),
 			ErrorLog:     stdlog.New(serverlogwriter{}, "HTTPS ", stdlog.Lshortfile),
 		}
@@ -104,9 +107,9 @@ func NewApplication(cfg *ServerdConfig) *Application {
 	} else {
 		app.HttpServer = &http.Server{
 			Addr:         cfg.HttpAddress,
-			IdleTimeout:  time.Duration(cfg.IdleTimeout) * time.Second,
-			ReadTimeout:  time.Duration(cfg.ReadTimeout) * time.Second,
-			WriteTimeout: time.Duration(cfg.WriteTimeout) * time.Second,
+			IdleTimeout:  time.Duration(cfg.Timeout.Idle) * time.Second,
+			ReadTimeout:  time.Duration(cfg.Timeout.Read) * time.Second,
+			WriteTimeout: time.Duration(cfg.Timeout.Write) * time.Second,
 			Handler:      CreateHandler(cfg),
 			ErrorLog:     stdlog.New(serverlogwriter{}, "HTTP ", stdlog.Lshortfile),
 		}
@@ -172,9 +175,9 @@ func redirectHTTPS(cfg *ServerdConfig) *http.Server {
 
 	srv := http.Server{
 		Addr:         cfg.HttpAddress,
-		IdleTimeout:  time.Duration(cfg.IdleTimeout) * time.Second,
-		ReadTimeout:  time.Duration(cfg.ReadTimeout) * time.Second,
-		WriteTimeout: time.Duration(cfg.WriteTimeout) * time.Second,
+		IdleTimeout:  time.Duration(cfg.Timeout.Idle) * time.Second,
+		ReadTimeout:  time.Duration(cfg.Timeout.Read) * time.Second,
+		WriteTimeout: time.Duration(cfg.Timeout.Write) * time.Second,
 		Handler:      mux,
 		ErrorLog:     stdlog.New(serverlogwriter{}, "HTTP-REDIRECT ", stdlog.Lshortfile),
 	}
