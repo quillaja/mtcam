@@ -125,7 +125,7 @@ func Scrape(mtID, camID int, cfg *ScrapedConfig) func(time.Time) {
 			return
 		}
 		// resize the image
-		img = imaging.Resize(img, cfg.Image.Width, 0, imaging.Lanczos)
+		img = imaging.Resize(img, cfg.Image.Width, cfg.Image.Height, imaging.Lanczos)
 
 		// build (and create if necessary) the directory where the scraped
 		// images will live

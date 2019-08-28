@@ -2,7 +2,8 @@
 
 ## TODO
 
-- [ ] resize image on height, not width
+- [x] resize image on height, not width (can do either or both. 0='auto' to maintain aspect ratio)
+- [ ] server to use StaticRoot if available, fallback to embedded
 - [ ] documentation on everything
 - [ ] shutdown scraped on signal (requires change to scheduler to allow tasks to complete)
 - [ ] tasks to update mountain timezones
@@ -79,6 +80,7 @@ or
 
 # Migration
 1. stop old mtcam scraper (on pi)
+    1. remove 'idle' scrapes from old db
 2. `$ sqlite3 new.db` create new database file
 3. `.read new_table.sql` create the new tables
 4. `.read migration.sql`  will pull in old.db, set new/updated fields on old data

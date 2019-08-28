@@ -26,6 +26,7 @@ type ScrapedConfig struct {
 // Image holds settings related to processing scraped images.
 type Image struct {
 	Width             int
+	Height            int
 	Quality           int
 	EqualityTesting   bool
 	EqualityTolerance float64

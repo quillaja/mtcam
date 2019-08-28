@@ -5,6 +5,9 @@ build:
 	go build ./cmd/scraped
 	go build ./cmd/served
 
+clean:
+	rm ./served ./scraped
+
 install:
 	-sudo mkdir $(INSTALL_DIR)
 	sudo mv scraped served $(INSTALL_DIR)/
