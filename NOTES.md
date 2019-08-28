@@ -1,5 +1,13 @@
 # Notes
 
+## TODO
+
+- [ ] resize image on height, not width
+- [ ] documentation on everything
+- [ ] shutdown scraped on signal (requires change to scheduler to allow tasks to complete)
+- [ ] tasks to update mountain timezones
+- [ ] config file watch for changes
+
 ## Ideas
 
 #### scraping

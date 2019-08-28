@@ -13,5 +13,8 @@ test/*
 *.crt
 *.key
 
-# garbage test images
+# test images
 cmd/scraped/img
+
+# test config
+*_config.json
