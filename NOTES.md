@@ -78,11 +78,12 @@ or
 - images in /var/opt/mtcam/img
 
 # Migration
-0. stop old mtcam scraper (on pi)
-1. `$ sqlite3 new.db` create new database file
-2. `.read new_table.sql` create the new tables
-3. `.read migration.sql`  will pull in old.db, set new/updated fields on old data
-4. `go run cmd/convert_tz/main.go new.db`  converts all times in db from PST to UTC
+1. stop old mtcam scraper (on pi)
+2. `$ sqlite3 new.db` create new database file
+3. `.read new_table.sql` create the new tables
+4. `.read migration.sql`  will pull in old.db, set new/updated fields on old data
+5. `go run cmd/convert_tz/main.go new.db`  converts all times in db from PST to UTC
+6. move images from pi to nuc (~18GB)
 
 # API
 Generally not changed from python version
