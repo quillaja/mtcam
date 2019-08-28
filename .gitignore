@@ -2,8 +2,16 @@
 *.db
 *.sql
 
+# generated files
+version/version.go
+cmd/served/client.go
+
 # for trial programs
 test/*
+
+# self-generated keys for https testing
+*.crt
+*.key
 
 # garbage test images
 cmd/scraped/img

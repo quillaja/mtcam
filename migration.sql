@@ -1,3 +1,7 @@
+/*
+migrate from v1.0 (python) to v2.0 (go)
+*/
+
 /* 'open' old database */
 ATTACH DATABASE 'mtcam_test.db' AS old;
 
