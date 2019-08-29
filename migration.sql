@@ -37,7 +37,7 @@ INSERT INTO scrape (rowid, created, result, detail, filename, camera_id)
 DETACH DATABASE old;
 
 /* set pathname for mountain and camera */
-UPDATE mountain SET pathname=lower(replace(name,' ','_'));
+UPDATE mountain SET pathname=lower(replace(name,' ','_')||'_'||state);
 UPDATE camera SET pathname=lower(replace(name,' ','_'));
 
 /* update mountain timezones to new 'style' */
