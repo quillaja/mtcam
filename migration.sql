@@ -58,5 +58,5 @@ UPDATE camera SET delay=30, rules='{{ betweenRiseSet .Now .Astro 1 }}' WHERE row
 UPDATE camera SET delay=30, rules='{{ betweenRiseSet .Now .Astro 0 }}' WHERE rowid=5; /*tourism(blanc)*/
 UPDATE camera SET delay=30, rules='{{ betweenRiseSet .Now .Astro 1 }}' WHERE rowid=6; /*vista(hood)*/
 UPDATE camera SET delay=30, rules='{{ betweenRiseSet .Now .Astro 1 }}' WHERE rowid=7; /*snowcrest(shasta)*/
-UPDATE camera SET delay=30, rules='{{ betweenRiseSet .Now .Astro 0 }}' WHERE rowid=8; /*schurman(rainier)*/
-UPDATE camera SET delay=30, rules='{{ betweenRiseSet .Now .Astro 1 }}' WHERE rowid=9; /*lone pine(whitney)*/
+UPDATE camera SET delay=30, rules='{{ betweenRiseSet .Now .Astro 1 }}' WHERE rowid=8; /*schurman(rainier)*/
+UPDATE camera SET delay=30, rules='{{ betweenRiseSet .Now .Astro 0 }}' WHERE rowid=9; /*lone pine(whitney)*/
