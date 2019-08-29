@@ -124,8 +124,18 @@ func Scrape(mtID, camID int, cfg *ScrapedConfig) func(time.Time) {
 			setDetailAndLog("couldn't decode downloaded image")
 			return
 		}
-		// resize the image
-		img = imaging.Resize(img, cfg.Image.Width, cfg.Image.Height, imaging.Lanczos)
+
+		// resize the image, using the minimum of image size vs cfg size
+		// so that the image will be resized only if it's larger than the
+		// configured size
+		w, h := img.Bounds().Dx(), img.Bounds().Dy()
+		if cfg.Image.Width < w {
+			w = cfg.Image.Width
+		}
+		if cfg.Image.Height < h {
+			h = cfg.Image.Height
+		}
+		img = imaging.Resize(img, w, h, imaging.Lanczos)
 
 		// build (and create if necessary) the directory where the scraped
 		// images will live

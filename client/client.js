@@ -46,6 +46,8 @@ window.onload = function (e) {
         // selecting a camera will show it's info and hide
         // whatever is showing in timelapse and scrapes(log) tabs
         showInfo();
+        tabClicked("info-tab");
+
         tabVisible("timelapse-tab", false);
         tabVisible("scrapes-tab", false);
     }
@@ -509,7 +511,7 @@ function createTimelapseImages() {
 }
 
 function updateTimelapseProgress() {
-    tlProg.innerText = tlFrame + "/" + tldisp.children.length;
+    tlProg.innerText = `${1+tlFrame}/${tldisp.children.length}`;
 }
 
 function setTimelapseSpeed(speedDropdown = null) {

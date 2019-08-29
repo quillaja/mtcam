@@ -3,9 +3,12 @@
 ## TODO
 
 - [x] resize image on height, not width (can do either or both. 0='auto' to maintain aspect ratio)
-- [ ] server to use StaticRoot if available, fallback to embedded
+- [X] resize image only if bigger than height/width
+- [x] simulate 'click' on info tab when hiding other tabs after user selects a camera
+- [x] fix 1-off error in timelapse counter (thought i did before?)
 - [ ] documentation on everything
 - [ ] shutdown scraped on signal (requires change to scheduler to allow tasks to complete)
+- [ ] server to use StaticRoot if available, fallback to embedded
 - [ ] tasks to update mountain timezones
 - [ ] config file watch for changes
 
