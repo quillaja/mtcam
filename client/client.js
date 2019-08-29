@@ -37,7 +37,12 @@ window.onload = function (e) {
             //create new element
             camSelect.appendChild(createCamSelectOption(cam));
         }
+        showInfo();
     };
+
+    camSelect.onchange = function(ev) {
+        showInfo();
+    }
 
     // setup tab bar
     setupTabBar();
@@ -65,11 +70,11 @@ window.onload = function (e) {
     };
 
     // attach functionality to "load weather" button
-    document.getElementById("submit-weather").onclick = function () {
-        loadAndDisplayWeather();
+    // document.getElementById("submit-weather").onclick = function () {
+    //     loadAndDisplayWeather();
 
-        tabVisible("weather-tab", true);
-    };
+    //     tabVisible("weather-tab", true);
+    // };
 
     // set the default 'start' to be Today at 00:00 (12am)
     var dt = new Date();
@@ -117,13 +122,12 @@ function loadAndDisplayPhotos() {
     var end = document.getElementById("end").value;
     var mt = document.getElementById("mountain").value;
     var cam = document.getElementById("cam").value;
-    var asLocal = document.getElementById("as-local").checked;
+    // var asLocal = document.getElementById("as-local").checked;
 
     var url = urlBase + "/api/mountains/" + mt +
         "/cams/" + cam +
         "/scrapes?start=" + start +
-        "&end=" + end +
-        "&as_local_time=" + asLocal;
+        "&end=" + end;
 
     request.open("GET", url, true);
     request.send();
@@ -238,6 +242,8 @@ function setupTabBar() {
     // associated content and apply correct styles.
     tabVisible("help-tab", true);
     tabClicked("help-tab");
+
+    tabVisible("info-tab", true);
 }
 
 // set tab visbility.
@@ -288,8 +294,8 @@ function strDatetimeLocal(date) {
         II = ten(date.getMinutes());
     //SS = ten(date.getSeconds());
 
-    return YYYY + '-' + MM + '-' + DD + 'T' +
-        HH + ':' + II;
+    return YYYY + '-' + MM + '-' + DD;// + 'T' +
+        // HH + ':' + II;
 }
 
 // create a single `<option>` element for the mountain 'dropdown'
@@ -314,7 +320,7 @@ function createScrapeHeader() {
     var c1 = document.createElement("th");
     var c2 = document.createElement("th");
     var c3 = document.createElement("th");
-    c1.innerText = "Time (Pacific Time)";
+    c1.innerText = "Time";
     c2.innerText = "Result";
     c3.innerText = "Detail";
     tr.appendChild(c1);
@@ -373,8 +379,9 @@ function showInfo() {
         // lat, lon (link)
         addPropValueToElement(mInfoBox, "Location", mapLink(mt["latitude"], mt["longitude"]));
         // timeZoneName, rawOffset, dstOffset
-        var tz = mt["tz"]["timeZoneName"] + "<br>(UTC+" +
-            secToHr(mt["tz"]["rawOffset"]) + "hr, +" + secToHr(mt["tz"]["dstOffset"]) + "hr DST)";
+        var tz = mt["tz"];
+        // var tz = mt["tz"]["timeZoneName"] + "<br>(UTC+" +
+        //     secToHr(mt["tz"]["rawOffset"]) + "hr, +" + secToHr(mt["tz"]["dstOffset"]) + "hr DST)";
         addPropValueToElement(mInfoBox, "Timezone", tz);
 
         locBox.appendChild(mInfoBox);

@@ -1,0 +1,7 @@
+[Unit]
+Description=Mountain Cams service
+After=network.target
+Wants=scraped.service served.service
+
+[Install]
+WantedBy=multi-user.target

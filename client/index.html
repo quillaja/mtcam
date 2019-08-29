@@ -5,14 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Mountain Cams</title>
-    <link rel='shortcut icon' type='image/x-icon' href='/static/favicon.ico' />
+    <link rel='shortcut icon' type='image/x-icon' href='favicon.ico' />
     <script src="client.js"></script>
     <link href="style.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
-
-    <!--for bokeh -->
-    <link href="https://cdn.pydata.org/bokeh/release/bokeh-0.12.13.min.css" rel="stylesheet" type="text/css">
-    <script src="https://cdn.pydata.org/bokeh/release/bokeh-0.12.13.min.js"></script>
 </head>
 
 <body>
@@ -29,18 +25,18 @@
 
         <div class="control-box">
             <label for="start" id="label-start">From:</label>
-            <input id="start" type="datetime-local" name="startdate">
+            <input id="start" type="date"  name="startdate">
 
             <label for="end" id="label-end">To:</label>
-            <input id="end" type="datetime-local" name="enddate">
+            <input id="end" type="date" name="enddate">
 
-            <input id="as-local" type="checkbox" checked>
-            <label for="as-local">Times local to mountain</label>
+            <!-- <input id="as-local" type="checkbox" checked>
+            <label for="as-local">Times local to mountain</label> -->
         </div>
 
         <div class="control-box">
             <button id="submit-photos" class="submit-button">Load Photos</button>
-            <button id="submit-weather" class="submit-button">Load Weather</button>
+            <!-- <button id="submit-weather" class="submit-button">Load Weather</button> -->
         </div>
     </div>
 
@@ -57,16 +53,13 @@
             <p>Select the mountain and camera from the dropdown boxes. Many mountains may have only 1 camera, though some may
                 have 2 or more.
             </p>
-            <p>Then, enter a complete date and time (Y-M-D and 12hr format) in the "From" and "To" fields to select a time range
-                from which to view camera images and data. Selecting "Times local to mountain" will cause the database to
-                convert the times from Pacifc Time to the timezone of the mountain being viewed. If not checked, the "From"
-                and "To" fields represent Pacific Time.
+            <p>Then, enter a complete date (Y-M-D) in the "From" and "To" fields to select a time range
+                from which to view camera images and data. The dates chosen are in the mountain's timezone.
             </p>
-            <p>If only the "From" field is entered, images beginning at the "From" date and time and ending at
-                <i>now</i> will be shown, if any exist in the database. If only the "To" field is entered, images beginning
-                at "To" minus 24 hours and ending at "To" will be shown, if any exist in the database.
+            <p>If only "From" is entered, images from the following 24 hours will be shown. If only "To" is entered, images from
+                the previous 24 hours will be shown.
             </p>
-            <p>When the desired mountain, camera, and time frame are selected, press "Load Data" to query the database. When
+            <p>When the desired mountain, camera, and time frame are selected, press "Load Photos" to query the database. When
                 this successfully completes, tabs for the log, timelapse, and other information will appear. Please keep
                 in mind that loading a large date range will cause many images to load in the timelapse, and could take a
                 few moments to download.
@@ -76,7 +69,7 @@
                 quality mountain webcams to be added, please mail
                 <a href="mailto:quillaja@hotmail.com?subject=mountain%20cams">quillaja@hotmail.com</a> with the subject "mountain cams".
             </p>
-            <p>Version: 1.0 beta</p>
+            <p>Version: 2.0 beta</p>
         </div>
 
         <div id="info" class="hidden"></div>
@@ -102,7 +95,7 @@
 
         <table id="scrapes" class="hidden"></table>
 
-        <div id="weather" class="hidden"></div>
+        <!-- <div id="weather" class="hidden"></div> -->
 
     </div>
 </body>

@@ -1,0 +1,13 @@
+[Unit]
+Description=Mountain Cams server
+After=network.target
+PartOf=mtcam.target
+
+[Service]
+WorkingDirectory=/opt/mtcam
+ExecStart=/opt/mtcam/served -cfg served_config.json
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
