@@ -38,10 +38,16 @@ window.onload = function (e) {
             camSelect.appendChild(createCamSelectOption(cam));
         }
         showInfo();
+        
     };
 
+    // attach functionality to camera selection dropdown
     camSelect.onchange = function(ev) {
+        // selecting a camera will show it's info and hide
+        // whatever is showing in timelapse and scrapes(log) tabs
         showInfo();
+        tabVisible("timelapse-tab", false);
+        tabVisible("scrapes-tab", false);
     }
 
     // setup tab bar

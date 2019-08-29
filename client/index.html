@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Mountain Cams</title>
+    <title>Mountain Cameras</title>
     <link rel='shortcut icon' type='image/x-icon' href='favicon.ico' />
     <script src="client.js"></script>
     <link href="style.css" rel="stylesheet">
@@ -25,7 +25,7 @@
 
         <div class="control-box">
             <label for="start" id="label-start">From:</label>
-            <input id="start" type="date"  name="startdate">
+            <input id="start" type="date" name="startdate">
 
             <label for="end" id="label-end">To:</label>
             <input id="end" type="date" name="enddate">
@@ -46,30 +46,40 @@
     <div class="display-area">
         <div id="help" class="hidden">
             <h3>Overview</h3>
-            <p>Mountain Cameras collects images from webcams on various mountains around the world, though mostly in the Pacific
-                Northwest and mostly Mount Hood. It allows one to view actual conditions and watch a "timelapse" of the mountains.
+            <p>Mountain Cameras collects images from webcams on various mountains around the world, though mostly in the
+                Pacific Northwest and mostly Mount Hood. It allows one to view actual conditions and watch a "timelapse"
+                of the mountains.
             </p>
-            <h3>Use</h3>
-            <p>Select the mountain and camera from the dropdown boxes. Many mountains may have only 1 camera, though some may
-                have 2 or more.
+            <h3>Usage</h3>
+            <p>Select the mountain and camera from the dropdown boxes. Many mountains may have only 1 camera, though
+                some may have 2 or more.
             </p>
             <p>Then, enter a complete date (Y-M-D) in the "From" and "To" fields to select a time range
                 from which to view camera images and data. The dates chosen are in the mountain's timezone.
             </p>
-            <p>If only "From" is entered, images from the following 24 hours will be shown. If only "To" is entered, images from
-                the previous 24 hours will be shown.
+            <p>If only "From" is entered, images from the following 24 hours will be shown. If only "To" is entered,
+                images from the previous 24 hours will be shown.
             </p>
-            <p>When the desired mountain, camera, and time frame are selected, press "Load Photos" to query the database. When
-                this successfully completes, tabs for the log, timelapse, and other information will appear. Please keep
-                in mind that loading a large date range will cause many images to load in the timelapse, and could take a
-                few moments to download.
+            <p>When the desired mountain, camera, and time frame are selected, press "Load Photos" to query the
+                database. When this successfully completes, tabs for the log, timelapse, and other information will
+                appear. Please keep
+                in mind that loading a large date range will cause many images to load in the timelapse, and could take
+                a few moments to download.
             </p>
             <h3>Questions</h3>
-            <p>This web app was concieved and created by Ben Stabley. If you have any questions or comments, including potential
-                quality mountain webcams to be added, please mail
-                <a href="mailto:quillaja@hotmail.com?subject=mountain%20cams">quillaja@hotmail.com</a> with the subject "mountain cams".
+            <p>This web app was concieved and created by Ben Stabley. If you have any questions or comments, including
+                potential quality mountain webcams to be added, please mail
+                <a href="mailto:quillaja@hotmail.com?subject=mountain%20cams">quillaja@hotmail.com</a> with the subject
+                "mountain cams".
             </p>
-            <p>Version: 2.0 beta</p>
+            <p>Version: 2.0<br />
+                <a href="https://github.com/quillaja/mtcam" target="_blank" class="plain-link">
+                    <svg height="20" alt="GitHub" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true">
+                        <path fill-rule="evenodd"
+                            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z">
+                        </path>
+                    </svg>Repository</a>
+            </p>
         </div>
 
         <div id="info" class="hidden"></div>
