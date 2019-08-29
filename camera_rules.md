@@ -51,3 +51,8 @@
  ## Wixi
  civil twilight (cam actually seems to do 30 mins AFTER sunrise/set
 `{{ betweenRiseSet .Now .Astro 0 }}`
+
+# Grand Teton
+ ## AAC Ranch
+ civil twilight
+`{{ betweenRiseSet .Now .Astro 0 }}`
