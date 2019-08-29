@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"flag"
 	"fmt"
 	stdlog "log"
@@ -104,6 +105,7 @@ func NewApplication(cfg *ServerdConfig) *Application {
 	if dohttps {
 		app.HttpsServer = &http.Server{
 			Addr:         cfg.HttpsAddress,
+			TLSNextProto: map[string]func(*http.Server, *tls.Conn, http.Handler){}, // disable http2 per https://golang.org/pkg/net/http/
 			IdleTimeout:  time.Duration(cfg.Timeout.Idle) * time.Second,
 			ReadTimeout:  time.Duration(cfg.Timeout.Read) * time.Second,
 			WriteTimeout: time.Duration(cfg.Timeout.Write) * time.Second,
