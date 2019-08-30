@@ -38,11 +38,11 @@ window.onload = function (e) {
             camSelect.appendChild(createCamSelectOption(cam));
         }
         showInfo();
-        
+
     };
 
     // attach functionality to camera selection dropdown
-    camSelect.onchange = function(ev) {
+    camSelect.onchange = function (ev) {
         // selecting a camera will show it's info and hide
         // whatever is showing in timelapse and scrapes(log) tabs
         showInfo();
@@ -60,21 +60,26 @@ window.onload = function (e) {
 
     // attach functionality to "load photos" button
     document.getElementById("submit-photos").onclick = function () {
-        loadAndDisplayPhotos();
+        let requestMade = loadAndDisplayPhotos();
 
-        // Array.from(document.getElementById("tab-area").children).
-        //     forEach(function (element) {
-        //         element.classList.remove("hidden");
-        //     });
-        tabVisible("info-tab", true);
-        tabVisible("timelapse-tab", true);
-        tabVisible("scrapes-tab", true);
+        if (requestMade) {
 
-        // for space savings on narrower devices (phones), hide 'help'
-        // tab. I decided to show the 'info' tab by default instead.
-        tabClicked("info-tab");
-        tabVisible("help-tab", false);
+            // show previously hidden tabs
+            tabVisible("info-tab", true);
+            tabVisible("timelapse-tab", true);
+            tabVisible("scrapes-tab", true);
 
+            // flash 2 'background' tabs
+            tabFlash("timelapse-tab");
+            tabFlash("scrapes-tab");
+
+            // for space savings on narrower devices (phones), hide 'help'
+            // tab. I decided to show the 'info' tab by default instead.
+            tabClicked("info-tab");
+            tabVisible("help-tab", false);
+        } else {
+            alert("Sorry, but you've asked for a time span longer than 7 days. To maintain performance of both the server and your browser, please select a time span 7 days or less. Thanks!\n-Ben");
+        }
     };
 
     // attach functionality to "load weather" button
@@ -130,15 +135,27 @@ function loadAndDisplayPhotos() {
     var end = document.getElementById("end").value;
     var mt = document.getElementById("mountain").value;
     var cam = document.getElementById("cam").value;
-    // var asLocal = document.getElementById("as-local").checked;
 
-    var url = urlBase + "/api/mountains/" + mt +
-        "/cams/" + cam +
-        "/scrapes?start=" + start +
-        "&end=" + end;
+    let dt = new Date(end) - new Date(start);
+    let ok = isNaN(dt); // NaN means one or both of start/end are unset (which is ok)
+    if (!ok) {
+        const msperday = 86400000; // ms in 1 day
+        let lenDays = Math.ceil(dt / msperday);
+        ok = lenDays <= 7; // if the timespan is 1 week or less, ok.
+    }
 
-    request.open("GET", url, true);
-    request.send();
+    // do request if ok
+    if (ok) {
+        var url = urlBase + "/api/mountains/" + mt +
+            "/cams/" + cam +
+            "/scrapes?start=" + start +
+            "&end=" + end;
+
+        request.open("GET", url, true);
+        request.send();
+    }
+
+    return ok;
 }
 
 function populateScrapeTable() {
@@ -256,12 +273,18 @@ function setupTabBar() {
 
 // set tab visbility.
 function tabVisible(tabId, visible) {
-    tab = document.getElementById(tabId)
+    let tab = document.getElementById(tabId)
     if (visible) {
         tab.classList.remove("hidden");
     } else {
         tab.classList.add("hidden");
     }
+}
+
+function tabFlash(tabId) {
+    let tab = document.getElementById(tabId);
+    tab.classList.add("flash");
+    window.setTimeout(() => { tab.classList.remove("flash"); }, 200);
 }
 
 // toggles the tab clicked.
@@ -303,7 +326,7 @@ function strDatetimeLocal(date) {
     //SS = ten(date.getSeconds());
 
     return YYYY + '-' + MM + '-' + DD;// + 'T' +
-        // HH + ':' + II;
+    // HH + ':' + II;
 }
 
 // create a single `<option>` element for the mountain 'dropdown'
@@ -511,7 +534,7 @@ function createTimelapseImages() {
 }
 
 function updateTimelapseProgress() {
-    tlProg.innerText = `${1+tlFrame}/${tldisp.children.length}`;
+    tlProg.innerText = `${1 + tlFrame}/${tldisp.children.length}`;
 }
 
 function setTimelapseSpeed(speedDropdown = null) {

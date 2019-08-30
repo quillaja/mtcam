@@ -9,6 +9,10 @@ cmd/served/client.go
 # for trial programs
 test/*
 
+# build output and "junk" files
+.out/*
+tmp/*
+
 # self-generated keys for https testing
 *.crt
 *.key

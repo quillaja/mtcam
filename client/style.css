@@ -60,10 +60,15 @@ body {
     border: 1px solid lightgray;
     background-color: #F0F0F0;
     color: gray;
+    transition: background-color 100ms;
 }
 
 .tab:hover {
     color: blue;
+}
+
+.tab.flash {
+    background-color: #ffeefe;
 }
 
 .tab.selected {

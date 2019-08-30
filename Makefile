@@ -1,19 +1,23 @@
 INSTALL_DIR = /opt/mtcam
+OUTPUT_DIR = .out
 
 build:
 	go generate ./version ./cmd/served
 	go build ./cmd/scraped
 	go build ./cmd/served
+	-mkdir $(OUTPUT_DIR)
+	mv scraped served $(OUTPUT_DIR)/
 
 clean:
-	rm ./served ./scraped
+	rm $(OUTPUT_DIR)/served $(OUTPUT_DIR)/scraped
+	rmdir $(OUTPUT_DIR)
 
 install:
 	-sudo mkdir $(INSTALL_DIR)
-	sudo mv scraped served $(INSTALL_DIR)/
+	sudo mv $(OUTPUT_DIR)/served $(OUTPUT_DIR)/scraped $(INSTALL_DIR)/
 
 service-install:
-	sudo cp ./service/* /etc/systemd/system/
+	sudo cp service/* /etc/systemd/system/
 	sudo systemctl daemon-reload
 	sudo systemctl enable mtcam.target
 
