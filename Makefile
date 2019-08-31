@@ -30,6 +30,7 @@ upgrade:
 	sudo systemctl start mtcam.target
 
 uninstall:
+	sudo systemctl stop mtcam.target
 	sudo systemctl disable mtcam.target
 	sudo rm /etc/systemd/system/mtcam.target
 	sudo rm /etc/systemd/system/scraped.service
