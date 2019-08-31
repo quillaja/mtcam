@@ -9,10 +9,10 @@ Sooner
 Later
 - [ ] documentation on everything
 - [ ] shutdown scraped on signal (requires change to scheduler to allow tasks to complete)
-- [ ] server to use StaticRoot if available, fallback to embedded
 - [ ] tasks to update mountain timezones
 - [ ] config file watch for changes
 - [ ] cache data served from `/api/data` to improve performance/reduce queries. goroutine to refresh data periodically.
+- [ ] web app manifest https://developers.google.com/web/fundamentals/web-app-manifest/
 
 Done
 - [x] resize image on height, not width (can do either or both. 0='auto' to maintain aspect ratio)
@@ -21,6 +21,7 @@ Done
 - [x] fix 1-off error in timelapse counter (thought i did before?)
 - [x] limit timespan of request to 2 weeks or do something else sensible to prevent huge 58000 scrape requests
 - [x] css styles for "flashing" tabs when they're first unhidden
+- [x] server to use StaticRoot if available, fallback to embedded
 
 ## Ideas
 

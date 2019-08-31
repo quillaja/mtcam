@@ -17,7 +17,7 @@ type ServerdConfig struct {
 	Timeout TimeoutConfig
 
 	// static root directory
-	// StaticRoot string
+	StaticRoot string
 
 	// api and image routes
 	Routes RoutesConfig

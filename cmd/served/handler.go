@@ -41,7 +41,12 @@ func CreateHandler(cfg *ServerdConfig) http.Handler {
 		cfg.Routes.Image, http.FileServer(http.Dir(cfg.ImageRoot))))
 
 	// add handler for root (static files)
-	mux.Handle("/", http.FileServer(client)) //http.Dir(cfg.StaticRoot)))
+	// use "StaticRoot" if set, fallback to embedded client
+	if cfg.StaticRoot != "" {
+		mux.Handle("/", http.FileServer(http.Dir(cfg.StaticRoot)))
+	} else {
+		mux.Handle("/", http.FileServer(client))
+	}
 
 	return mux
 }
