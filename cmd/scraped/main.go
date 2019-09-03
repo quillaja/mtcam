@@ -66,6 +66,7 @@ func main() {
 		Config:    &cfg,
 		Scheduler: scheduler.NewScheduler()}
 
+	log.Printf(log.Info, "Starting scrape daemon %s", version.Version)
 	err = app.run()
 	if err != nil {
 		log.Printf(log.Critical, "error running application: %s", err)

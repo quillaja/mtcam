@@ -185,7 +185,7 @@ func redirectHTTPS(cfg *ServerdConfig) *http.Server {
 		nurl := *r.URL
 		nurl.Scheme = "https"
 		nurl.Host = r.Host
-		log.Printf(log.Debug, "redirecting http to %s", nurl.String())
+		log.Printf(log.Debug, "%s redirecting http to %s", r.RemoteAddr, nurl.String())
 		http.Redirect(w, r, nurl.String(), http.StatusPermanentRedirect)
 	}))
 
