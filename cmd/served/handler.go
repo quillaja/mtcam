@@ -59,7 +59,7 @@ func ApiData() http.HandlerFunc {
 		status := http.StatusOK
 		defer func() {
 			took := time.Since(reqstart)
-			log.Printf(log.Debug, "%s %d %s %s (%s)",
+			log.Printf(log.Info, "%s %d %s %s (%s)",
 				r.RemoteAddr, status, http.StatusText(status), r.RequestURI,
 				took)
 		}()
@@ -109,7 +109,7 @@ func ApiScrapes(apiRoute, imgRoute string) http.HandlerFunc {
 		status := http.StatusOK
 		defer func() {
 			took := time.Since(reqstart)
-			log.Printf(log.Debug, "%s %d %s %s (%s) %s",
+			log.Printf(log.Info, "%s %d %s %s (%s) %s",
 				r.RemoteAddr, status, http.StatusText(status), r.RequestURI,
 				took, msg)
 		}()

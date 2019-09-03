@@ -82,6 +82,11 @@ Done
 1. ~~github.com/shibukawa/configdir - don't really need if i assume linux (can just use os.GetEnv())~~
 
 ## Directories
+- binaries and cfg in /opt/mtcam
+- images and db in ~/mtcam
+
+or 
+
 - all files (bin, cfg, db) in /opt/mtcam
 - images in /opt/mtcam/img
 

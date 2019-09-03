@@ -2,6 +2,7 @@ package main
 
 import "github.com/quillaja/mtcam/config"
 
+// ServedConfig holds configuration settings for the served program.
 type ServerdConfig struct {
 	config.SuiteConfig `json:"-"`
 
