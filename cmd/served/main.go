@@ -9,6 +9,7 @@ import (
 	"flag"
 	"fmt"
 	stdlog "log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -71,12 +72,12 @@ func main() {
 	sig := make(chan os.Signal)
 	signal.Notify(sig, os.Kill, os.Interrupt, syscall.SIGTERM)
 
-	log.Printf(log.Info, "Starting server daemon %s", version.Version)
+	log.Printf(log.Info, "starting server daemon %s", version.Version)
 	app.run()
 
 	<-sig // wait for SIGKILL, SIGINT, or SIGTERM
 
-	log.Printf(log.Info, "Shutting down server daemon %s", version.Version)
+	log.Printf(log.Info, "shutting down server daemon %s", version.Version)
 	app.shutdown()
 	log.Print(log.Info, "server daemon finished")
 }
@@ -185,6 +186,10 @@ func redirectHTTPS(cfg *ServerdConfig) *http.Server {
 		nurl := *r.URL
 		nurl.Scheme = "https"
 		nurl.Host = r.Host
+		// put a new port on host if the https server is on a non-standard port
+		if !(cfg.HttpsAddress == ":https" || cfg.HttpsAddress == ":443") {
+			nurl.Host = net.JoinHostPort(nurl.Hostname(), cfg.HttpsAddress[1:]) // a little hackish. assumes colon.
+		}
 		log.Printf(log.Debug, "%s redirecting http to %s", r.RemoteAddr, nurl.String())
 		http.Redirect(w, r, nurl.String(), http.StatusPermanentRedirect)
 	}))
