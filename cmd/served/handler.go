@@ -21,12 +21,26 @@ const contenttype = "Content-Type"
 // json mime
 const jsonMime = "application/json"
 
+// HTTP strict transport security
+// see https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Strict_Transport_Security_Cheat_Sheet.html
+const hstsHeader = "Strict-Transport-Security"
+const hstsValue = "max-age=86400; includeSubDomains" // 24 hr lifetime
+
 // time.Format() formats
 const (
 	datefmt     = "2006-01-02"
 	datetimefmt = "2006-01-02 15:04"
 	datetzfmt   = "2006-01-02 -0700"
 )
+
+// addHSTS is a 'middleware' that writes HSTS headers to all requests.
+func addHSTS(h http.Handler) http.Handler {
+	return http.HandlerFunc(
+		func(w http.ResponseWriter, req *http.Request) {
+			w.Header().Add(hstsHeader, hstsValue)
+			h.ServeHTTP(w, req)
+		})
+}
 
 // CreateHandler creates a ServeMux for the given serverd config.
 func CreateHandler(cfg *ServerdConfig) http.Handler {
@@ -43,9 +57,9 @@ func CreateHandler(cfg *ServerdConfig) http.Handler {
 	// add handler for root (static files)
 	// use "StaticRoot" if set, fallback to embedded client
 	if cfg.StaticRoot != "" {
-		mux.Handle("/", http.FileServer(http.Dir(cfg.StaticRoot)))
+		mux.Handle("/", addHSTS(http.FileServer(http.Dir(cfg.StaticRoot))))
 	} else {
-		mux.Handle("/", http.FileServer(client))
+		mux.Handle("/", addHSTS(http.FileServer(client)))
 	}
 
 	return mux
@@ -176,10 +190,7 @@ func ApiScrapes(apiRoute, imgRoute string) http.HandlerFunc {
 
 			scrapes[i].Created = scrapes[i].Created.In(tz)
 		}
-		// log.Printf(log.Debug, "%s requested %d scrapes for %s(%d) %s(%d) in period (%s) to (%s)",
-		// 	r.RemoteAddr,
-		// 	len(scrapes), mt.Name, mt.ID, cam.Name, cam.ID,
-		// 	start.Format(time.RFC3339), end.Format(time.RFC3339))
+
 		msg = fmt.Sprintf("%d scrapes for %s(%d) %s(%d) in (%s) to (%s)",
 			len(scrapes), mt.Name, mt.ID, cam.Name, cam.ID,
 			start.Format(datetzfmt), end.Format(datetzfmt))

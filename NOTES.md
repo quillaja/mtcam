@@ -9,6 +9,7 @@ Sooner
 Later
 - [ ] documentation on everything
 - [ ] shutdown scraped on signal (requires change to scheduler to allow tasks to complete)
+- [ ] rewrite client.js
 - [ ] tasks to update mountain timezones
 - [ ] config file watch for changes
 - [ ] cache data served from `/api/data` to improve performance/reduce queries. goroutine to refresh data periodically.
@@ -22,6 +23,7 @@ Done
 - [x] limit timespan of request to 2 weeks or do something else sensible to prevent huge 58000 scrape requests
 - [x] css styles for "flashing" tabs when they're first unhidden
 - [x] server to use StaticRoot if available, fallback to embedded
+- [x] HTTP strict transport? see: https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Strict_Transport_Security_Cheat_Sheet.html
 
 ## Ideas
 

@@ -244,7 +244,7 @@ function setupMtCamSelection() {
     };
 
     // prepare and make api request
-    var url = urlBase + "/api/data";
+    var url = urlBase + "/api/data/";
     request.open("GET", url, true);
     request.send();
 }
