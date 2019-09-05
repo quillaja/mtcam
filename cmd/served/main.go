@@ -120,6 +120,9 @@ func NewApplication(cfg *ServerdConfig) *Application {
 
 		log.Printf(log.Info, "listening on %s, redirecting from %s",
 			cfg.HttpsAddress, cfg.HttpAddress)
+		if len(cfg.RedirectedHosts) > 0 {
+			log.Printf(log.Info, "redirecting hosts %v", cfg.RedirectedHosts)
+		}
 
 	} else {
 		app.HttpServer = &http.Server{
@@ -180,9 +183,16 @@ func (app *Application) shutdown() {
 
 // listens on :http and redirects to the same address, just with https.
 func redirectHTTPS(cfg *ServerdConfig) *http.Server {
-	mux := new(http.ServeMux)
 
-	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// deny http request if they're asking for anything but / on one of
+		// the specified hosts.
+		if r.RequestURI != "/" ||
+			(len(cfg.RedirectedHosts) > 0 && !hostInList(r.Host, cfg.RedirectedHosts)) {
+			log.Printf(log.Debug, "%s denied redirect host: %s uri: %s", r.RemoteAddr, r.Host, r.RequestURI)
+			http.NotFound(w, r)
+			return
+		}
 		nurl := *r.URL
 		nurl.Scheme = "https"
 		nurl.Host = r.Host
@@ -190,20 +200,33 @@ func redirectHTTPS(cfg *ServerdConfig) *http.Server {
 		if !(cfg.HttpsAddress == ":https" || cfg.HttpsAddress == ":443") {
 			nurl.Host = net.JoinHostPort(nurl.Hostname(), cfg.HttpsAddress[1:]) // a little hackish. assumes colon.
 		}
-		log.Printf(log.Debug, "%s redirecting http to %s", r.RemoteAddr, nurl.String())
+		log.Printf(log.Debug, "%s redirecting %s to %s", r.RemoteAddr, r.RequestURI, nurl.String())
 		http.Redirect(w, r, nurl.String(), http.StatusPermanentRedirect)
-	}))
+	})
 
 	srv := http.Server{
 		Addr:         cfg.HttpAddress,
 		IdleTimeout:  time.Duration(cfg.Timeout.Idle) * time.Second,
 		ReadTimeout:  time.Duration(cfg.Timeout.Read) * time.Second,
 		WriteTimeout: time.Duration(cfg.Timeout.Write) * time.Second,
-		Handler:      mux,
+		Handler:      handler,
 		ErrorLog:     stdlog.New(serverlogwriter{}, "HTTP-REDIRECT ", stdlog.Lshortfile),
 	}
 
 	return &srv
+}
+
+func hostInList(host string, list []string) bool {
+	h, _, err := net.SplitHostPort(host)
+	if err == nil {
+		host = h
+	}
+	for _, h := range list {
+		if host == h {
+			return true
+		}
+	}
+	return false
 }
 
 // used to "forward" the server's internal logging to the application's
@@ -211,6 +234,6 @@ func redirectHTTPS(cfg *ServerdConfig) *http.Server {
 type serverlogwriter struct{}
 
 func (w serverlogwriter) Write(p []byte) (n int, err error) {
-	log.Print(log.Error, string(p))
+	log.Printf(log.Debug, "  %s", string(p))
 	return len(p), nil
 }

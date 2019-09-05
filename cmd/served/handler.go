@@ -84,7 +84,7 @@ func ApiData() http.HandlerFunc {
 		if err != nil {
 			log.Printf(log.Error, "ApiData db error getting mts or cams: %s", err)
 			status = http.StatusInternalServerError
-			w.WriteHeader(status)
+			http.Error(w, "", status)
 			return
 		}
 
@@ -108,7 +108,7 @@ func ApiData() http.HandlerFunc {
 		err = enc.Encode(mts)
 		if err != nil {
 			status = http.StatusInternalServerError
-			w.WriteHeader(status)
+			http.Error(w, "", status)
 			return
 		}
 		w.Header().Set(contenttype, jsonMime)
@@ -136,7 +136,7 @@ func ApiScrapes(apiRoute, imgRoute string) http.HandlerFunc {
 		if err != nil {
 			log.Print(log.Error, "ApiScrapes regexp: %s", err)
 			status = http.StatusInternalServerError
-			w.WriteHeader(status)
+			http.Error(w, "", status)
 			return
 		}
 
@@ -144,7 +144,7 @@ func ApiScrapes(apiRoute, imgRoute string) http.HandlerFunc {
 		matches := re.FindStringSubmatch(r.URL.Path)
 		if matches == nil || len(matches) != 3 {
 			status = http.StatusNotFound
-			w.WriteHeader(status)
+			http.Error(w, "", status)
 			return
 		}
 
@@ -155,13 +155,13 @@ func ApiScrapes(apiRoute, imgRoute string) http.HandlerFunc {
 		if err != nil {
 			log.Printf(log.Error, "ApiScrapes db error getting mt or cam: %s", err)
 			status = http.StatusInternalServerError
-			w.WriteHeader(status)
+			http.Error(w, "", status)
 			return
 		}
 		if mt.ID == 0 || cam.ID == 0 {
 			// if a mt or cam isn't found in db, return 404
 			status = http.StatusNotFound
-			w.WriteHeader(status)
+			http.Error(w, "", status)
 			return
 		}
 
@@ -173,7 +173,7 @@ func ApiScrapes(apiRoute, imgRoute string) http.HandlerFunc {
 		if err != nil {
 			log.Printf(log.Error, "ApiScrapes db error getting scrapes: %s", err)
 			status = http.StatusInternalServerError
-			w.WriteHeader(status)
+			http.Error(w, "", status)
 			return
 		}
 
@@ -202,7 +202,7 @@ func ApiScrapes(apiRoute, imgRoute string) http.HandlerFunc {
 		if err != nil {
 			log.Printf(log.Error, "ApiScrapes couldn't encode scrapes for mtID(%d), camID(%d): %s", mtID, camID, err)
 			status = http.StatusInternalServerError
-			w.WriteHeader(status)
+			http.Error(w, "", status)
 			return
 		}
 		w.Header().Set(contenttype, jsonMime)

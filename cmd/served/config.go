@@ -22,6 +22,8 @@ type ServerdConfig struct {
 
 	// api and image routes
 	Routes RoutesConfig
+
+	RedirectedHosts []string
 }
 
 // TimeoutConfig holds timeouts for server, in seconds.

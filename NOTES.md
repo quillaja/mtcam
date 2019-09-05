@@ -5,10 +5,11 @@
 Sooner
 - [ ] fallback to some 'default' astro or start/end time if Sun/Moon served is inaccessible
 - [ ] robots.txt ?
+- [ ] import older "palmer" data (note logs are in Y-D-M format, not Y-M-D)
 
 Later
-- [ ] documentation on everything
 - [ ] shutdown scraped on signal (requires change to scheduler to allow tasks to complete)
+- [ ] documentation on everything
 - [ ] rewrite client.js
 - [ ] tasks to update mountain timezones
 - [ ] config file watch for changes
@@ -24,6 +25,7 @@ Done
 - [x] css styles for "flashing" tabs when they're first unhidden
 - [x] server to use StaticRoot if available, fallback to embedded
 - [x] HTTP strict transport? see: https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Strict_Transport_Security_Cheat_Sheet.html
+- [x] block (404) any HTTP requests not for specfic domains (hosts).
 
 ## Ideas
 
