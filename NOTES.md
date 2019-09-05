@@ -25,7 +25,8 @@ Done
 - [x] css styles for "flashing" tabs when they're first unhidden
 - [x] server to use StaticRoot if available, fallback to embedded
 - [x] HTTP strict transport? see: https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Strict_Transport_Security_Cheat_Sheet.html
-- [x] block (404) any HTTP requests not for specfic domains (hosts).
+- [x] block (404) any HTTP requests not for specfic domains (hosts). (and also anything that isn't for root ("/"))
+- [x] "end" scrape param still needs to include that day for all cases.
 
 ## Ideas
 

@@ -231,14 +231,24 @@ func processQuery(query url.Values, tzname string) (start, end time.Time) {
 
 	switch {
 	case start.IsZero() && end.IsZero():
+		// user entered nothing.
+		// so end at "now" and start from 24 hours earlier.
 		end = time.Now().In(tz)
 		start = end.Add(negDay)
 
 	case start.IsZero() && !end.IsZero():
-		start = end.Add(negDay)
+		// user entered only end.
+		// so the "previous 24 hours" from
+		// the last moment of the "end" day would start at the beginning
+		// of "end", and end at end+24hrs.
+		start = end
+		end = end.Add(posDay)
 
 	case !start.IsZero() && end.IsZero():
+		// user entered only start.
+		// start at the beginning of that day and end 24 hours later.
 		end = start.Add(posDay)
+
 	default:
 		// user entered both start and end.
 		// ensure end is the last moment of the day, so when start's
