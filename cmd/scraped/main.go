@@ -66,7 +66,7 @@ func main() {
 		Config:    &cfg,
 		Scheduler: scheduler.NewScheduler()}
 
-	log.Printf(log.Info, "Starting scrape daemon %s", version.Version)
+	log.Printf(log.Info, "starting scrape daemon %s", version.Version)
 	err = app.run()
 	if err != nil {
 		log.Printf(log.Critical, "error running application: %s", err)
@@ -74,11 +74,13 @@ func main() {
 	}
 }
 
+// Application is the scraped app.
 type Application struct {
 	Config    *ScrapedConfig
 	Scheduler *scheduler.Scheduler
 }
 
+// run starts the scheduler, adds tasks to schedule scrapes, and blocks.
 func (app *Application) run() error {
 	// start scheduler
 	app.Scheduler.Start(context.Background())

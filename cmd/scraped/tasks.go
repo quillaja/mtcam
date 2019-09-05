@@ -296,6 +296,7 @@ func ScheduleScrapes(mtID int, attempt int, app *Application) func(time.Time) {
 			start := roundup(now, interval)
 			stop := startOfNextDay(now)
 			count := 0
+			var begin, end time.Time
 			// for each time+interval until end-of-day...
 			for t := start; t.Before(stop); t = t.Add(interval) {
 				// determine if the cam should be scraped at time t
@@ -310,7 +311,13 @@ func ScheduleScrapes(mtID int, attempt int, app *Application) func(time.Time) {
 					app.Scheduler.Add(scheduler.NewTask(
 						t,
 						Scrape(mt.ID, cam.ID, app.Config)))
+					// record actual number of scrapes scheduled
+					// and the true first and last times
 					count++
+					if begin.IsZero() {
+						begin = t
+					}
+					end = t
 				} else if err != nil {
 					fail(err)
 					return
@@ -318,7 +325,7 @@ func ScheduleScrapes(mtID int, attempt int, app *Application) func(time.Time) {
 			}
 			log.Printf(log.Debug, "%d scrapes scheduled for %s(id=%d) from %s to %s every %s",
 				count, cam.Name, cam.ID,
-				start.Format(time.UnixDate), stop.Format(time.UnixDate),
+				begin.Format(time.UnixDate), end.Format(time.UnixDate),
 				interval)
 		}
 

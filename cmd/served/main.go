@@ -1,7 +1,6 @@
 // package main starts a server to respond to api requests for scrape info.
 // It also serves the client application and (if configured) will redirect
 // HTTP requests to HTTPS.
-
 package main
 
 import (
