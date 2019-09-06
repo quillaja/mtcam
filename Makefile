@@ -7,6 +7,7 @@ build:
 	go build ./cmd/served
 	-mkdir $(OUTPUT_DIR)
 	mv scraped served $(OUTPUT_DIR)/
+	git restore version/version.go
 
 clean:
 	rm $(OUTPUT_DIR)/served $(OUTPUT_DIR)/scraped
