@@ -2,8 +2,8 @@ package scheduler
 
 import (
 	"fmt"
-	"sort"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -15,16 +15,18 @@ type Task interface {
 	Run(time.Time)
 }
 
-type task struct {
-	when time.Time
-	run  func(time.Time)
-}
-
 // NewTask creates a task that calls run at when.
 func NewTask(when time.Time, run func(time.Time)) Task {
 	return &task{
 		when: when,
 		run:  run}
+}
+
+// task is a basic struct implementing the Task interface
+// available for convenience.
+type task struct {
+	when time.Time
+	run  func(time.Time)
 }
 
 func (t *task) When() time.Time { return t.when }
@@ -35,92 +37,102 @@ func (t *task) String() string {
 	return t.When().String()
 }
 
-// taskQueue is a queue of tasks to be executed.
-type taskQueue []Task
+// TaskQueue is a concurrent-safe queue of tasks.
+type TaskQueue struct {
+	queue   []Task
+	m       sync.Mutex
+	running int64
+	wg      sync.WaitGroup
+}
 
-func (q taskQueue) Append(t Task) taskQueue {
+// NewTaskQueue creates a new TaskQueue.
+func NewTaskQueue() *TaskQueue {
+	return &TaskQueue{
+		queue: []Task{}}
+}
+
+// Append inserts a Task into the queue.
+func (q *TaskQueue) Append(t Task) {
+	q.m.Lock()
+	defer q.m.Unlock()
+
 	// find index for insertion
 	var i int
-	for ; i < len(q) && q[i].When().Before(t.When()); i++ {
+	for ; i < len(q.queue) && q.queue[i].When().Before(t.When()); i++ {
 	}
 
-	q = append(q, nil)   // grow queue with zero value
-	copy(q[i+1:], q[i:]) // shift contents up one index
-	q[i] = t             // insert item
-
-	return q
+	q.queue = append(q.queue, nil)   // grow queue with zero value
+	copy(q.queue[i+1:], q.queue[i:]) // shift contents up one index
+	q.queue[i] = t                   // insert item
 }
 
-func (q taskQueue) sort() {
-	sort.SliceStable(q, func(i, j int) bool {
-		return q[i].When().Before(q[j].When())
-	})
-}
-
-func (q taskQueue) Process() taskQueue {
-	// q.sort()
+// Process calls Task.Run() on all tasks due.
+func (q *TaskQueue) Process() {
+	q.m.Lock()
+	defer q.m.Unlock()
 
 	now := time.Now()
 	var front int
-	for i := 0; i < len(q); i++ {
-		if q[i].When().Before(now) {
-			go q[i].Run(q[i].When())
-			q[i] = nil
+	for i := 0; i < len(q.queue); i++ {
+		if q.queue[i].When().Before(now) { // TODO: what about tasks older than a certain duration?
+
+			q.wg.Add(1)
+			atomic.AddInt64(&q.running, 1)
+			go func(t Task) {
+				t.Run(t.When())
+				q.wg.Done()
+				atomic.AddInt64(&q.running, -1)
+			}(q.queue[i])
+
+			q.queue[i] = nil
 			front = i + 1
 		} else {
 			break
 		}
 	}
 
-	keep := q[front:]
+	// move all remaining tasks forward
+	keep := q.queue[front:]
 	for i := range keep {
-		q[i] = keep[i]
+		q.queue[i] = keep[i]
 	}
 
-	return q[:len(keep)]
+	// slice off the 'extra'
+	q.queue = q.queue[:len(keep)]
 }
 
-// safeTaskQueue is a concurrent-safe taskQueue.
-type safeTaskQueue struct {
-	sync.Mutex
-	queue taskQueue
-}
-
-func newSafeQueue() *safeTaskQueue {
-	return &safeTaskQueue{
-		queue: taskQueue{}}
-}
-
-func (q *safeTaskQueue) Append(t Task) {
-	q.Lock()
-	defer q.Unlock()
-	q.queue = q.queue.Append(t)
-}
-
-func (q *safeTaskQueue) Process() {
-	q.Lock()
-	defer q.Unlock()
-	q.queue = q.queue.Process()
-}
-
-func (q *safeTaskQueue) Next() time.Time {
+// Next gets the time the next Task must be processed.
+func (q *TaskQueue) Next() time.Time {
 
 	if q.Len() > 0 {
-		q.Lock()
-		defer q.Unlock()
+		q.m.Lock()
+		defer q.m.Unlock()
 		return q.queue[0].When()
 	}
 	return time.Now()
 }
 
-func (q *safeTaskQueue) Len() int {
-	q.Lock()
-	defer q.Unlock()
+// Len returns the number of Tasks currently in the queue.
+func (q *TaskQueue) Len() int {
+	q.m.Lock()
+	defer q.m.Unlock()
 	return len(q.queue)
 }
 
-func (q *safeTaskQueue) String() string {
-	q.Lock()
-	defer q.Unlock()
-	return fmt.Sprintf("len(%d) %v", len(q.queue), q.queue)
+// Running returns the number of Tasks currently running.
+func (q *TaskQueue) Running() int {
+	q.m.Lock()
+	defer q.m.Unlock()
+	return int(q.running)
+}
+
+// Wg gives access to a WaitGroup for the running tasks.
+func (q *TaskQueue) Wg() *sync.WaitGroup {
+	return &q.wg
+}
+
+func (q *TaskQueue) String() string {
+	// q.m.Lock()
+	// defer q.m.Unlock()
+	return fmt.Sprintf("%d in queue| %d running| next task at %s", q.Len(), q.Running(), q.Next())
 }

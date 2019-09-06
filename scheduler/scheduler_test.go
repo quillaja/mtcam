@@ -14,15 +14,18 @@ func TestNewScheduler(t *testing.T) {
 	f := func(num int) func(time.Time) {
 		return func(t time.Time) {
 			fmt.Printf("%-3d%s\n", num, t)
+			time.Sleep(10 * time.Second)
+			fmt.Printf("%d done\n", num)
 		}
 	}
 
 	fmt.Println("start:", nowplus(0))
 
-	sch := NewScheduler()
+	sch := NewScheduler(WaitForUnfinishedTasks(10 * time.Second))
 	sch.Add(NewTask(nowplus(30), f(1)))
 
-	ctx, _ := context.WithTimeout(context.Background(), 35*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
 	sch.Start(ctx)
 
 	for i := 2; i < 6; i++ {
@@ -31,7 +34,8 @@ func TestNewScheduler(t *testing.T) {
 
 	sch.Wait()
 	// time.Sleep(10 * time.Millisecond)
-	fmt.Println("35 sec since start. done.")
+	fmt.Println("15+10 sec since start. done.")
+	fmt.Println(sch)
 }
 
 func nowplus(sec int) time.Time {
