@@ -188,7 +188,7 @@ func redirectHTTPS(cfg *ServerdConfig) *http.Server {
 		// the specified hosts.
 		if r.RequestURI != "/" ||
 			(len(cfg.RedirectedHosts) > 0 && !hostInList(r.Host, cfg.RedirectedHosts)) {
-			log.Printf(log.Debug, "%s denied redirect host: %s uri: %s", r.RemoteAddr, r.Host, r.RequestURI)
+			//log.Printf(log.Debug, "%s denied redirect host: %s uri: %s", r.RemoteAddr, r.Host, r.RequestURI)
 			http.NotFound(w, r)
 			return
 		}
