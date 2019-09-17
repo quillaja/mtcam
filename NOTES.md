@@ -8,7 +8,6 @@ Sooner
 - [ ] import older "palmer" data (note logs are in Y-D-M format, not Y-M-D)
 
 Later
-- [ ] shutdown scraped on signal (requires change to scheduler to allow tasks to complete)
 - [ ] documentation on everything
 - [ ] rewrite client.js
 - [ ] tasks to update mountain timezones
@@ -27,6 +26,7 @@ Done
 - [x] HTTP strict transport? see: https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Strict_Transport_Security_Cheat_Sheet.html
 - [x] block (404) any HTTP requests not for specfic domains (hosts). (and also anything that isn't for root ("/"))
 - [x] "end" scrape param still needs to include that day for all cases.
+- [x] shutdown scraped on signal (requires change to scheduler to allow tasks to complete)
 
 ## Ideas
 

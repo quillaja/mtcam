@@ -5,6 +5,9 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/pkg/errors"
@@ -62,9 +65,12 @@ func main() {
 	}
 
 	// initialize application and run
+	taskwait := 30 * time.Second
 	app := &Application{
-		Config:    &cfg,
-		Scheduler: scheduler.NewScheduler()}
+		Config: &cfg,
+		Scheduler: scheduler.NewScheduler(
+			scheduler.WaitForUnfinishedTasks(taskwait)),
+	}
 
 	log.Printf(log.Info, "starting scrape daemon %s", version.Version)
 	err = app.run()
@@ -72,18 +78,33 @@ func main() {
 		log.Printf(log.Critical, "error running application: %s", err)
 		return
 	}
+
+	// wait for os signals to end app
+	sig := make(chan os.Signal)
+	signal.Notify(sig, os.Kill, os.Interrupt, syscall.SIGTERM)
+
+	<-sig
+
+	log.Printf(log.Info, "waiting %s for %d tasks to complete...", taskwait, app.Scheduler.Running())
+	app.shutdown() // will wait 30 sec for unfinished tasks to complete
+
+	log.Printf(log.Info, "shutting down scrape daemon %s", version.Version)
 }
 
 // Application is the scraped app.
 type Application struct {
 	Config    *ScrapedConfig
 	Scheduler *scheduler.Scheduler
+
+	cancel context.CancelFunc
 }
 
 // run starts the scheduler, adds tasks to schedule scrapes, and blocks.
 func (app *Application) run() error {
 	// start scheduler
-	app.Scheduler.Start(context.Background())
+	var ctx context.Context
+	ctx, app.cancel = context.WithCancel(context.Background())
+	app.Scheduler.Start(ctx)
 
 	// load scheduler with some tasks
 	mts, err := db.Mountains()
@@ -96,7 +117,12 @@ func (app *Application) run() error {
 			ScheduleScrapes(id, 0, app)))
 	}
 
+	return nil
+}
+
+func (app *Application) shutdown() {
+	app.cancel()
+
 	// block on scheduler
 	app.Scheduler.Wait()
-	return nil
 }
