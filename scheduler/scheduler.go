@@ -114,7 +114,7 @@ func (s *Scheduler) resetTimer(t time.Time) {
 }
 
 // Wait blocks the current goroutine until the context passed to Start()
-// is canceled.
+// is canceled PLUS any amount of "wait time" the scheduler was configured with.
 func (s *Scheduler) Wait() {
 	<-s.done
 }
@@ -123,6 +123,11 @@ func (s *Scheduler) Wait() {
 func (s *Scheduler) Add(t Task) {
 	s.queue.Append(t)
 	s.resetTimer(s.queue.Next())
+}
+
+// Running returns the number of Tasks currently running.
+func (s *Scheduler) Running() int {
+	return s.queue.Running()
 }
 
 func (s *Scheduler) String() string {

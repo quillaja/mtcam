@@ -132,7 +132,5 @@ func (q *TaskQueue) Wg() *sync.WaitGroup {
 }
 
 func (q *TaskQueue) String() string {
-	// q.m.Lock()
-	// defer q.m.Unlock()
 	return fmt.Sprintf("%d in queue| %d running| next task at %s", q.Len(), q.Running(), q.Next())
 }
