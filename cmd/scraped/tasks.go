@@ -275,12 +275,21 @@ func ScheduleScrapes(mtID int, attempt int, app *Application) func(time.Time) {
 			if err == nil {
 				break
 			}
-			time.Sleep(1 * time.Second)
+			time.Sleep(5 * time.Second)
 		}
 		if tries >= maxTries {
-			err = errors.Wrapf(err, "too many tries to get astro data for %s(id=%d)", mt.Name, mt.ID)
-			fail(err)
-			return
+			err = errors.Wrapf(err, "too many tries to get astro data for %s(id=%d). using default 4am-10pm", mt.Name, mt.ID)
+			// fail(err)
+			// return
+			sun = astro.Data{
+				Date: now,
+				Lat:  mt.Latitude,
+				Lon:  mt.Longitude,
+				SunTransit: map[astro.Phenom]time.Time{
+					astro.StartCivilTwilight: time.Date(now.Year(), now.Month(), now.Day(), 4, 0, 0, 0, now.Location()),
+					astro.EndCivilTwilight:   time.Date(now.Year(), now.Month(), now.Day(), 22, 0, 0, 0, now.Location()),
+				},
+			}
 		}
 		log.Printf(log.Debug, "took %d/%d tries to get astro data for %s(id=%d)", tries+1, maxTries, mt.Name, mt.ID)
 
