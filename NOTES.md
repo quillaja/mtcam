@@ -3,7 +3,9 @@
 ## TODO
 
 Sooner
-- [ ] fallback to some 'default' astro or start/end time if Sun/Moon served is inaccessible
+- [ ] add more indexes to the database to improve performance of common queries.
+- [ ] cache data served from `/api/data` to improve performance/reduce queries. goroutine to refresh data periodically.
+- [ ] website requests statistics tracking/logging
 - [ ] robots.txt ?
 - [ ] import older "palmer" data (note logs are in Y-D-M format, not Y-M-D)
 
@@ -12,10 +14,10 @@ Later
 - [ ] rewrite client.js
 - [ ] tasks to update mountain timezones
 - [ ] config file watch for changes
-- [ ] cache data served from `/api/data` to improve performance/reduce queries. goroutine to refresh data periodically.
 - [ ] web app manifest https://developers.google.com/web/fundamentals/web-app-manifest/
 
 Done
+- [x] fallback to some 'default' astro or start/end time if Sun/Moon served is inaccessible
 - [x] resize image on height, not width (can do either or both. 0='auto' to maintain aspect ratio)
 - [X] resize image only if bigger than height/width
 - [x] simulate 'click' on info tab when hiding other tabs after user selects a camera

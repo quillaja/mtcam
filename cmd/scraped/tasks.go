@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/disintegration/imaging"
-	"github.com/kelvins/sunrisesunset"
 	"github.com/lucasb-eyer/go-colorful"
 	"github.com/pkg/errors"
 
@@ -269,7 +268,7 @@ func ScheduleScrapes(mtID int, attempt int, app *Application) func(time.Time) {
 		log.Printf(log.Debug, "processing mountain %s(id=%d)", mt.Name, mt.ID)
 
 		// get astro data for mt
-		const maxTries = 5
+		const maxTries = 3
 		var tries int
 		var sun astro.Data
 		for ; tries < maxTries; tries++ {
@@ -277,32 +276,14 @@ func ScheduleScrapes(mtID int, attempt int, app *Application) func(time.Time) {
 			if err == nil {
 				break
 			}
-			time.Sleep(5 * time.Second)
+			time.Sleep(3 * time.Second)
 		}
 		if tries >= maxTries {
-			// err = errors.Wrapf(err, "too many tries to get astro data for %s(id=%d)", mt.Name, mt.ID)
-			// fail(err)
-			// return
-			log.Printf(log.Error, "too many tries to get astro data for %s(id=%d). falling back to pkg sunrisesunset", mt.Name, mt.ID)
-
-			_, offsetSec := now.Zone() // now's zone is same as mt's zone.
-			offset := float64(offsetSec) / 3600
-			rise, set, sunerr := sunrisesunset.GetSunriseSunset(mt.Latitude, mt.Longitude, offset, now.UTC())
-			if sunerr != nil {
-				fail(errors.Wrapf(sunerr, "error using pkg sunrisesunset"))
-				return
-			}
-			rise = time.Date(now.Year(), now.Month(), now.Day(), rise.Hour(), rise.Minute(), rise.Second(), 0, now.Location())
-			set = time.Date(now.Year(), now.Month(), now.Day(), set.Hour(), set.Minute(), set.Second(), 0, now.Location())
-
-			sun = astro.Data{
-				Date: now,
-				Lat:  mt.Latitude,
-				Lon:  mt.Longitude,
-				SunTransit: map[astro.Phenom]time.Time{
-					astro.StartCivilTwilight: rise.Add(-30 * time.Minute), // civil twilight is about 30 mins before/after rise/set.
-					astro.EndCivilTwilight:   set.Add(30 * time.Minute),
-				},
+			log.Printf(log.Error, "too many tries to get astro data for %s(id=%d). falling back to local calculation", mt.Name, mt.ID)
+			sun, err = astro.GetLocal(mt.Latitude, mt.Longitude, now)
+			if err != nil {
+				err = errors.Wrap(err, "using local calculation")
+				fail(err)
 			}
 		} else {
 			log.Printf(log.Debug, "took %d/%d tries to get astro data for %s(id=%d)", tries+1, maxTries, mt.Name, mt.ID)
