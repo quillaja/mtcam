@@ -3,7 +3,9 @@
 package log
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -72,4 +74,17 @@ func Print(lvl Level, v ...interface{}) {
 		fmt += " %v"
 	}
 	Printf(lvl, fmt, v...)
+}
+
+// PrintJSON will append a json representation of data to the file in one line.
+// Any error encountered will result in nothing being written.
+func PrintJSON(filename string, data interface{}) {
+	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
+	if err != nil {
+		return
+	}
+	defer file.Close()
+
+	enc := json.NewEncoder(file)
+	enc.Encode(data)
 }

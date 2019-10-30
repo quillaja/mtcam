@@ -47,8 +47,8 @@ func CreateHandler(cfg *ServerdConfig) http.Handler {
 	mux := http.NewServeMux()
 
 	// add handlers for API endpoints
-	mux.HandleFunc(cfg.Routes.Api+"data/", ApiData())
-	mux.HandleFunc(cfg.Routes.Api+"mountains/", ApiScrapes(cfg.Routes.Api, cfg.Routes.Image))
+	mux.HandleFunc(cfg.Routes.Api+"data/", ApiData(cfg))
+	mux.HandleFunc(cfg.Routes.Api+"mountains/", ApiScrapes(cfg))
 
 	// add handlers for image folder
 	mux.Handle(cfg.Routes.Image, http.StripPrefix(
@@ -67,7 +67,7 @@ func CreateHandler(cfg *ServerdConfig) http.Handler {
 
 // ApiData returns a HandlerFunc that responds to requests for the publicly
 // accessible lump sum of mountains and cameras.
-func ApiData() http.HandlerFunc {
+func ApiData(cfg *ServerdConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		reqstart := time.Now()
 		status := http.StatusOK
@@ -76,6 +76,12 @@ func ApiData() http.HandlerFunc {
 			log.Printf(log.Info, "%s %d %s %s (%s)",
 				r.RemoteAddr, status, http.StatusText(status), r.RequestURI,
 				took)
+			log.PrintJSON(cfg.RequestLog, map[string]interface{}{
+				"type":    "data",
+				"took_ms": took.Milliseconds(),
+				"at":      reqstart,
+				"remote":  r.RemoteAddr,
+			})
 		}()
 
 		// fetch all mountains from db
@@ -116,22 +122,27 @@ func ApiData() http.HandlerFunc {
 }
 
 // ApiScrapes returns a HandlerFunc to respond to requests for scrapes.
-func ApiScrapes(apiRoute, imgRoute string) http.HandlerFunc {
+func ApiScrapes(cfg *ServerdConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		reqstart := time.Now()
 		msg := ""
 		status := http.StatusOK
+		reqlog := map[string]interface{}{"type": "scrapes"}
 		defer func() {
 			took := time.Since(reqstart)
 			log.Printf(log.Info, "%s %d %s %s (%s) %s",
 				r.RemoteAddr, status, http.StatusText(status), r.RequestURI,
 				took, msg)
+			reqlog["remote"] = r.RemoteAddr
+			reqlog["took_ms"] = took.Milliseconds()
+			reqlog["at"] = reqstart
+			log.PrintJSON(cfg.RequestLog, reqlog)
 		}()
 
 		// process url path to extract params for this request
 		// first group is mountainID, second is cameraID.
 		//  return 404 for non-matching urls
-		expression := apiRoute + `mountains/(\d+)/cams/(\d+)/scrapes`
+		expression := cfg.Routes.Api + `mountains/(\d+)/cams/(\d+)/scrapes`
 		re, err := regexp.Compile(expression)
 		if err != nil {
 			log.Print(log.Error, "ApiScrapes regexp: %s", err)
@@ -183,7 +194,7 @@ func ApiScrapes(apiRoute, imgRoute string) http.HandlerFunc {
 		tz, _ := time.LoadLocation(mt.TzLocation)
 		for i := range scrapes {
 			if scrapes[i].Result == model.Success {
-				scrapes[i].Filename = path.Join(imgRoute, mt.Pathname, cam.Pathname, scrapes[i].Filename)
+				scrapes[i].Filename = path.Join(cfg.Routes.Image, mt.Pathname, cam.Pathname, scrapes[i].Filename)
 			} else {
 				scrapes[i].Filename = ""
 			}
@@ -194,6 +205,11 @@ func ApiScrapes(apiRoute, imgRoute string) http.HandlerFunc {
 		msg = fmt.Sprintf("%d scrapes for %s(%d) %s(%d) in (%s) to (%s)",
 			len(scrapes), mt.Name, mt.ID, cam.Name, cam.ID,
 			start.Format(datetzfmt), end.Format(datetzfmt))
+		reqlog["scrapes"] = len(scrapes)
+		reqlog["mtID"] = mtID
+		reqlog["camID"] = camID
+		reqlog["from"] = start
+		reqlog["to"] = end
 
 		// encode scrapes array into json and return
 		enc := json.NewEncoder(w)

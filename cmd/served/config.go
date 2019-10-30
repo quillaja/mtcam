@@ -24,6 +24,9 @@ type ServerdConfig struct {
 	Routes RoutesConfig
 
 	RedirectedHosts []string
+
+	// file path for json log of scrape requests
+	RequestLog string
 }
 
 // TimeoutConfig holds timeouts for server, in seconds.
