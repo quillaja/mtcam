@@ -5,7 +5,7 @@
 Sooner
 - [ ] add more indexes to the database to improve performance of common queries.
 - [ ] cache data served from `/api/data` to improve performance/reduce queries. goroutine to refresh data periodically.
-- [ ] website requests statistics tracking/logging
+- [/] website requests statistics tracking/logging
 - [ ] robots.txt ?
 - [ ] import older "palmer" data (note logs are in Y-D-M format, not Y-M-D)
 
@@ -17,9 +17,10 @@ Later
 - [ ] web app manifest https://developers.google.com/web/fundamentals/web-app-manifest/
 
 Done
+- [x] prevent button mashing in client with temporary disable of load photos button.
 - [x] fallback to some 'default' astro or start/end time if Sun/Moon served is inaccessible
 - [x] resize image on height, not width (can do either or both. 0='auto' to maintain aspect ratio)
-- [X] resize image only if bigger than height/width
+- [x] resize image only if bigger than height/width
 - [x] simulate 'click' on info tab when hiding other tabs after user selects a camera
 - [x] fix 1-off error in timelapse counter (thought i did before?)
 - [x] limit timespan of request to 2 weeks or do something else sensible to prevent huge 58000 scrape requests
