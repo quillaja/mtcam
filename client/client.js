@@ -60,8 +60,13 @@ window.onload = function (e) {
 
     // attach functionality to "load photos" button
     document.getElementById("submit-photos").onclick = function () {
+        // prevent user from pressing the "load photos" button more than
+        // once in 5 seconds
+        let btn = document.getElementById("submit-photos");
+        btn.disabled = true;
+        setTimeout(() => { btn.disabled = false; }, 5 * 1000);
+        
         let requestMade = loadAndDisplayPhotos();
-
         if (requestMade) {
 
             // show previously hidden tabs
