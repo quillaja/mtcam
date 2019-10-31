@@ -26,6 +26,10 @@ const jsonMime = "application/json"
 const hstsHeader = "Strict-Transport-Security"
 const hstsValue = "max-age=86400; includeSubDomains" // 24 hr lifetime
 
+// cache control
+const cachecontrolHeader = "Cache-Control"
+const cachecontrolValue = "public, max-age=86400" // 24 hr lifetime
+
 // time.Format() formats
 const (
 	datefmt     = "2006-01-02"
@@ -33,10 +37,11 @@ const (
 	datetzfmt   = "2006-01-02 -0700"
 )
 
-// addHSTS is a 'middleware' that writes HSTS headers to all requests.
-func addHSTS(h http.Handler) http.Handler {
+// addHeaders is a 'middleware' that writes standard headers to all requests.
+func addHeaders(h http.Handler) http.Handler {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, req *http.Request) {
+			w.Header().Add(cachecontrolHeader, cachecontrolValue)
 			w.Header().Add(hstsHeader, hstsValue)
 			h.ServeHTTP(w, req)
 		})
@@ -57,9 +62,9 @@ func CreateHandler(cfg *ServerdConfig) http.Handler {
 	// add handler for root (static files)
 	// use "StaticRoot" if set, fallback to embedded client
 	if cfg.StaticRoot != "" {
-		mux.Handle("/", addHSTS(http.FileServer(http.Dir(cfg.StaticRoot))))
+		mux.Handle("/", addHeaders(http.FileServer(http.Dir(cfg.StaticRoot))))
 	} else {
-		mux.Handle("/", addHSTS(http.FileServer(client)))
+		mux.Handle("/", addHeaders(http.FileServer(client)))
 	}
 
 	return mux
