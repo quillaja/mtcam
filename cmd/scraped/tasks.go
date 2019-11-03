@@ -355,8 +355,9 @@ func roundup(t time.Time, d time.Duration) time.Time {
 
 // startOfNextDay returns the day after t at 0:00:00.
 func startOfNextDay(t time.Time) time.Time {
-	next := t.Add(24 * time.Hour)
-	return time.Date(next.Year(), next.Month(), next.Day(), 0, 0, 0, 0, next.Location())
+	// increasing Day() by 1 will produce 'invalid' days (eg "Oct 32"), but
+	// time.Date() will normalize them (eg "Nov 1")
+	return time.Date(t.Year(), t.Month(), t.Day()+1, 0, 0, 0, 0, t.Location())
 }
 
 // equal determines if 2 images are (about) the same
