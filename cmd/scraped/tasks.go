@@ -284,6 +284,7 @@ func ScheduleScrapes(mtID int, attempt int, app *Application) func(time.Time) {
 			if err != nil {
 				err = errors.Wrap(err, "using local calculation")
 				fail(err)
+				return
 			}
 		} else {
 			log.Printf(log.Debug, "took %d/%d tries to get astro data for %s(id=%d)", tries+1, maxTries, mt.Name, mt.ID)
@@ -301,7 +302,7 @@ func ScheduleScrapes(mtID int, attempt int, app *Application) func(time.Time) {
 			start := roundup(now, interval)
 			stop := startOfNextDay(now)
 			count := 0
-			var begin, end time.Time
+			begin, end := start, stop
 			// for each time+interval until end-of-day...
 			for t := start; t.Before(stop); t = t.Add(interval) {
 				// determine if the cam should be scraped at time t
