@@ -113,11 +113,11 @@ func Scrape(mtID, camID int, cfg *ScrapedConfig) func(time.Time) {
 			setDetailAndLog("trouble downloading image")
 			return
 		}
-		if !strings.Contains(resp.Header.Get(contenttype), "image") {
-			err = errors.Errorf("non-image content type: %s", resp.Header[contenttype])
-			setDetailAndLog("trouble downloading image")
-			return
-		}
+		// if !strings.Contains(resp.Header.Get(contenttype), "image") {
+		// 	err = errors.Errorf("non-image content type: %s", resp.Header[contenttype])
+		// 	setDetailAndLog("trouble downloading image")
+		// 	return
+		// }
 
 		// extract the image
 		img, err := imaging.Decode(resp.Body)
