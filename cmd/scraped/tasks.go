@@ -268,27 +268,27 @@ func ScheduleScrapes(mtID int, attempt int, app *Application) func(time.Time) {
 		log.Printf(log.Debug, "processing mountain %s(id=%d)", mt.Name, mt.ID)
 
 		// get astro data for mt
-		const maxTries = 3
-		var tries int
+		// const maxTries = 3
+		// var tries int
 		var sun astro.Data
-		for ; tries < maxTries; tries++ {
-			sun, err = astro.Get(mt.Latitude, mt.Longitude, now)
-			if err == nil {
-				break
-			}
-			time.Sleep(3 * time.Second)
+		// for ; tries < maxTries; tries++ {
+		// 	sun, err = astro.Get(mt.Latitude, mt.Longitude, now)
+		// 	if err == nil {
+		// 		break
+		// 	}
+		// 	time.Sleep(3 * time.Second)
+		// }
+		// if tries >= maxTries {
+		// 	log.Printf(log.Error, "too many tries to get astro data for %s(id=%d). falling back to local calculation", mt.Name, mt.ID)
+		sun, err = astro.GetLocal(mt.Latitude, mt.Longitude, now)
+		if err != nil {
+			err = errors.Wrap(err, "using local calculation")
+			fail(err)
+			return
 		}
-		if tries >= maxTries {
-			log.Printf(log.Error, "too many tries to get astro data for %s(id=%d). falling back to local calculation", mt.Name, mt.ID)
-			sun, err = astro.GetLocal(mt.Latitude, mt.Longitude, now)
-			if err != nil {
-				err = errors.Wrap(err, "using local calculation")
-				fail(err)
-				return
-			}
-		} else {
-			log.Printf(log.Debug, "took %d/%d tries to get astro data for %s(id=%d)", tries+1, maxTries, mt.Name, mt.ID)
-		}
+		// } else {
+		// 	log.Printf(log.Debug, "took %d/%d tries to get astro data for %s(id=%d)", tries+1, maxTries, mt.Name, mt.ID)
+		// }
 
 		// for each cam
 		for _, cam := range cams {
